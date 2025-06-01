@@ -11,7 +11,7 @@ export async function middleware(request: NextRequest) {
   // For protected routes: redirect to sign-in if no token
   if (isProtectedRoute && !token) {
     const signInUrl = new URL("/api/auth/signin", request.url);
-    signInUrl.searchParams.set("callbackUrl", request.url);
+    signInUrl.searchParams.set("callbackUrl", "main");
     return NextResponse.redirect(signInUrl);
   }
 

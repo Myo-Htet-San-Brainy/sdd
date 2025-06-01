@@ -1,7 +1,8 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 
-const signInApiUrl = "";
+const SIGN_IN_URL_LOCAL = "http://localhost:3000";
+const SIGN_IN_URL_PROD = "";
 
 export const authOptions = {
   providers: [
@@ -13,18 +14,15 @@ export const authOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const res = await axios.post(
-            "https://when-we-free-gp4d.vercel.app/api/auth/signIn",
-            {
-              username: credentials?.username,
-              password: credentials?.password,
-            }
-          );
+          const res = await axios.post(`${SIGN_IN_URL_LOCAL}/api/auth/signIn`, {
+            username: credentials?.username,
+            password: credentials?.password,
+          });
 
           if (res.status === 200) {
             const { userId, userRole } = res.data;
             //userId, role, username
-            return { id: userId, name: credentials?.username!, role: userRole };
+            return { id: userId, name: credentials?.username, role: userRole };
           } else {
             throw new Error("Login failed, please try again later");
           }
