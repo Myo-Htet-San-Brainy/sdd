@@ -1,3 +1,5 @@
+"use client";
+import { signOut } from "next-auth/react";
 import React from "react";
 
 const layout = ({
@@ -7,7 +9,10 @@ const layout = ({
 }>) => {
   return (
     <div>
-      <div>main navbar</div>
+      <div>
+        main navbar
+        <button onClick={() => signOut()}>sign out</button>
+      </div>
       {children}
     </div>
   );
