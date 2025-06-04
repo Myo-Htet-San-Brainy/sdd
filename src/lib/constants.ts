@@ -13,11 +13,11 @@ export const MODULES_AND_PERMISSIONS = {
     },
     PERMISSION_UPDATE: {
       name: "ROLE:UPDATE",
-      displayName: "Update Roles",
+      displayName: "Update Role",
     },
     PERMISSION_DELETE: {
       name: "ROLE:DELETE",
-      displayName: "Delete Roles",
+      displayName: "Delete Role",
     },
   },
   USER: {
@@ -34,11 +34,11 @@ export const MODULES_AND_PERMISSIONS = {
     },
     PERMISSION_UPDATE: {
       name: "USER:UPDATE",
-      displayName: "Update Users",
+      displayName: "Update User",
     },
     PERMISSION_DELETE: {
       name: "USER:DELETE",
-      displayName: "Delete Users",
+      displayName: "Delete User",
     },
   },
 };

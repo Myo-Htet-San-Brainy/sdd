@@ -73,8 +73,13 @@ const Page = () => {
   }
   return (
     <div>
-      {hasPermission(myPermissions!, CREATE_PERMISSION) && (
-        <Link href={""}>Create</Link>
+      {hasPermission(
+        myPermissions!,
+        MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.name
+      ) && (
+        <Link href={MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.link}>
+          {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.displayName}
+        </Link>
       )}
       {roles?.map((role) => {
         return (
@@ -85,6 +90,22 @@ const Page = () => {
                 <p key={permission}>{permission}</p>
               ))}
             </div>
+            {hasPermission(
+              myPermissions!,
+              MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
+            ) && (
+              <Link href={`/main/role/${role._id}/update`}>
+                {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.displayName}
+              </Link>
+            )}
+            {hasPermission(
+              myPermissions!,
+              MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.name
+            ) && (
+              <button onClick={() => console.log("deleted role")}>
+                {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.displayName}
+              </button>
+            )}
           </div>
         );
       })}
