@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextAuthOptions";
-import { getCollection } from "@/lib/mongodb";
 import { hasPermission } from "@/lib/utils"; // assume this is your util
 import { getAllRoles, getRoleByName } from "@/db/role";
 
@@ -9,6 +8,7 @@ const REQUESTED_PERMISSION = "ROLE:READ";
 
 export async function GET(req: NextRequest) {
   try {
+    // throw new Error("test error");
     // 1. Check session
     const session = await getServerSession(authOptions);
     if (!session) {
