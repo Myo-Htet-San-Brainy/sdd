@@ -1,16 +1,13 @@
-import GlobalNavbar from "@/components/GlobalNavbar";
-import React from "react";
-
 const layout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
   return (
-    <div>
-      <GlobalNavbar />
+    <>
+      <div>Role Nav</div>
       {children}
-    </div>
+    </>
   );
 };
 
