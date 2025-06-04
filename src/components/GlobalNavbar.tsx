@@ -16,20 +16,7 @@ import {
 import { usePopUpsStore } from "@/store";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
 import Link from "next/link";
-
-const NAVLINKS = [
-  {
-    module: "ROLE",
-    displayName: "Role Management",
-    actions: [
-      {
-        name: "ROLE:READ",
-        displayName: "View Roles",
-        link: "/main/role",
-      },
-    ],
-  },
-];
+import { PERMISSIONS } from "@/lib/constants";
 
 const GlobalNavbar = () => {
   const { data: myPermissions, isFetching: isMyPermissionsFetching } =
@@ -56,26 +43,29 @@ const GlobalNavbar = () => {
                 <DrawerClose>close</DrawerClose>
               </DrawerTitle>
               <DrawerDescription className="">
-                {NAVLINKS.map((item) => {
+                {PERMISSIONS.map((item) => {
                   return (
                     <>
-                      {hasAnyModulePermission(myPermissions!, item.module) && (
-                        <p className="mt-2 text-left text-sm bg-slate-300 p-2">
-                          {item.displayName}
-                        </p>
+                      {hasAnyModulePermission(myPermissions!, item.name) && (
+                        <div>
+                          <p className="mt-2 text-left text-sm bg-slate-300 p-2">
+                            {item.displayName}
+                          </p>
+                          {item.actions.map((action) => {
+                            return (
+                              action.name.includes(":READ") &&
+                              hasPermission(myPermissions!, action.name) && (
+                                <Link
+                                  href={action.link!}
+                                  className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                                >
+                                  {action.displayName}
+                                </Link>
+                              )
+                            );
+                          })}
+                        </div>
                       )}
-                      {item.actions.map((action) => {
-                        return (
-                          hasPermission(myPermissions!, action.name) && (
-                            <Link
-                              href={action.link}
-                              className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-                            >
-                              {action.displayName}
-                            </Link>
-                          )
-                        );
-                      })}
                     </>
                   );
                 })}
