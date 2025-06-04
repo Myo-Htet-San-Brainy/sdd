@@ -2,6 +2,7 @@ import { getCollection } from "@/lib/mongodb";
 import { type NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/nextAuthOptions";
+import { getRoleByName } from "@/db/role";
 
 export async function GET(req: NextRequest) {
   try {
@@ -14,11 +15,7 @@ export async function GET(req: NextRequest) {
 
     const userRole = session.user.role;
 
-    // Get role collection
-    const roleCollection = await getCollection("role");
-
-    // Find role document
-    const role = await roleCollection.findOne({ name: userRole });
+    const role = await getRoleByName(userRole);
 
     // Check if role exists
     if (!role) {

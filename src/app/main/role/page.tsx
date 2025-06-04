@@ -1,5 +1,5 @@
 "use client";
-import { PERMISSIONS } from "@/lib/constants";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import Link from "next/link";
@@ -11,13 +11,13 @@ const Page = () => {
   const { data: myPermissions, isFetching: isMyPermissionsFetching } =
     useGetMyPermissions();
   if (isMyPermissionsFetching) {
-    return <div>loading...</div>;
+    return <div>checking permission...</div>;
   }
   if (!hasPermission(myPermissions!, REQUESTED_PERMISSION)) {
     return (
       <div>
         you are not permitted to do role Management. do these instead...
-        {PERMISSIONS.map((item) => {
+        {MODULES_AND_PERMISSIONS.map((item) => {
           return (
             <>
               {hasAnyModulePermission(myPermissions!, item.name) && (
@@ -25,15 +25,15 @@ const Page = () => {
                   <p className="mt-2 text-left text-sm bg-slate-300 p-2">
                     {item.displayName}
                   </p>
-                  {item.actions.map((action) => {
+                  {item.permissions.map((permission) => {
                     return (
-                      action.name.includes(":READ") &&
-                      hasPermission(myPermissions!, action.name) && (
+                      permission.name.includes(":READ") &&
+                      hasPermission(myPermissions!, permission.name) && (
                         <Link
-                          href={action.link!}
+                          href={permission.link!}
                           className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
                         >
-                          {action.displayName}
+                          {permission.displayName}
                         </Link>
                       )
                     );
@@ -46,6 +46,7 @@ const Page = () => {
       </div>
     );
   }
+  //fetch roles
   return <div>Role List</div>;
 };
 

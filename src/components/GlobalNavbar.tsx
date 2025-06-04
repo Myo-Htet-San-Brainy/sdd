@@ -16,13 +16,13 @@ import {
 import { usePopUpsStore } from "@/store";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
 import Link from "next/link";
-import { PERMISSIONS } from "@/lib/constants";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 
 const GlobalNavbar = () => {
   const { data: myPermissions, isFetching: isMyPermissionsFetching } =
     useGetMyPermissions();
   const { isOpenGlobalNavbar, setIsOpenGlobalNavbar } = usePopUpsStore();
-  console.log(myPermissions);
+  //   console.log(myPermissions);
 
   return (
     <>
@@ -43,7 +43,7 @@ const GlobalNavbar = () => {
                 <DrawerClose>close</DrawerClose>
               </DrawerTitle>
               <DrawerDescription className="">
-                {PERMISSIONS.map((item) => {
+                {MODULES_AND_PERMISSIONS.map((item) => {
                   return (
                     <>
                       {hasAnyModulePermission(myPermissions!, item.name) && (
@@ -51,15 +51,18 @@ const GlobalNavbar = () => {
                           <p className="mt-2 text-left text-sm bg-slate-300 p-2">
                             {item.displayName}
                           </p>
-                          {item.actions.map((action) => {
+                          {item.permissions.map((permission) => {
                             return (
-                              action.name.includes(":READ") &&
-                              hasPermission(myPermissions!, action.name) && (
+                              permission.name.includes(":READ") &&
+                              hasPermission(
+                                myPermissions!,
+                                permission.name
+                              ) && (
                                 <Link
-                                  href={action.link!}
+                                  href={permission.link!}
                                   className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
                                 >
-                                  {action.displayName}
+                                  {permission.displayName}
                                 </Link>
                               )
                             );

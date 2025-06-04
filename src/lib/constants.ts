@@ -1,8 +1,8 @@
-export const PERMISSIONS = [
+export const MODULES_AND_PERMISSIONS = [
   {
     name: "ROLE",
     displayName: "Role Management",
-    actions: [
+    permissions: [
       {
         name: "ROLE:READ",
         displayName: "View Roles",
@@ -25,7 +25,7 @@ export const PERMISSIONS = [
   {
     name: "USER",
     displayName: "User Management",
-    actions: [
+    permissions: [
       {
         name: "USER:READ",
         displayName: "View Users",
