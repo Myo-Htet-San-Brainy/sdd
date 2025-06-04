@@ -43,33 +43,24 @@ const GlobalNavbar = () => {
                 <DrawerClose>close</DrawerClose>
               </DrawerTitle>
               <DrawerDescription className="">
-                {MODULES_AND_PERMISSIONS.map((item) => {
+                {MODULES_AND_PERMISSIONS.map((module) => {
                   return (
-                    <>
-                      {hasAnyModulePermission(myPermissions!, item.name) && (
-                        <div>
-                          <p className="mt-2 text-left text-sm bg-slate-300 p-2">
-                            {item.displayName}
-                          </p>
-                          {item.permissions.map((permission) => {
-                            return (
-                              permission.name.includes(":READ") &&
-                              hasPermission(
-                                myPermissions!,
-                                permission.name
-                              ) && (
-                                <Link
-                                  href={permission.link!}
-                                  className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-                                >
-                                  {permission.displayName}
-                                </Link>
-                              )
-                            );
-                          })}
-                        </div>
-                      )}
-                    </>
+                    hasPermission(
+                      myPermissions!,
+                      module.displayPermission.name
+                    ) && (
+                      <>
+                        <p className="mt-2 text-left text-sm bg-slate-300 p-2">
+                          {module.displayName}
+                        </p>
+                        <Link
+                          href={module.displayPermission.link}
+                          className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                        >
+                          {module.displayPermission.displayName}
+                        </Link>
+                      </>
+                    )
                   );
                 })}
               </DrawerDescription>

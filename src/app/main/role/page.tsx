@@ -6,8 +6,7 @@ import { useGetRoles } from "@/query/role";
 import Link from "next/link";
 import React from "react";
 
-const REQUESTED_PERMISSION = "ROLE:READ";
-const REQUESTED_MODULE = "ROLE";
+const PERMISSION_FOR_PAGE = "ROLE:READ";
 
 const Page = () => {
   const { data: myPermissions, isFetching: isFetchingMyPermissions } =
@@ -20,34 +19,25 @@ const Page = () => {
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
   }
-  if (!hasPermission(myPermissions!, REQUESTED_PERMISSION)) {
+  if (!hasPermission(myPermissions!, PERMISSION_FOR_PAGE)) {
     return (
       <div>
         you are not permitted to do role Management. do these instead...
-        {MODULES_AND_PERMISSIONS.map((item) => {
+        {MODULES_AND_PERMISSIONS.map((module) => {
           return (
-            <>
-              {hasAnyModulePermission(myPermissions!, item.name) && (
-                <div>
-                  <p className="mt-2 text-left text-sm bg-slate-300 p-2">
-                    {item.displayName}
-                  </p>
-                  {item.permissions.map((permission) => {
-                    return (
-                      permission.name.includes(":READ") &&
-                      hasPermission(myPermissions!, permission.name) && (
-                        <Link
-                          href={permission.link!}
-                          className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-                        >
-                          {permission.displayName}
-                        </Link>
-                      )
-                    );
-                  })}
-                </div>
-              )}
-            </>
+            hasPermission(myPermissions!, module.displayPermission.name) && (
+              <>
+                <p className="mt-2 text-left text-sm bg-slate-300 p-2">
+                  {module.displayName}
+                </p>
+                <Link
+                  href={module.displayPermission.link}
+                  className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                >
+                  {module.displayPermission.displayName}
+                </Link>
+              </>
+            )
           );
         })}
       </div>
@@ -61,31 +51,22 @@ const Page = () => {
     return (
       <div>
         Something went wrong while getting roles for you. do these instead...
-        {MODULES_AND_PERMISSIONS.map((item) => {
+        {MODULES_AND_PERMISSIONS.map((module) => {
           return (
-            <>
-              {item.name !== REQUESTED_MODULE &&
-                hasAnyModulePermission(myPermissions!, item.name) && (
-                  <div>
-                    <p className="mt-2 text-left text-sm bg-slate-300 p-2">
-                      {item.displayName}
-                    </p>
-                    {item.permissions.map((permission) => {
-                      return (
-                        permission.name.includes(":READ") &&
-                        hasPermission(myPermissions!, permission.name) && (
-                          <Link
-                            href={permission.link!}
-                            className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-                          >
-                            {permission.displayName}
-                          </Link>
-                        )
-                      );
-                    })}
-                  </div>
-                )}
-            </>
+            module.displayPermission.name !== PERMISSION_FOR_PAGE &&
+            hasPermission(myPermissions!, module.displayPermission.name) && (
+              <>
+                <p className="mt-2 text-left text-sm bg-slate-300 p-2">
+                  {module.displayName}
+                </p>
+                <Link
+                  href={module.displayPermission.link}
+                  className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                >
+                  {module.displayPermission.displayName}
+                </Link>
+              </>
+            )
           );
         })}
       </div>

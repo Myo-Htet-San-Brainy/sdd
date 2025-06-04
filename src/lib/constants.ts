@@ -2,11 +2,15 @@ export const MODULES_AND_PERMISSIONS = [
   {
     name: "ROLE",
     displayName: "Role Management",
+    displayPermission: {
+      name: "ROLE:READ",
+      displayName: "View Roles",
+      link: "/main/role",
+    },
     permissions: [
       {
         name: "ROLE:READ",
         displayName: "View Roles",
-        link: "/main/role",
       },
       {
         name: "ROLE:CREATE",
@@ -25,11 +29,15 @@ export const MODULES_AND_PERMISSIONS = [
   {
     name: "USER",
     displayName: "User Management",
+    displayPermission: {
+      name: "USER:READ",
+      displayName: "View Users",
+      link: "/main/user",
+    },
     permissions: [
       {
         name: "USER:READ",
         displayName: "View Users",
-        link: "/main/user",
       },
       {
         name: "USER:CREATE",
