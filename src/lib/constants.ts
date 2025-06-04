@@ -1,56 +1,44 @@
-export const MODULES_AND_PERMISSIONS = [
-  {
-    name: "ROLE",
+export const MODULES_AND_PERMISSIONS = {
+  ROLE: {
     displayName: "Role Management",
-    displayPermission: {
+    PERMISSION_READ: {
       name: "ROLE:READ",
       displayName: "View Roles",
       link: "/main/role",
     },
-    permissions: [
-      {
-        name: "ROLE:READ",
-        displayName: "View Roles",
-      },
-      {
-        name: "ROLE:CREATE",
-        displayName: "Create Roles",
-      },
-      {
-        name: "ROLE:UPDATE",
-        displayName: "Update Roles",
-      },
-      {
-        name: "ROLE:DELETE",
-        displayName: "Delete Roles",
-      },
-    ],
+    PERMISSION_CREATE: {
+      name: "ROLE:CREATE",
+      displayName: "Create Roles",
+      link: "/main/role/create",
+    },
+    PERMISSION_UPDATE: {
+      name: "ROLE:UPDATE",
+      displayName: "Update Roles",
+    },
+    PERMISSION_DELETE: {
+      name: "ROLE:DELETE",
+      displayName: "Delete Roles",
+    },
   },
-  {
-    name: "USER",
+  USER: {
     displayName: "User Management",
-    displayPermission: {
+    PERMISSION_READ: {
       name: "USER:READ",
       displayName: "View Users",
       link: "/main/user",
     },
-    permissions: [
-      {
-        name: "USER:READ",
-        displayName: "View Users",
-      },
-      {
-        name: "USER:CREATE",
-        displayName: "Create Users",
-      },
-      {
-        name: "USER:UPDATE",
-        displayName: "Update Users",
-      },
-      {
-        name: "USER:DELETE",
-        displayName: "Delete Users",
-      },
-    ],
+    PERMISSION_CREATE: {
+      name: "USER:CREATE",
+      displayName: "Create Users",
+      link: "/main/user/create",
+    },
+    PERMISSION_UPDATE: {
+      name: "USER:UPDATE",
+      displayName: "Update Users",
+    },
+    PERMISSION_DELETE: {
+      name: "USER:DELETE",
+      displayName: "Delete Users",
+    },
   },
-];
+};

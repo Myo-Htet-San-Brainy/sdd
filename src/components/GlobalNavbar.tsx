@@ -43,23 +43,18 @@ const GlobalNavbar = () => {
                 <DrawerClose>close</DrawerClose>
               </DrawerTitle>
               <DrawerDescription className="">
-                {MODULES_AND_PERMISSIONS.map((module) => {
+                {Object.values(MODULES_AND_PERMISSIONS).map((module) => {
                   return (
                     hasPermission(
                       myPermissions!,
-                      module.displayPermission.name
+                      module.PERMISSION_READ.name
                     ) && (
-                      <>
-                        <p className="mt-2 text-left text-sm bg-slate-300 p-2">
-                          {module.displayName}
-                        </p>
-                        <Link
-                          href={module.displayPermission.link}
-                          className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-                        >
-                          {module.displayPermission.displayName}
-                        </Link>
-                      </>
+                      <Link
+                        href={module.PERMISSION_READ.link}
+                        className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                      >
+                        {module.PERMISSION_READ.displayName}
+                      </Link>
                     )
                   );
                 })}
