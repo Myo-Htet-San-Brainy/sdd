@@ -19,7 +19,12 @@ export async function GET(req: NextRequest) {
     // 2. Check if user has permission to read roles
     const userRole = session.user.role;
     const role = await getRoleByName(userRole);
-    if (!hasPermission(role?.permissions, REQUESTED_PERMISSION)) {
+    if (
+      !hasPermission(
+        role?.permissions,
+        MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name
+      )
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
