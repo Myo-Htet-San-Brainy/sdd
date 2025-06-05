@@ -23,3 +23,17 @@ export async function createRole(role: {
   const roleCollection = await getCollection("role");
   return await roleCollection.insertOne(role);
 }
+
+export async function updateRole(
+  roleId: string,
+  updatedFields: {
+    name?: string;
+    permissions?: string[];
+  }
+) {
+  const roleCollection = await getCollection("role");
+  return await roleCollection.updateOne(
+    { _id: new ObjectId(roleId) }, // Filter by ID
+    { $set: updatedFields } // Update fields
+  );
+}

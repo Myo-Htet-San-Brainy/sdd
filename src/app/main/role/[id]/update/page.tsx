@@ -38,7 +38,7 @@ const Page = () => {
   if (
     !hasPermission(
       myPermissions!,
-      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.name
+      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
     )
   ) {
     return (
