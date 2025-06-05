@@ -22,3 +22,25 @@ export async function getRoles(): Promise<Role[]> {
     throw error;
   }
 }
+
+export async function createRole({
+  rolename,
+  allowedPermissions,
+}: {
+  rolename: string;
+  allowedPermissions: string[];
+}): Promise<void> {
+  try {
+    const response = await axios.post("/api/role", {
+      rolename,
+      allowedPermissions,
+    });
+
+    if (response.status !== 201) {
+      throw new Error("Failed to create role.");
+    }
+  } catch (error: any) {
+    console.log("error creating role:", error);
+    throw error;
+  }
+}

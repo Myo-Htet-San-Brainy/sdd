@@ -8,6 +8,7 @@ import { useState } from "react";
 
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useCreateRoleMutation } from "@/query/role";
 
 const allPermissions = getAllPermissions();
 const page = () => {
@@ -15,6 +16,7 @@ const page = () => {
     useGetMyPermissions();
   const [roleName, setRoleName] = useState("");
   const [allowedPermissions, setAllowedPermissions] = useState<string[]>([]);
+  const { mutate } = useCreateRoleMutation();
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
   }
@@ -62,7 +64,19 @@ const page = () => {
       return;
     }
     // send roleName + allowedPermissions to API
-    console.log({ roleName, allowedPermissions });
+    mutate(
+      { rolename: roleName, allowedPermissions },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("Role Created!");
+          setRoleName("");
+          setAllowedPermissions([]);
+        },
+        onError(error, variables, context) {
+          toast.error("Creating Role Failed! Try again later...");
+        },
+      }
+    );
   };
 
   return (

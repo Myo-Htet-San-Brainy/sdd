@@ -9,3 +9,11 @@ export async function getAllRoles() {
   const roleCollection = await getCollection("role");
   return await roleCollection.find({}).toArray();
 }
+
+export async function createRole(role: {
+  name: string;
+  permissions: string[];
+}) {
+  const roleCollection = await getCollection("role");
+  return await roleCollection.insertOne(role);
+}
