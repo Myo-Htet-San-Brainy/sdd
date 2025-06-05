@@ -79,11 +79,11 @@ export async function updateRole({
 }): Promise<void> {
   try {
     const response = await axios.patch(`/api/role/${roleId}`, {
-      rolename,
-      allowedPermissions,
+      name: rolename,
+      permissions: allowedPermissions,
     });
 
-    if (response.status !== 204) {
+    if (response.status !== 200) {
       throw new CustomError("Failed to update role.", 500);
     }
   } catch (error: any) {

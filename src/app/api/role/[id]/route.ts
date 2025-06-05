@@ -15,7 +15,7 @@ const REQUESTED_PERMISSION = "ROLE:READ";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // throw new Error("test error");
@@ -38,7 +38,7 @@ export async function GET(
     }
 
     // 5. Return roles
-    const id = params.id;
+    const { id } = await params;
     const data = await getRoleById(id);
     if (!data) {
       // handle not found
@@ -56,7 +56,7 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // throw new Error("test error");
@@ -78,17 +78,22 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const id = params.id;
+    const { id } = await params;
     if (!(await getRoleById(id))) {
       // handle not found
       return NextResponse.json({ error: "Role not found" }, { status: 404 });
     }
     const { name, permissions } = await req.json();
     const result = await updateRole(id, { name, permissions });
-    console.log(result);
+    if (!result.acknowledged) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { message: "updating role successful!" },
-      { status: 204 }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Get role error:", error);
