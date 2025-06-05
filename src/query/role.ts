@@ -1,4 +1,4 @@
-import { createRole, getRole, getRoles } from "@/services/role";
+import { createRole, getRole, getRoles, updateRole } from "@/services/role";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useGetRoles = () => {
@@ -20,6 +20,17 @@ export const useCreateRoleMutation = () => {
 
   return useMutation({
     mutationFn: createRole,
+    onSuccess(data, variables, context) {
+      queryClient.invalidateQueries({ queryKey: ["roles"] });
+    },
+  });
+};
+
+export const useUpdateRoleMutation = () => {
+  const queryClient = useQueryClient(); // ✨ get query client
+
+  return useMutation({
+    mutationFn: updateRole,
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
     },

@@ -2,12 +2,13 @@
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { getAllPermissions, hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useGetRole } from "@/query/role";
+import { useGetRole, useUpdateRoleMutation } from "@/query/role";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
+import { CustomError } from "@/lib/CustomError";
 
 const allPermissions = getAllPermissions();
 
@@ -31,6 +32,9 @@ const Page = () => {
       setRoleName(role.name);
     }
   }, [role]);
+
+  const { mutate } = useUpdateRoleMutation();
+  const router = useRouter();
 
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
@@ -92,6 +96,25 @@ const Page = () => {
     }
     // send roleName + allowedPermissions to API
     console.log({ roleName, allowedPermissions });
+    mutate(
+      { roleId: id, rolename: roleName, allowedPermissions },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("Role Updated!");
+          router.push("/main/role");
+        },
+        onError(error, variables, context) {
+          if (error instanceof CustomError) {
+            if (error.status === 404) {
+              toast.error("Role Not Found!");
+              router.push("/main/role");
+            } else {
+              toast.error("Internal Server Error!");
+            }
+          }
+        },
+      }
+    );
   };
 
   return (

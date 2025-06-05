@@ -1,4 +1,5 @@
 import { Role } from "@/Interfaces/Role";
+import { CustomError } from "@/lib/CustomError";
 import axios from "axios";
 
 //get roles fn
@@ -63,6 +64,36 @@ export async function createRole({
     }
   } catch (error: any) {
     console.log("error creating role:", error);
+    throw error;
+  }
+}
+
+export async function updateRole({
+  roleId,
+  rolename,
+  allowedPermissions,
+}: {
+  roleId: string;
+  rolename: string;
+  allowedPermissions: string[];
+}): Promise<void> {
+  try {
+    const response = await axios.patch(`/api/role/${roleId}`, {
+      rolename,
+      allowedPermissions,
+    });
+
+    if (response.status !== 204) {
+      throw new CustomError("Failed to update role.", 500);
+    }
+  } catch (error: any) {
+    console.log("error creating role:", error);
+    if (error.response?.status === 404) {
+      throw new CustomError("Role Not Found!", 404);
+    }
+    if (error.response?.status === 500) {
+      throw new CustomError("Internal Sever Error!", 500);
+    }
     throw error;
   }
 }
