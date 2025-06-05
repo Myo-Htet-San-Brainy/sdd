@@ -31,8 +31,8 @@ export async function getRole({ id }: { id: string }): Promise<Role> {
       throw new Error("Something went wrong!");
     }
 
-    const { roles } = response.data;
-    return roles;
+    const { role } = response.data;
+    return role;
   } catch (error: any) {
     console.log("error fetching roles:", error);
     if (error.response?.status === 404) {
