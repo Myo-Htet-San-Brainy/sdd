@@ -11,31 +11,22 @@ import {
   updateRole,
 } from "@/db/role";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-
-const REQUESTED_PERMISSION = "ROLE:READ";
+import { verifyPermission } from "@/lib/serverUtils";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // throw new Error("test error");
-    // 1. Check session
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name
+    );
 
-    // 2. Check if user has permission to read roles
-    const userRole = session.user.role;
-    const role = await getRoleByName(userRole);
-    if (
-      !hasPermission(
-        role?.permissions,
-        MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name
-      )
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
     }
 
     // 5. Return roles
@@ -60,25 +51,16 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // throw new Error("test error");
-    // 1. Check session
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
+    );
 
-    // 2. Check if user has permission to read roles
-    const userRole = session.user.role;
-    const role = await getRoleByName(userRole);
-    if (
-      !hasPermission(
-        role?.permissions,
-        MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
-      )
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
     }
-
     const { id } = await params;
     if (!(await getRoleById(id))) {
       // handle not found
@@ -110,23 +92,15 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // throw new Error("test error");
-    // 1. Check session
-    const session = await getServerSession(authOptions);
-    if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.name
+    );
 
-    // 2. Check if user has permission to read roles
-    const userRole = session.user.role;
-    const role = await getRoleByName(userRole);
-    if (
-      !hasPermission(
-        role?.permissions,
-        MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
-      )
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
     }
 
     const { id } = await params;
