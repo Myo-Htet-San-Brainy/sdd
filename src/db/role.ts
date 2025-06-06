@@ -37,3 +37,8 @@ export async function updateRole(
     { $set: updatedFields } // Update fields
   );
 }
+
+export async function deleteRoleById(roleId: string) {
+  const roleCollection = await getCollection("role");
+  return await roleCollection.deleteOne({ _id: new ObjectId(roleId) });
+}

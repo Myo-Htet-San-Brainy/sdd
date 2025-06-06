@@ -63,11 +63,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 3. Get data from request body
-    const { roleName, allowedPermissions } = await req.json();
+    const { rolename, allowedPermissions } = await req.json();
 
     // 5. Create new role in the 'role' collection
     const result = await createRole({
-      name: roleName,
+      name: rolename,
       permissions: allowedPermissions,
     });
     // 6. Check if insert was successful
