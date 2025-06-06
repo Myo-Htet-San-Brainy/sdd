@@ -9,6 +9,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import toast from "react-hot-toast";
 import { useCreateRoleMutation } from "@/query/role";
+import AllowedPermissions from "@/components/AllowedPermissions";
 
 const allPermissions = getAllPermissions();
 const page = () => {
@@ -27,21 +28,12 @@ const page = () => {
     )
   ) {
     return (
-      <div>
-        you are not permitted to do role Management. do these instead...
-        {Object.values(MODULES_AND_PERMISSIONS).map((module) => {
-          return (
-            hasPermission(myPermissions!, module.PERMISSION_READ.name) && (
-              <Link
-                href={module.PERMISSION_READ.link}
-                className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-              >
-                {module.PERMISSION_READ.displayName}
-              </Link>
-            )
-          );
-        })}
-      </div>
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.displayName
+        }
+        myPermissions={myPermissions!}
+      />
     );
   }
 

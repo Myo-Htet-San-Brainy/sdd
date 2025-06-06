@@ -1,4 +1,6 @@
 "use client";
+import AllowedPermissions from "@/components/AllowedPermissions";
+import FallbackPermissions from "@/components/FallbackPermissions";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
@@ -8,11 +10,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 import toast from "react-hot-toast";
-
-const READ_PERMISSION = "ROLE:READ";
-const CREATE_PERMISSION = "ROLE:CREATE";
-const UPDATE_PERMISSION = "ROLE:UPDATE";
-const DELETE_PERMISSION = "ROLE:DELETE";
 
 const Page = () => {
   const { data: myPermissions, isFetching: isFetchingMyPermissions } =
@@ -55,21 +52,10 @@ const Page = () => {
     )
   ) {
     return (
-      <div>
-        you are not permitted to do role Management. do these instead...
-        {Object.values(MODULES_AND_PERMISSIONS).map((module) => {
-          return (
-            hasPermission(myPermissions!, module.PERMISSION_READ.name) && (
-              <Link
-                href={module.PERMISSION_READ.link}
-                className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-              >
-                {module.PERMISSION_READ.displayName}
-              </Link>
-            )
-          );
-        })}
-      </div>
+      <AllowedPermissions
+        actionNotPermitted={MODULES_AND_PERMISSIONS.ROLE.displayName}
+        myPermissions={myPermissions!}
+      />
     );
   }
 
@@ -78,23 +64,11 @@ const Page = () => {
   }
   if (isErrorRoles) {
     return (
-      <div>
-        Something went wrong while getting roles for you. do these instead...
-        {Object.values(MODULES_AND_PERMISSIONS).map((module) => {
-          return (
-            module.PERMISSION_READ.name !==
-              MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name &&
-            hasPermission(myPermissions!, module.PERMISSION_READ.name) && (
-              <Link
-                href={module.PERMISSION_READ.link}
-                className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-              >
-                {module.PERMISSION_READ.displayName}
-              </Link>
-            )
-          );
-        })}
-      </div>
+      <FallbackPermissions
+        myPermissions={myPermissions!}
+        errorAction={MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name}
+        errorActionTitle={"getting roles"}
+      />
     );
   }
   return (

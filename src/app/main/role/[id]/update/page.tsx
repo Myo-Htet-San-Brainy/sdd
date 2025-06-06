@@ -9,6 +9,7 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { CustomError } from "@/lib/CustomError";
+import AllowedPermissions from "@/components/AllowedPermissions";
 
 const allPermissions = getAllPermissions();
 
@@ -46,21 +47,12 @@ const Page = () => {
     )
   ) {
     return (
-      <div>
-        you are not permitted to do role Management. do these instead...
-        {Object.values(MODULES_AND_PERMISSIONS).map((module) => {
-          return (
-            hasPermission(myPermissions!, module.PERMISSION_READ.name) && (
-              <Link
-                href={module.PERMISSION_READ.link}
-                className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-              >
-                {module.PERMISSION_READ.displayName}
-              </Link>
-            )
-          );
-        })}
-      </div>
+      <AllowedPermissions
+        myPermissions={myPermissions!}
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.displayName
+        }
+      />
     );
   }
 
@@ -72,7 +64,7 @@ const Page = () => {
     return (
       <div>
         <p>{errorRole.message || "Something went wrong!"}</p>
-        <Link href={"/main/role"}>View other Roles</Link>
+        <Link href={"/main/role"}>Update other Roles</Link>
       </div>
     );
   }
