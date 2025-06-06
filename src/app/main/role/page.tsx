@@ -1,10 +1,13 @@
 "use client";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { CustomError } from "@/lib/CustomError";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useGetRoles } from "@/query/role";
+import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
+import toast from "react-hot-toast";
 
 const READ_PERMISSION = "ROLE:READ";
 const CREATE_PERMISSION = "ROLE:CREATE";
@@ -19,6 +22,29 @@ const Page = () => {
     isFetching: isFetchingRoles,
     isError: isErrorRoles,
   } = useGetRoles();
+  const { mutate } = useDeleteRoleMutation();
+  const queryClient = useQueryClient(); // ✨ get query client
+  function handleDeleteRole(roleId: string) {
+    // console.log("delete role...");
+    mutate(
+      { roleId },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("Role Deleted!");
+        },
+        onError(error, variables, context) {
+          if (error instanceof CustomError) {
+            if (error.status === 404) {
+              toast.success("Role Deleted!");
+              queryClient.invalidateQueries({ queryKey: ["roles"] });
+            } else {
+              toast.error("Role Deletion Failed!");
+            }
+          }
+        },
+      }
+    );
+  }
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
   }
@@ -102,7 +128,7 @@ const Page = () => {
               myPermissions!,
               MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.name
             ) && (
-              <button onClick={() => console.log("deleted role")}>
+              <button onClick={() => handleDeleteRole(role._id)}>
                 {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.displayName}
               </button>
             )}

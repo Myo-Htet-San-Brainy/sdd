@@ -97,3 +97,26 @@ export async function updateRole({
     throw error;
   }
 }
+
+export async function deleteRole({
+  roleId,
+}: {
+  roleId: string;
+}): Promise<void> {
+  try {
+    const response = await axios.delete(`/api/role/${roleId}`);
+
+    if (response.status !== 200) {
+      throw new CustomError("Failed to delete role.", 500);
+    }
+  } catch (error: any) {
+    console.log("error creating role:", error);
+    if (error.response?.status === 404) {
+      throw new CustomError("Role Not Found!", 404);
+    }
+    if (error.response?.status === 500) {
+      throw new CustomError("Internal Sever Error!", 500);
+    }
+    throw error;
+  }
+}
