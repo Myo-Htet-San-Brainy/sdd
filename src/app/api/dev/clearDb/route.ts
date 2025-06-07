@@ -12,7 +12,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const userCol = await getCollection("User");
+    const userCol = await getCollection("user");
 
     await userCol.deleteMany({
       _id: { $ne: new ObjectId("683c2298de25e07b9ade7a14") },

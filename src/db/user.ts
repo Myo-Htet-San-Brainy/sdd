@@ -12,3 +12,16 @@ export async function createUser(user: any) {
   const userCollection = await getCollection("user");
   return await userCollection.insertOne(user);
 }
+
+export async function getUserById(userId: string) {
+  const userCollection = await getCollection("user");
+  return await userCollection.findOne({ _id: new ObjectId(userId) });
+}
+
+export async function updateUser(userId: string, userPayload: any) {
+  const userCollection = await getCollection("user");
+  return await userCollection.updateOne(
+    { _id: new ObjectId(userId) }, // Filter by ID
+    { $set: userPayload } // Update fields
+  );
+}
