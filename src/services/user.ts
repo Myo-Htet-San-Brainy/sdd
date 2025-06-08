@@ -92,3 +92,24 @@ export async function getUser({ id }: { id: string }): Promise<User> {
     }
   }
 }
+
+export async function deleteUser({
+  userId,
+}: {
+  userId: string;
+}): Promise<void> {
+  try {
+    const response = await axios.delete(`/api/user/${userId}`);
+
+    if (response.status !== 200) {
+      throw new Error("Something went wrong!");
+    }
+  } catch (error: any) {
+    console.log("error deleting user:", error);
+    if (error.response?.status === 404) {
+      throw new CustomError("This user has been removed already!", 404);
+    } else {
+      throw new CustomError("Something went wrong!", 500);
+    }
+  }
+}

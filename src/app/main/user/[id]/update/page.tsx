@@ -10,7 +10,7 @@ import toast from "react-hot-toast";
 import { X } from "lucide-react";
 import { CustomError } from "@/lib/CustomError";
 import AllowedPermissions from "@/components/AllowedPermissions";
-import { useGetUser } from "@/query/user";
+import { useGetUser, useUpdateUserMutation } from "@/query/user";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,6 +32,7 @@ const Page = () => {
     isError: isErrorRoles,
     error: errorRoles,
   } = useGetRoles();
+  const { mutate } = useUpdateUserMutation();
 
   const {
     register,
@@ -111,7 +112,25 @@ const Page = () => {
   }
 
   const onSubmit = (data: any) => {
-    console.log(data);
+    mutate(
+      { userId: id, userPayload: data },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("User Updated!");
+          router.push("/main/user");
+        },
+        onError(error, variables, context) {
+          if (error instanceof CustomError) {
+            if (error.status === 404) {
+              toast.error("This User has just been removed by other admins!");
+              router.push("/main/user");
+            } else {
+              toast.error("Smth went wrong!");
+            }
+          }
+        },
+      }
+    );
   };
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

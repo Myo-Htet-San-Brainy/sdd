@@ -6,7 +6,7 @@ import { CustomError } from "@/lib/CustomError";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
-import { useGetUsers } from "@/query/user";
+import { useDeleteUserMutation, useGetUsers } from "@/query/user";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
@@ -20,6 +20,26 @@ const Page = () => {
     isFetching: isFetchingUsers,
     isError: isErrorUsers,
   } = useGetUsers();
+  const { mutate } = useDeleteUserMutation();
+  function handleDeleteUser(userId: string) {
+    mutate(
+      { userId },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("User Deleted!");
+        },
+        onError(error, variables, context) {
+          if (error instanceof CustomError) {
+            if (error.status === 404) {
+              toast.success("User Deleted!");
+            } else {
+              toast.error("User Deletion Failed!");
+            }
+          }
+        },
+      }
+    );
+  }
 
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
@@ -81,7 +101,7 @@ const Page = () => {
               myPermissions!,
               MODULES_AND_PERMISSIONS.USER.PERMISSION_DELETE.name
             ) && (
-              <button onClick={() => console.log("delete user")}>
+              <button onClick={() => handleDeleteUser(user._id)}>
                 {MODULES_AND_PERMISSIONS.USER.PERMISSION_DELETE.displayName}
               </button>
             )}

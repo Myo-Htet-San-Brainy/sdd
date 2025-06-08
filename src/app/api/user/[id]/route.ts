@@ -12,7 +12,7 @@ import {
 } from "@/db/role";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hashPassword, verifyPermission } from "@/lib/serverUtils";
-import { getUserById, updateUser } from "@/db/user";
+import { deleteUserById, getUserById, updateUser } from "@/db/user";
 
 export async function GET(
   req: NextRequest,
@@ -91,6 +91,47 @@ export async function PATCH(
     );
   } catch (error) {
     console.error("update user error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
+
+    const { id } = await params;
+    if (!(await getUserById(id))) {
+      // handle not found
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    const result = await deleteUserById(id);
+    if (!result.acknowledged) {
+      return NextResponse.json(
+        { error: "Internal server error" },
+        { status: 500 }
+      );
+    }
+    return NextResponse.json(
+      { message: "deleting user successful!" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("delete user error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

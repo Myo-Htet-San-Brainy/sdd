@@ -25,3 +25,8 @@ export async function updateUser(userId: string, userPayload: any) {
     { $set: userPayload } // Update fields
   );
 }
+
+export async function deleteUserById(userId: string) {
+  const userCollection = await getCollection("user");
+  return await userCollection.deleteOne({ _id: new ObjectId(userId) });
+}
