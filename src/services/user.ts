@@ -49,6 +49,7 @@ export async function createUser(user: any): Promise<void> {
   }
 }
 
+//
 export async function updateUser({
   userId,
   userPayload,
@@ -68,6 +69,26 @@ export async function updateUser({
       throw new CustomError("User Not Found!", 404);
     } else {
       throw new CustomError("Internal Sever Error!", 500);
+    }
+  }
+}
+
+export async function getUser({ id }: { id: string }): Promise<User> {
+  try {
+    const response = await axios.get(`/api/user/${id}`);
+
+    if (response.status !== 200) {
+      throw new Error("Something went wrong!");
+    }
+
+    const { user } = response.data;
+    return user;
+  } catch (error: any) {
+    console.log("error getting user:", error);
+    if (error.response?.status === 404) {
+      throw new CustomError("This user has been removed already!", 404);
+    } else {
+      throw new CustomError("Something went wrong!", 500);
     }
   }
 }

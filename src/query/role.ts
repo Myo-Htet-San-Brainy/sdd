@@ -39,7 +39,7 @@ export const useUpdateRoleMutation = () => {
     mutationFn: updateRole,
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["roles"] });
-      queryClient.invalidateQueries({ queryKey: ["roles", variables.roleId] });
+      queryClient.invalidateQueries({ queryKey: ["role", variables.roleId] });
       queryClient.invalidateQueries({ queryKey: ["myPermissions"] });
     },
   });

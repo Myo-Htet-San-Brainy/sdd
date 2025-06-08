@@ -14,6 +14,39 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hashPassword, verifyPermission } from "@/lib/serverUtils";
 import { getUserById, updateUser } from "@/db/user";
 
+export async function GET(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
+
+    // 5. Return roles
+    const { id } = await params;
+    const data = await getUserById(id);
+    if (!data) {
+      // handle not found
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+    return NextResponse.json({ user: data }, { status: 200 });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
