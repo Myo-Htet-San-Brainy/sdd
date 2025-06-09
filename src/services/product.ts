@@ -8,9 +8,9 @@ import axios from "axios";
 //return Role[]
 //check if 200
 
-export async function getProductsByType(): Promise<Product[]> {
+export async function getProductsByType(type: string): Promise<Product[]> {
   try {
-    const response = await axios.get("/api/product");
+    const response = await axios.get(`/api/product?type=${type}`);
 
     if (response.status !== 200) {
       throw new Error("Error fetching products!");

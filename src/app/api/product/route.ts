@@ -7,6 +7,7 @@ import { getProductsByType } from "@/db/product";
 
 export async function GET(req: NextRequest) {
   try {
+    // throw new Error("TE");
     const permissionCheck = await verifyPermission(
       MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
     );
