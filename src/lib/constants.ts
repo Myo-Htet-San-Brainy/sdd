@@ -41,4 +41,25 @@ export const MODULES_AND_PERMISSIONS = {
       displayName: "Delete User",
     },
   },
+  PRODUCT: {
+    displayName: "Manage Products",
+    PERMISSION_READ: {
+      name: "PRODUCT:READ",
+      displayName: "View Products",
+      link: "/main/product",
+    },
+    PERMISSION_CREATE: {
+      name: "PRODUCT:CREATE",
+      displayName: "Create Products",
+      link: "/main/product/create",
+    },
+    PERMISSION_UPDATE: {
+      name: "PRODUCT:UPDATE",
+      displayName: "Update Product",
+    },
+    PERMISSION_DELETE: {
+      name: "PRODUCT:DELETE",
+      displayName: "Delete Product",
+    },
+  },
 };
