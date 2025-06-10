@@ -43,8 +43,8 @@ export async function getMatchingProductTypes(type: string) {
     },
     { $unwind: "$matchingTypes" },
     { $group: { _id: "$matchingTypes" } },
-    { $project: { _id: 0, type: "$_id" } },
   ];
 
-  return await productCollection.aggregate(pipeline).toArray();
+  const result = await productCollection.aggregate(pipeline).toArray();
+  return result.map((item) => item._id);
 }

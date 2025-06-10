@@ -5,12 +5,12 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useGetProductsByType } from "@/query/product";
+import { useGetProductsByType, useGetSuggestions } from "@/query/product";
 import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
 import { useDeleteUserMutation, useGetUsers } from "@/query/user";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const Page = () => {
@@ -18,12 +18,31 @@ const Page = () => {
     useGetMyPermissions();
   const [type, setType] = useState("");
   const [searchInput, setSearchInput] = useState("");
+  const [suggestionPrompt, setSuggestionPrompt] = useState("");
   const {
     data: products,
     isFetching: isFetchingProducts,
     isError: isErrorProducts,
     isPending: isPendingProducts,
   } = useGetProductsByType({ type: searchInput });
+  const formRef: React.RefObject<HTMLFormElement | null> = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      // Check if click occurred outside the form
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setSuggestionPrompt("");
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
 
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
@@ -69,7 +88,7 @@ const Page = () => {
       toast.error("Please enter a product type");
       return;
     }
-
+    setSuggestionPrompt("");
     setSearchInput(trimmedType);
   }
 
@@ -84,9 +103,9 @@ const Page = () => {
         </Link>
       )}
       <form
+        ref={formRef}
         onSubmit={(e) => {
           e.preventDefault();
-
           handleSearch(); // pass it to your handler or set it to state
         }}
         className="flex items-center gap-2 my-4"
@@ -94,9 +113,17 @@ const Page = () => {
         <input
           type="text"
           value={type}
-          onChange={(e) => setType(e.target.value)}
+          onChange={(e) => {
+            const value = e.target.value;
+            setType(value);
+            setSuggestionPrompt(value);
+          }}
           placeholder="Search by product type..."
           className="border px-4 py-2 rounded-md w-full max-w-xs"
+          onFocus={(e) => {
+            const currentValue = e.target.value;
+            setSuggestionPrompt(currentValue);
+          }}
         />
         <button
           disabled={isFetchingProducts}
@@ -105,7 +132,24 @@ const Page = () => {
         >
           Search
         </button>
+        <div>
+          {suggestions?.map((suggestion) => {
+            return (
+              <button
+                key={suggestion}
+                onClick={(e) => {
+                  setSearchInput(suggestion);
+                  setType(suggestion);
+                  setSuggestionPrompt("");
+                }}
+              >
+                {suggestion}
+              </button>
+            );
+          })}
+        </div>
       </form>
+
       {content}
     </div>
   );
