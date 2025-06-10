@@ -23,3 +23,21 @@ export async function getProductsByType(type: string): Promise<Product[]> {
     throw new CustomError("Internal Sever Error!", 500);
   }
 }
+
+export async function getMatchingProductTypes(
+  type: string
+): Promise<Product[]> {
+  try {
+    const response = await axios.get(`/api/product/suggestions?type=${type}`);
+
+    if (response.status !== 200) {
+      throw new Error("Error fetching suggestions!");
+    }
+
+    const { types } = response.data;
+    return types;
+  } catch (error: any) {
+    console.log("error fetching suggestions:", error);
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}

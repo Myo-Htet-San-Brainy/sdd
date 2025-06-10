@@ -43,9 +43,9 @@ const Page = () => {
   }
 
   let content;
-  console.log(isPendingProducts);
-  console.log(isFetchingProducts);
-  console.log(isErrorProducts);
+  // console.log(isPendingProducts);
+  // console.log(isFetchingProducts);
+  // console.log(isErrorProducts);
 
   if (isFetchingProducts) {
     content = <p>fetching...</p>;

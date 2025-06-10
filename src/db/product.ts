@@ -20,3 +20,31 @@ export async function getProductsByType(type: string) {
     )
     .toArray();
 }
+
+export async function getMatchingProductTypes(type: string) {
+  const productCollection = await getCollection("product");
+
+  const pipeline = [
+    {
+      $match: {
+        type: { $elemMatch: { $regex: type, $options: "i" } },
+      },
+    },
+    {
+      $project: {
+        matchingTypes: {
+          $filter: {
+            input: "$type",
+            as: "t",
+            cond: { $regexMatch: { input: "$$t", regex: type, options: "i" } },
+          },
+        },
+      },
+    },
+    { $unwind: "$matchingTypes" },
+    { $group: { _id: "$matchingTypes" } },
+    { $project: { _id: 0, type: "$_id" } },
+  ];
+
+  return await productCollection.aggregate(pipeline).toArray();
+}

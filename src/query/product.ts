@@ -1,5 +1,5 @@
 import { CustomError } from "@/lib/CustomError";
-import { getProductsByType } from "@/services/product";
+import { getMatchingProductTypes, getProductsByType } from "@/services/product";
 import {
   createRole,
   deleteRole,
@@ -20,6 +20,14 @@ export const useGetProductsByType = ({ type }: { type: string }) => {
   return useQuery({
     queryFn: () => getProductsByType(type),
     queryKey: ["products", type],
+    enabled: Boolean(type),
+  });
+};
+
+export const useGetSuggestions = ({ type }: { type: string }) => {
+  return useQuery({
+    queryFn: () => getMatchingProductTypes(type),
+    queryKey: ["suggestions", type],
     enabled: Boolean(type),
   });
 };
