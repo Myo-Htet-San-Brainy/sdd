@@ -1,6 +1,7 @@
 "use client";
 import AllowedPermissions from "@/components/AllowedPermissions";
 import FallbackPermissions from "@/components/FallbackPermissions";
+import Product from "@/components/Product";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
 import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
@@ -78,7 +79,13 @@ const Page = () => {
     if (products.length <= 0) {
       content = <p>no products with such type</p>;
     } else {
-      content = <p>products</p>;
+      content = (
+        <p>
+          {products.map((product) => {
+            return <Product key={product._id} product={product} />;
+          })}
+        </p>
+      );
     }
   }
 
