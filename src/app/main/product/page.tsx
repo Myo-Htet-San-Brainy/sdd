@@ -1,5 +1,6 @@
 "use client";
 import AllowedPermissions from "@/components/AllowedPermissions";
+import BookmarkedProductsPopUp from "@/components/BookmarkedProductsPopUp";
 import FallbackPermissions from "@/components/FallbackPermissions";
 import Product from "@/components/Product";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
@@ -9,6 +10,7 @@ import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
 import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
 import { useDeleteUserMutation, useGetUsers } from "@/query/user";
+import { useBookmarkedProductsStore, usePopUpsStore } from "@/store";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
@@ -44,6 +46,7 @@ const Page = () => {
   }, []);
 
   const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
+  const { setIsOpenBookmarkedProductsPopUp } = usePopUpsStore();
 
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
@@ -101,6 +104,12 @@ const Page = () => {
 
   return (
     <div>
+      <div>
+        <button onClick={() => setIsOpenBookmarkedProductsPopUp(true)}>
+          open bookmark
+        </button>
+        <BookmarkedProductsPopUp />
+      </div>
       {hasPermission(
         myPermissions!,
         MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.name

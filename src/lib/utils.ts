@@ -25,3 +25,14 @@ export const getAllPermissions = () => {
     )
     .map((p: any) => ({ name: p.name, displayName: p.displayName }));
 };
+
+import { ObjectId } from "mongodb";
+
+export function isItemInList<T extends { _id: ObjectId | string }>(
+  item: T,
+  list: T[]
+): boolean {
+  const itemId = item._id.toString();
+
+  return list.some((listItem) => listItem._id.toString() === itemId);
+}

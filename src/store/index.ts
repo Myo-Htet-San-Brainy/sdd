@@ -4,6 +4,8 @@ import { create } from "zustand";
 interface PopUpsStore {
   isOpenGlobalNavbar: boolean;
   setIsOpenGlobalNavbar: (newState: boolean) => void;
+  isOpenBookmarkedProductsPopUp: boolean;
+  setIsOpenBookmarkedProductsPopUp: (newState: boolean) => void;
 }
 
 export const usePopUpsStore = create<PopUpsStore>()((set) => ({
@@ -11,6 +13,12 @@ export const usePopUpsStore = create<PopUpsStore>()((set) => ({
   setIsOpenGlobalNavbar: (newState) => {
     set((prev) => {
       return { ...prev, isOpenGlobalNavbar: newState };
+    });
+  },
+  isOpenBookmarkedProductsPopUp: false,
+  setIsOpenBookmarkedProductsPopUp: (newState) => {
+    set((prev) => {
+      return { ...prev, isOpenBookmarkedProductsPopUp: newState };
     });
   },
 }));
