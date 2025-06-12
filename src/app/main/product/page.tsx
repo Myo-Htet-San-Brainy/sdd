@@ -104,12 +104,8 @@ const Page = () => {
 
   return (
     <div>
-      <div>
-        <button onClick={() => setIsOpenBookmarkedProductsPopUp(true)}>
-          open bookmark
-        </button>
-        <BookmarkedProductsPopUp />
-      </div>
+      <BookmarkedProductsPopUp />
+
       {hasPermission(
         myPermissions!,
         MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.name
