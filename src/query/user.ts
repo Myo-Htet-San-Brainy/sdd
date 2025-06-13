@@ -15,9 +15,9 @@ import {
 } from "@/services/user";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-export const useGetUsers = () => {
+export const useGetUsers = (params: { role?: string }) => {
   return useQuery({
-    queryFn: getUsers,
+    queryFn: () => getUsers({ role: params.role }),
     queryKey: ["users"],
   });
 };

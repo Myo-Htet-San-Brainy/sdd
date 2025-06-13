@@ -53,3 +53,90 @@ export const useBookmarkedProductsStore = create<BookMarkedProductsStore>()(
     },
   })
 );
+
+export interface CartProduct {
+  product: Product;
+  itemsToSell: number;
+}
+interface CartStore {
+  cart: CartProduct[];
+  addToCart: (newProduct: Product) => void;
+  removeFromCart: (productId: string) => void;
+  totalPrice: () => number;
+  totalNoOfItems: () => number;
+}
+
+export const useCartStore = create<CartStore>()((set, get) => ({
+  cart: [],
+  addToCart(newProduct) {
+    set((prev) => {
+      const product = prev.cart.find(
+        (cartProduct) => cartProduct.product._id === newProduct._id
+      );
+      if (!product) {
+        return {
+          ...prev,
+          cart: [
+            ...prev.cart,
+            {
+              product: newProduct,
+              itemsToSell: 1,
+            },
+          ],
+        };
+      } else {
+        const updated = prev.cart.map((val) => {
+          if (val.product._id === newProduct._id) {
+            return {
+              ...val,
+              itemsToSell: val.itemsToSell + 1,
+            };
+          } else {
+            return val;
+          }
+        });
+        return {
+          ...prev,
+          cart: updated,
+        };
+      }
+    });
+  },
+  removeFromCart(productId: string) {
+    set((prev) => {
+      const product = prev.cart.find(
+        (cartProduct) => cartProduct.product._id === productId
+      );
+
+      if (!product) return prev;
+
+      if (product.itemsToSell > 1) {
+        const updated = prev.cart.map((val) => {
+          if (val.product._id === productId) {
+            return {
+              ...val,
+              itemsToSell: val.itemsToSell - 1,
+            };
+          }
+          return val;
+        });
+        return { ...prev, cart: updated };
+      } else {
+        const updated = prev.cart.filter(
+          (val) => val.product._id !== productId
+        );
+        return { ...prev, cart: updated };
+      }
+    });
+  },
+  totalPrice() {
+    return get().cart.reduce((total, item) => {
+      return total + item.product.sellingPrice * item.itemsToSell;
+    }, 0);
+  },
+  totalNoOfItems() {
+    return get().cart.reduce((total, item) => {
+      return total + item.itemsToSell;
+    }, 0);
+  },
+}));

@@ -8,9 +8,13 @@ import axios from "axios";
 //return Role[]
 //check if 200
 
-export async function getUsers(): Promise<User[]> {
+export async function getUsers(params: { role?: string }): Promise<User[]> {
   try {
-    const response = await axios.get("/api/user");
+    const response = await axios.get(`/api/user`, {
+      params: {
+        role: params.role,
+      },
+    });
 
     if (response.status !== 200) {
       throw new CustomError("Failed to fetch users.", 500);

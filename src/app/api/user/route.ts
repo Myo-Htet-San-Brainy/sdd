@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRole, getAllRoles } from "@/db/role";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hashPassword, verifyPermission } from "@/lib/serverUtils";
-import { createUser, getAllUsers } from "@/db/user";
+import { createUser, getAllUsers, getUsersByRole } from "@/db/user";
 
 export async function GET(req: NextRequest) {
   try {
@@ -17,7 +17,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const users = await getAllUsers();
+    const searchParams = req.nextUrl.searchParams;
+    const role = searchParams.get("role");
+    let users;
+    if (role) {
+      users = await getUsersByRole(role);
+    } else {
+      users = await getAllUsers();
+    }
+
     return NextResponse.json({ users: users || [] }, { status: 200 });
   } catch (error) {
     console.error("Get users error:", error);

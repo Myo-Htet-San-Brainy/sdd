@@ -8,6 +8,16 @@ export async function getAllUsers() {
     .toArray();
 }
 
+export async function getUsersByRole(role: string) {
+  const userCollection = await getCollection("user");
+  return await userCollection
+    .find(
+      { role }, // Filter by the specified role
+      { projection: { password: 0 } } // 🚫 exclude 'password'
+    )
+    .toArray();
+}
+
 export async function createUser(user: any) {
   const userCollection = await getCollection("user");
   return await userCollection.insertOne(user);

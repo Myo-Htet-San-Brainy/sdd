@@ -19,7 +19,7 @@ const Page = () => {
     data: users,
     isFetching: isFetchingUsers,
     isError: isErrorUsers,
-  } = useGetUsers();
+  } = useGetUsers({});
   const { mutate } = useDeleteUserMutation();
   function handleDeleteUser(userId: string) {
     mutate(

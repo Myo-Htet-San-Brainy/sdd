@@ -1,12 +1,16 @@
 import { Product as ProductI } from "@/Interfaces/Product";
 import { isItemInList } from "@/lib/utils";
-import { useBookmarkedProductsStore } from "@/store";
+import { CartProduct, useBookmarkedProductsStore, useCartStore } from "@/store";
 import React from "react";
 
 const Product = ({ product }: { product: ProductI }) => {
   const { addToBookmark, removeFromBookmark, bookmarkedProducts } =
     useBookmarkedProductsStore();
   const isBookmarked = isItemInList(product, bookmarkedProducts);
+  const { cart, addToCart, removeFromCart } = useCartStore();
+  const products = cart.map((val) => val.product);
+  const isInCart = isItemInList(product, products);
+  const cartProduct = cart.find((val) => val.product._id === product._id);
   return (
     <div>
       <p>
@@ -26,6 +30,34 @@ const Product = ({ product }: { product: ProductI }) => {
           </button>
         ) : (
           <button onClick={() => addToBookmark(product)}>bookmark this</button>
+        )}
+      </div>
+      <div>
+        {isInCart ? (
+          <div>
+            <button onClick={() => removeFromCart(product._id)}>remove</button>
+            <p>{(cartProduct as CartProduct).itemsToSell}</p>
+            <button
+              disabled={
+                product.noOfItemsInStock <=
+                (cartProduct as CartProduct).itemsToSell
+              }
+              onClick={() => addToCart(product)}
+            >
+              add
+            </button>
+          </div>
+        ) : (
+          <div>
+            <button disabled>remove</button>
+            <p>0</p>
+            <button
+              disabled={product.noOfItemsInStock <= 0}
+              onClick={() => addToCart(product)}
+            >
+              add
+            </button>
+          </div>
         )}
       </div>
     </div>
