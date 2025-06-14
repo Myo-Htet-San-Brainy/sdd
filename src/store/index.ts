@@ -62,6 +62,7 @@ interface CartStore {
   cart: CartProduct[];
   addToCart: (newProduct: Product) => void;
   removeFromCart: (productId: string) => void;
+  clearCart: () => void;
   totalPrice: () => number;
   totalNoOfItems: () => number;
 }
@@ -127,6 +128,14 @@ export const useCartStore = create<CartStore>()((set, get) => ({
         );
         return { ...prev, cart: updated };
       }
+    });
+  },
+  clearCart() {
+    set((prev) => {
+      return {
+        ...prev,
+        cart: [],
+      };
     });
   },
   totalPrice() {

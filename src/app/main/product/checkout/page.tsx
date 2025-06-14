@@ -1,11 +1,15 @@
 "use client";
 
+import { useCreateSaleMutation } from "@/query/sale";
 import { useGetUsers } from "@/query/user";
 import { useCartStore } from "@/store";
+import { useRouter } from "next/navigation";
+
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const Page = () => {
-  const { cart } = useCartStore();
+  const { cart, clearCart } = useCartStore();
   const total = useCartStore((state) => state.totalPrice());
   const [buyer, setBuyer] = useState("");
   const {
@@ -13,6 +17,8 @@ const Page = () => {
     isError: isErrorBuyers,
     isFetching: isFetchingBuyers,
   } = useGetUsers({ role: "commissioner" });
+  const { mutate } = useCreateSaleMutation();
+  const router = useRouter();
   if (cart.length <= 0) {
     return <p>no items in cart yet!</p>;
   }
@@ -23,16 +29,32 @@ const Page = () => {
     return <p>Error preping sale!</p>;
   }
   function handleSell() {
-    if (buyer === "") {
-      console.log({
-        buyer: null,
-        cart,
-      });
-    }
-    console.log({
-      buyer,
-      cart,
-    });
+    const b = buyer === "" ? null : buyer;
+
+    const soldProducts = cart.map(({ product, itemsToSell }) => ({
+      _id: product._id,
+      itemsToSell,
+      sellingPrice: product.sellingPrice,
+    }));
+
+    // Flatten all product types into one array
+    const soldProductsTypes = [
+      ...new Set(cart.flatMap(({ product }) => product.type)),
+    ];
+
+    mutate(
+      { payload: { soldProducts, buyer: b }, soldProductsTypes },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("Created Sale!");
+          router.push("/main/product");
+          clearCart();
+        },
+        onError(error, variables, context) {
+          toast.error("Smth went wrong creating sale!");
+        },
+      }
+    );
   }
 
   return (
