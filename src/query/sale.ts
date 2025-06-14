@@ -1,0 +1,44 @@
+import { CustomError } from "@/lib/CustomError";
+import {
+  createRole,
+  deleteRole,
+  getRole,
+  getRoles,
+  updateRole,
+} from "@/services/role";
+import { createSale } from "@/services/sale";
+import {
+  createUser,
+  deleteUser,
+  getUser,
+  getUsers,
+  updateUser,
+} from "@/services/user";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export const useCreateSaleMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createSale,
+    onSuccess(data, variables) {
+      const {
+        soldProductsTypes,
+        payload: { soldProducts },
+      } = variables;
+
+      // ✅ Invalidate the main 'sales' query
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+
+      // ✅ Invalidate each product type list: ['products', type]
+      soldProductsTypes.forEach((type) => {
+        queryClient.invalidateQueries({ queryKey: ["products", type] });
+      });
+
+      // ✅ Invalidate individual product queries: ['product', productId]
+      soldProducts.forEach(({ _id }: { _id: string }) => {
+        queryClient.invalidateQueries({ queryKey: ["product", _id] });
+      });
+    },
+  });
+};
