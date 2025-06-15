@@ -44,6 +44,7 @@ export const useCreateProductMutation = () => {
     mutationFn: createProduct,
     onSuccess(data, variables) {
       queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["products-meta"] });
     },
   });
 };

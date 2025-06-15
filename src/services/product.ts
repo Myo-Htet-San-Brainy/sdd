@@ -55,7 +55,11 @@ export async function getProductMeta(params: {
   brand?: boolean;
   location?: boolean;
   source?: boolean;
-}): Promise<void> {
+}): Promise<{
+  brands: string[] | null;
+  locations: string[] | null;
+  sources: string[] | null;
+}> {
   try {
     const response = await axios.get(`/api/product/meta`, {
       params,
@@ -64,6 +68,7 @@ export async function getProductMeta(params: {
     if (response.status !== 200) {
       throw new Error("Error product meta!");
     }
+    return response.data;
   } catch (error: any) {
     console.log("error getting product meta:", error);
     throw new CustomError("Internal Sever Error!", 500);

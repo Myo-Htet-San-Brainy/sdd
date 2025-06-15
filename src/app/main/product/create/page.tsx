@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProductMutation } from "@/query/product";
+import { useCreateProductMutation, useGetProductMeta } from "@/query/product";
 import toast from "react-hot-toast";
 
 const dummyBrands = ["Nike", "Adidas", "Puma"];
@@ -76,6 +76,18 @@ const Page = () => {
     control,
   });
   const { mutate } = useCreateProductMutation();
+  const {
+    data: productMeta,
+    isFetching: isFetchingProductMeta,
+    isError: isErrorProductMeta,
+  } = useGetProductMeta({ brand: true, source: true, location: true });
+
+  if (isFetchingProductMeta) {
+    return <p>Preping Create Product Form...</p>;
+  }
+  if (isErrorProductMeta) {
+    return <p>Smth went wrong preping Create Product Form...</p>;
+  }
 
   const onSubmit = (data: any) => {
     let { type } = data;
@@ -139,7 +151,7 @@ const Page = () => {
         ) : (
           <select {...register("brand")} className="border p-2">
             <option value="">Please select a brand</option>
-            {dummyBrands.map((brand) => (
+            {productMeta?.brands?.map((brand) => (
               <option key={brand} value={brand}>
                 {brand}
               </option>
@@ -163,7 +175,7 @@ const Page = () => {
         ) : (
           <select {...register("source")} className="border p-2">
             <option value="">Please select a source</option>
-            {dummySources.map((source) => (
+            {productMeta?.sources?.map((source) => (
               <option key={source} value={source}>
                 {source}
               </option>
@@ -189,7 +201,7 @@ const Page = () => {
         ) : (
           <select {...register("location")} className="border p-2">
             <option value="">Please select a location</option>
-            {dummyLocations.map((loc) => (
+            {productMeta?.locations?.map((loc) => (
               <option key={loc} value={loc}>
                 {loc}
               </option>
