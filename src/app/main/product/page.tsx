@@ -112,10 +112,10 @@ const Page = () => {
       <BookmarkedProductsPopUp />
       {hasPermission(
         myPermissions!,
-        MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.name
+        MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
       ) && (
-        <Link href={MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.link}>
-          {MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.displayName}
+        <Link href={MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.link}>
+          {MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.displayName}
         </Link>
       )}
       <CartLink />
