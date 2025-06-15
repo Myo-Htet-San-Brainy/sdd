@@ -6,4 +6,7 @@ export interface Product {
   noOfItemsInStock: number;
   sellingPrice: number;
   location: string;
+  buyingPrice?: number;
+  source?: string;
+  lowStockThreshold?: number;
 }

@@ -1,6 +1,7 @@
 import { Product as ProductI } from "@/Interfaces/Product";
 import { isItemInList } from "@/lib/utils";
 import { CartProduct, useBookmarkedProductsStore, useCartStore } from "@/store";
+import Link from "next/link";
 import React from "react";
 
 const Product = ({ product }: { product: ProductI }) => {
@@ -60,6 +61,7 @@ const Product = ({ product }: { product: ProductI }) => {
           </div>
         )}
       </div>
+      <Link href={`/main/product/${product._id}`}>details</Link>
     </div>
   );
 };
