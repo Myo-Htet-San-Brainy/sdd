@@ -48,3 +48,26 @@ export async function getMatchingProductTypes(type: string) {
   const result = await productCollection.aggregate(pipeline).toArray();
   return result.map((item) => item._id);
 }
+
+export async function createProduct(product: any) {
+  const productCollection = await getCollection("product");
+  return await productCollection.insertOne(product);
+}
+
+// db/product.ts
+export async function getAllProductsFieldValues(
+  field: "brand" | "source" | "location"
+) {
+  const productCollection = await getCollection("product");
+
+  const values = await productCollection
+    .find({}, { projection: { [field]: 1 } })
+    .toArray();
+
+  // extract, filter falsy, dedupe
+  const uniqueValues = Array.from(
+    new Set(values.map((item) => item[field]).filter(Boolean))
+  );
+
+  return uniqueValues;
+}

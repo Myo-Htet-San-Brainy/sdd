@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useCreateProductMutation } from "@/query/product";
+import toast from "react-hot-toast";
 
 const dummyBrands = ["Nike", "Adidas", "Puma"];
 const dummySources = ["Factory", "Distributor", "Local"];
@@ -52,6 +54,7 @@ const Page = () => {
     register,
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(schema),
@@ -72,9 +75,23 @@ const Page = () => {
     name: "type",
     control,
   });
+  const { mutate } = useCreateProductMutation();
 
   const onSubmit = (data: any) => {
-    console.log(data);
+    let { type } = data;
+    type = type.map((item: any) => item.value);
+    mutate(
+      { payload: { ...data, type } },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("Product Created!");
+          reset();
+        },
+        onError(error, variables, context) {
+          toast.error("Creating Product Failed! Try again later...");
+        },
+      }
+    );
   };
 
   return (

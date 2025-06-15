@@ -1,5 +1,10 @@
 import { CustomError } from "@/lib/CustomError";
-import { getMatchingProductTypes, getProductsByType } from "@/services/product";
+import {
+  createProduct,
+  getMatchingProductTypes,
+  getProductMeta,
+  getProductsByType,
+} from "@/services/product";
 import {
   createRole,
   deleteRole,
@@ -29,5 +34,32 @@ export const useGetSuggestions = ({ type }: { type: string }) => {
     queryFn: () => getMatchingProductTypes(type),
     queryKey: ["suggestions", type],
     enabled: Boolean(type),
+  });
+};
+
+export const useCreateProductMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: createProduct,
+    onSuccess(data, variables) {
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+    },
+  });
+};
+
+export const useGetProductMeta = (params: {
+  brand?: boolean;
+  location?: boolean;
+  source?: boolean;
+}) => {
+  return useQuery({
+    queryFn: () => getProductMeta(params),
+    queryKey: [
+      "products-meta",
+      params.brand && "brand",
+      params.location && "location",
+      params.source && "source",
+    ],
   });
 };
