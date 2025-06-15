@@ -2,6 +2,7 @@ import { CustomError } from "@/lib/CustomError";
 import {
   createProduct,
   getMatchingProductTypes,
+  getProductById,
   getProductMeta,
   getProductsByType,
 } from "@/services/product";
@@ -62,5 +63,13 @@ export const useGetProductMeta = (params: {
       params.location && "location",
       params.source && "source",
     ],
+  });
+};
+
+export const useGetProduct = (id?: string) => {
+  return useQuery({
+    queryFn: () => getProductById(id as string),
+    queryKey: ["product", id],
+    enabled: Boolean(id),
   });
 };

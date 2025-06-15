@@ -1,8 +1,11 @@
 "use client";
 
 import { Product } from "@/Interfaces/Product";
+import { CustomError } from "@/lib/CustomError";
+import { useGetProduct } from "@/query/product";
+import { useQueryClient } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
-import React from "react";
+import React, { useEffect } from "react";
 
 const dummyProduct: Omit<Product, "_id"> = {
   type: ["Footwear", "Sports"],
@@ -17,8 +20,42 @@ const dummyProduct: Omit<Product, "_id"> = {
 };
 
 const Page = () => {
-  const { id } = useParams();
-  const product = dummyProduct;
+  const { id }: { id?: string } = useParams();
+  const {
+    data: product,
+    isFetching: isFetchingProduct,
+    isPending: isPendingProduct,
+    isError: isErrorProduct,
+    error: errorProduct,
+  } = useGetProduct(id);
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (
+      errorProduct &&
+      errorProduct instanceof CustomError &&
+      errorProduct.status === 404
+    ) {
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+    }
+  }, [isErrorProduct]);
+
+  if (isPendingProduct || isFetchingProduct) {
+    return <p>loading product details...</p>;
+  }
+
+  if (isErrorProduct) {
+    if (errorProduct instanceof CustomError && errorProduct.status === 404) {
+      return <p>Product Not Found!</p>;
+    } else {
+      return <p>Smth went wrong loading product!</p>;
+    }
+  }
+
+  if (!product) {
+    return <p>Smth went wrong loading product!</p>;
+  }
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 rounded-2xl shadow-md border space-y-4">

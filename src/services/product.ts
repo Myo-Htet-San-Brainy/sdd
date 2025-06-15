@@ -1,6 +1,27 @@
 import { Product } from "@/Interfaces/Product";
 import { CustomError } from "@/lib/CustomError";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
+
+export async function getProductById(id: string): Promise<Product> {
+  try {
+    const response = await axios.get(`/api/product/${id}`);
+
+    if (response.status !== 200) {
+      throw new Error("Error fetching product!");
+    }
+
+    const { product } = response.data;
+    return product;
+  } catch (error: any) {
+    console.log("error fetching product:", error);
+    if (isAxiosError(error)) {
+      if (error.response?.status === 404) {
+        throw new CustomError("Product not found!", 404);
+      }
+    }
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}
 
 export async function getProductsByType(type: string): Promise<Product[]> {
   try {

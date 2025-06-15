@@ -1,6 +1,16 @@
 import { getCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb"; // 💡 important for _id!
 
+export async function getProductById(id: string) {
+  const productCollection = await getCollection("product");
+
+  try {
+    return await productCollection.findOne({ _id: new ObjectId(id) });
+  } catch {
+    return null; // If ObjectId throws or product not found
+  }
+}
+
 export async function getProductsByType(type: string) {
   const productCollection = await getCollection("product");
 
