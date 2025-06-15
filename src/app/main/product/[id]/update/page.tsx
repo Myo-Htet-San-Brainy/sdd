@@ -1,49 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, useFieldArray, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProductMutation, useGetProductMeta } from "@/query/product";
+import {
+  useCreateProductMutation,
+  useGetProductById,
+  useGetProductMeta,
+} from "@/query/product";
 import toast from "react-hot-toast";
-
-const dummyBrands = ["Nike", "Adidas", "Puma"];
-const dummySources = ["Factory", "Distributor", "Local"];
-const dummyLocations = ["Warehouse A", "Warehouse B"];
-
-export const productSchema = z.object({
-  type: z
-    .array(
-      z.object({
-        value: z.string().min(1, "Each type must have at least 1 character"),
-      })
-    )
-    .min(1, "At least one type is required"),
-
-  brand: z.string().min(1, "Brand is required"),
-  source: z.string().min(1, "Source is required"),
-  location: z.string().min(1, "Location is required"),
-
-  noOfItemsInStock: z
-    .number({ invalid_type_error: "Must be a number" })
-    .int("Must be an integer")
-    .min(0, "Must be 0 or more"),
-
-  buyingPrice: z
-    .number({ invalid_type_error: "Must be a number" })
-    .min(0, "Must be 0 or more"),
-
-  sellingPrice: z
-    .number({ invalid_type_error: "Must be a number" })
-    .min(0, "Must be 0 or more"),
-
-  description: z.string().optional(),
-
-  lowStockThreshold: z
-    .number({ invalid_type_error: "Must be a number" })
-    .int("Must be an integer")
-    .min(0, "Must be 0 or more"),
-});
+import { productSchema } from "../../create/page";
+import { useParams } from "next/navigation";
+import { CustomError } from "@/lib/CustomError";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Page = () => {
   const [isNewBrand, setIsNewBrand] = useState(false);
@@ -81,12 +51,58 @@ const Page = () => {
     isFetching: isFetchingProductMeta,
     isError: isErrorProductMeta,
   } = useGetProductMeta({ brand: true, source: true, location: true });
+  const { id }: { id?: string } = useParams();
+  const {
+    data: product,
+    isFetching: isFetchingProduct,
+    isPending: isPendingProduct,
+    isError: isErrorProduct,
+    error: errorProduct,
+  } = useGetProductById(id);
+
+  const queryClient = useQueryClient();
+
+  useEffect(() => {
+    if (
+      errorProduct &&
+      errorProduct instanceof CustomError &&
+      errorProduct.status === 404
+    ) {
+      queryClient.invalidateQueries({ queryKey: ["product", id] });
+    }
+  }, [isErrorProduct]);
+
+  useEffect(() => {
+    if (product) {
+      const type = product.type.map((value) => {
+        return { value };
+      });
+      reset({
+        ...product,
+        type,
+      });
+    }
+  }, [product]);
 
   if (isFetchingProductMeta) {
-    return <p>Preping Create Product Form...</p>;
+    return <p>Preping Update Product Form...</p>;
   }
   if (isErrorProductMeta) {
-    return <p>Smth went wrong preping Create Product Form...</p>;
+    return <p>Smth went wrong preping Update Product Form...</p>;
+  }
+  if (isFetchingProduct) {
+    return <p>Preping Update Product Form...</p>;
+  }
+  if (isErrorProduct) {
+    if (errorProduct instanceof CustomError && errorProduct.status === 404) {
+      return <p>Product Not Found!</p>;
+    } else {
+      return <p>Smth went wrong Preping Update Product Form!</p>;
+    }
+  }
+
+  if (!product) {
+    return <p>Smth went wrong Preping Update Product Form!</p>;
   }
 
   const onSubmit = (data: any) => {

@@ -2,8 +2,9 @@
 
 import { Product } from "@/Interfaces/Product";
 import { CustomError } from "@/lib/CustomError";
-import { useGetProduct } from "@/query/product";
+import { useGetProductById } from "@/query/product";
 import { useQueryClient } from "@tanstack/react-query";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { useEffect } from "react";
 
@@ -27,7 +28,7 @@ const Page = () => {
     isPending: isPendingProduct,
     isError: isErrorProduct,
     error: errorProduct,
-  } = useGetProduct(id);
+  } = useGetProductById(id);
 
   const queryClient = useQueryClient();
 
@@ -78,9 +79,12 @@ const Page = () => {
           />
         )}
       </div>
-      <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition">
+      <Link
+        href={`/main/product/${product._id}/update`}
+        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+      >
         Update
-      </button>
+      </Link>
     </div>
   );
 };

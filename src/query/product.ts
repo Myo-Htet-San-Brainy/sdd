@@ -66,7 +66,7 @@ export const useGetProductMeta = (params: {
   });
 };
 
-export const useGetProduct = (id?: string) => {
+export const useGetProductById = (id?: string) => {
   return useQuery({
     queryFn: () => getProductById(id as string),
     queryKey: ["product", id],
