@@ -104,17 +104,19 @@ export async function updateProduct({
   productPayload: any;
 }): Promise<void> {
   try {
-    const response = await axios.patch(`/api/user/${userId}`, userPayload);
+    const response = await axios.patch(
+      `/api/product/${productId}`,
+      productPayload
+    );
 
     if (response.status !== 200) {
-      throw new Error("Failed to update user!");
+      throw new Error("Failed to update product!");
     }
   } catch (error: any) {
-    console.log("error creating user:", error);
-    if (error.response?.status === 404) {
-      throw new CustomError("User Not Found!", 404);
-    } else {
-      throw new CustomError("Internal Sever Error!", 500);
+    console.log("error updating product:", error);
+    if (isAxiosError(error) && error.response?.status === 404) {
+      throw new CustomError("Product Not Found!", 404);
     }
+    throw new CustomError("Internal Sever Error!", 500);
   }
 }

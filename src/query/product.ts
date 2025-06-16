@@ -69,7 +69,7 @@ export const useGetProductMeta = (params: {
 
 export const useGetProductById = (id?: string) => {
   return useQuery({
-    queryFn: () => getProdu\\\\\\\  8 [ctById(id as string),
+    queryFn: () => getProductById(id as string),
     queryKey: ["product", id],
     enabled: Boolean(id),
   });

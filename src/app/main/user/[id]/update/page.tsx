@@ -122,8 +122,10 @@ const Page = () => {
         onError(error, variables, context) {
           if (error instanceof CustomError) {
             if (error.status === 404) {
-              toast.error("This User has just been removed by other admins!");
-              router.push("/main/user");
+              toast.error(
+                "This product has just been removed by other admins!"
+              );
+              router.push("/main/product");
             } else {
               toast.error("Smth went wrong!");
             }

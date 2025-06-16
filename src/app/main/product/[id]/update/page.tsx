@@ -8,10 +8,11 @@ import {
   useCreateProductMutation,
   useGetProductById,
   useGetProductMeta,
+  useUpdateProductMutation,
 } from "@/query/product";
 import toast from "react-hot-toast";
 import { productSchema } from "../../create/page";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { CustomError } from "@/lib/CustomError";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -45,7 +46,7 @@ const Page = () => {
     name: "type",
     control,
   });
-  const { mutate } = useCreateProductMutation();
+  const { mutate } = useUpdateProductMutation();
   const {
     data: productMeta,
     isFetching: isFetchingProductMeta,
@@ -60,7 +61,7 @@ const Page = () => {
     error: errorProduct,
   } = useGetProductById(id);
 
-  const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     if (product) {
@@ -99,11 +100,11 @@ const Page = () => {
     let { type } = data;
     type = type.map((item: any) => item.value);
     mutate(
-      { payload: { ...data, type } },
+      { productId: id!, productPayload: { ...data, type } },
       {
         onSuccess(data, variables, context) {
-          toast.success("Product Created!");
-          reset();
+          toast.success("Product Updated!");
+          router.push(`/main/product/${id}`);
         },
         onError(error, variables, context) {
           toast.error("Creating Product Failed! Try again later...");
