@@ -21,3 +21,8 @@ export async function updateStockAfterSale(soldProducts: any[]) {
 
   return await Promise.all(updates);
 }
+
+export async function getAllSales() {
+  const saleCollection = await getCollection("sale");
+  return await saleCollection.find().toArray();
+}

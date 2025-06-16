@@ -6,7 +6,7 @@ import {
   getRoles,
   updateRole,
 } from "@/services/role";
-import { createSale } from "@/services/sale";
+import { createSale, getAllSales } from "@/services/sale";
 import {
   createUser,
   deleteUser,
@@ -40,5 +40,12 @@ export const useCreateSaleMutation = () => {
         queryClient.invalidateQueries({ queryKey: ["product", _id] });
       });
     },
+  });
+};
+
+export const useGetSales = () => {
+  return useQuery({
+    queryFn: getAllSales,
+    queryKey: ["sales"],
   });
 };
