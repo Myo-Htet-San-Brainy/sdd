@@ -61,7 +61,16 @@ const Product = ({ product }: { product: ProductI }) => {
           </div>
         )}
       </div>
-      <Link href={`/main/product/${product._id}`}>details</Link>
+      <Link
+        href={{
+          pathname: `/main/product/${product._id}`,
+          query: {
+            type: JSON.stringify(product.type),
+          },
+        }}
+      >
+        details
+      </Link>
     </div>
   );
 };

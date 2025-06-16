@@ -5,6 +5,7 @@ import {
   getProductById,
   getProductMeta,
   getProductsByType,
+  updateProduct,
 } from "@/services/product";
 import {
   createRole,
@@ -68,8 +69,34 @@ export const useGetProductMeta = (params: {
 
 export const useGetProductById = (id?: string) => {
   return useQuery({
-    queryFn: () => getProductById(id as string),
+    queryFn: () => getProdu\\\\\\\  8 [ctById(id as string),
     queryKey: ["product", id],
     enabled: Boolean(id),
+  });
+};
+
+export const useUpdateProductMutation = () => {
+  const queryClient = useQueryClient(); // ✨ get query client
+
+  return useMutation({
+    mutationFn: updateProduct,
+    onSuccess(data, variables, context) {
+      const { productPayload, productId } = variables;
+      productPayload.type.forEach((type: string) => {
+        queryClient.invalidateQueries({ queryKey: ["products", type] });
+      });
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
+      queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+    },
+    onError(error, variables, context) {
+      const { productPayload, productId } = variables;
+      if (error instanceof CustomError && error.status === 404) {
+        productPayload.type.forEach((type: string) => {
+          queryClient.invalidateQueries({ queryKey: ["products", type] });
+        });
+        queryClient.invalidateQueries({ queryKey: ["product", productId] });
+        queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+      }
+    },
   });
 };

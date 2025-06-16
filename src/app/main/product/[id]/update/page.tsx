@@ -63,16 +63,6 @@ const Page = () => {
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    if (
-      errorProduct &&
-      errorProduct instanceof CustomError &&
-      errorProduct.status === 404
-    ) {
-      queryClient.invalidateQueries({ queryKey: ["product", id] });
-    }
-  }, [isErrorProduct]);
-
-  useEffect(() => {
     if (product) {
       const type = product.type.map((value) => {
         return { value };
@@ -90,7 +80,7 @@ const Page = () => {
   if (isErrorProductMeta) {
     return <p>Smth went wrong preping Update Product Form...</p>;
   }
-  if (isFetchingProduct) {
+  if (isFetchingProduct || isPendingProduct) {
     return <p>Preping Update Product Form...</p>;
   }
   if (isErrorProduct) {

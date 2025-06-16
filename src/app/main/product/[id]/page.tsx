@@ -5,7 +5,7 @@ import { CustomError } from "@/lib/CustomError";
 import { useGetProductById } from "@/query/product";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 
 const dummyProduct: Omit<Product, "_id"> = {
@@ -31,6 +31,9 @@ const Page = () => {
   } = useGetProductById(id);
 
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
+  const typeParam = searchParams.get("type");
+  const type = typeParam ? JSON.parse(typeParam) : [];
 
   useEffect(() => {
     if (
@@ -38,7 +41,10 @@ const Page = () => {
       errorProduct instanceof CustomError &&
       errorProduct.status === 404
     ) {
-      queryClient.invalidateQueries({ queryKey: ["product", id] });
+      type.forEach((type: string) => {
+        queryClient.invalidateQueries({ queryKey: ["products", type] });
+      });
+      queryClient.invalidateQueries({ queryKey: ["products-meta"] });
     }
   }, [isErrorProduct]);
 
