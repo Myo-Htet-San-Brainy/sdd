@@ -24,7 +24,10 @@ export async function updateStockAfterSale(soldProducts: any[]) {
 
 export async function getAllSales() {
   const saleCollection = await getCollection("sale");
-  return await saleCollection.find().toArray();
+  return await saleCollection
+    .find()
+    .sort({ createdAt: -1 }) // ← newest first
+    .toArray();
 }
 
 export async function updateSale(id: string, salePayload: any) {
