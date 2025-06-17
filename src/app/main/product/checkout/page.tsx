@@ -1,23 +1,25 @@
 "use client";
 
-import { useCreateSaleMutation } from "@/query/sale";
+import { useCreateSaleMutation, useUpdateSaleMutation } from "@/query/sale";
 import { useGetUsers } from "@/query/user";
-import { useCartStore } from "@/store";
+import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { useRouter } from "next/navigation";
 
 import { useState } from "react";
 import toast from "react-hot-toast";
 
 const Page = () => {
-  const { cart, clearCart } = useCartStore();
+  const { cart, clearCart, buyer, setBuyer } = useCartStore();
+  const { updatedSaleId, setUpdatedSaleId } = useUpdatedSaleIdStore();
   const total = useCartStore((state) => state.totalPrice());
-  const [buyer, setBuyer] = useState("");
+
   const {
     data: buyers,
     isError: isErrorBuyers,
     isFetching: isFetchingBuyers,
   } = useGetUsers({ role: "commissioner" });
-  const { mutate } = useCreateSaleMutation();
+  const { mutate: createSaleMutate } = useCreateSaleMutation();
+  const { mutate: updateSaleMutate } = useUpdateSaleMutation();
   const router = useRouter();
   if (cart.length <= 0) {
     return <p>no items in cart yet!</p>;
@@ -42,19 +44,39 @@ const Page = () => {
       ...new Set(cart.flatMap(({ product }) => product.type)),
     ];
 
-    mutate(
-      { payload: { soldProducts, buyer: b }, soldProductsTypes },
-      {
-        onSuccess(data, variables, context) {
-          toast.success("Created Sale!");
-          router.push("/main/product");
-          clearCart();
+    if (updatedSaleId) {
+      updateSaleMutate(
+        {
+          saleId: updatedSaleId,
+          salePayload: { soldProducts, buyer: b },
         },
-        onError(error, variables, context) {
-          toast.error("Smth went wrong creating sale!");
-        },
-      }
-    );
+        {
+          onSuccess(data, variables, context) {
+            toast.success("updated sale!");
+            router.push("/main/product");
+            clearCart();
+          },
+          onError(error, variables, context) {
+            toast.error("Smth went wrong creating sale!");
+          },
+        }
+      );
+    } else {
+      createSaleMutate(
+        { payload: { soldProducts, buyer: b }, soldProductsTypes },
+        {
+          onSuccess(data, variables, context) {
+            toast.success("Created Sale!");
+            router.push("/main/product");
+            clearCart();
+            setUpdatedSaleId(null);
+          },
+          onError(error, variables, context) {
+            toast.error("Smth went wrong updating sale!");
+          },
+        }
+      );
+    }
   }
 
   return (

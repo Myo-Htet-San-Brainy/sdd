@@ -26,3 +26,16 @@ export async function getAllSales() {
   const saleCollection = await getCollection("sale");
   return await saleCollection.find().toArray();
 }
+
+export async function updateSale(id: string, salePayload: any) {
+  const saleCollection = await getCollection("sale");
+  return await saleCollection.updateOne(
+    { _id: new ObjectId(id) },
+    { $set: salePayload }
+  );
+}
+
+export async function getSaleById(id: string) {
+  const saleCollection = await getCollection("sale");
+  return await saleCollection.findOne({ _id: new ObjectId(id) });
+}

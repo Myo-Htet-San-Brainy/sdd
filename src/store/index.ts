@@ -60,6 +60,9 @@ export interface CartProduct {
 }
 interface CartStore {
   cart: CartProduct[];
+  buyer: string;
+  setBuyer: (buyer: string) => void;
+  setCart: (cart: CartProduct[]) => void;
   addToCart: (newProduct: Product) => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
@@ -69,6 +72,23 @@ interface CartStore {
 
 export const useCartStore = create<CartStore>()((set, get) => ({
   cart: [],
+  buyer: "",
+  setCart(cart) {
+    set((prev) => {
+      return {
+        ...prev,
+        cart,
+      };
+    });
+  },
+  setBuyer(buyer) {
+    set((prev) => {
+      return {
+        ...prev,
+        buyer,
+      };
+    });
+  },
   addToCart(newProduct) {
     set((prev) => {
       const product = prev.cart.find(
@@ -147,5 +167,19 @@ export const useCartStore = create<CartStore>()((set, get) => ({
     return get().cart.reduce((total, item) => {
       return total + item.itemsToSell;
     }, 0);
+  },
+}));
+
+interface UpdatedSaleIdStore {
+  updatedSaleId: string | null;
+  setUpdatedSaleId: (newState: string | null) => void;
+}
+
+export const useUpdatedSaleIdStore = create<UpdatedSaleIdStore>()((set) => ({
+  updatedSaleId: null,
+  setUpdatedSaleId(newState) {
+    set((prev) => {
+      return { ...prev, updatedSaleId: newState };
+    });
   },
 }));

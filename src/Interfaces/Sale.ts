@@ -3,7 +3,10 @@ import { Product } from "./Product";
 export interface Sale {
   _id: string;
   createdAt: string;
-  buyer: string;
+  buyer: {
+    _id: string;
+    username: string;
+  } | null;
   soldProducts: SoldProduct[];
 }
 

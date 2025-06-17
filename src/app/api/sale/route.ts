@@ -39,11 +39,11 @@ export async function GET(req: NextRequest) {
             };
           })
         );
-        const buyer = await getUserById(sale.buyer);
+        const buyer = sale.buyer && (await getUserById(sale.buyer));
 
         return {
           ...sale,
-          buyer: buyer?.username || null,
+          buyer: buyer,
           soldProducts: enrichedSoldProducts,
         };
       })

@@ -6,7 +6,7 @@ import {
   getRoles,
   updateRole,
 } from "@/services/role";
-import { createSale, getAllSales } from "@/services/sale";
+import { createSale, getAllSales, updateSale } from "@/services/sale";
 import {
   createUser,
   deleteUser,
@@ -47,5 +47,19 @@ export const useGetSales = () => {
   return useQuery({
     queryFn: getAllSales,
     queryKey: ["sales"],
+  });
+};
+
+export const useUpdateSaleMutation = () => {
+  const queryClient = useQueryClient(); // ✨ get query client
+
+  return useMutation({
+    mutationFn: updateSale,
+    onSuccess(data, variables, context) {
+      const { saleId } = variables;
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+
+      queryClient.invalidateQueries({ queryKey: ["sale", saleId] });
+    },
   });
 };

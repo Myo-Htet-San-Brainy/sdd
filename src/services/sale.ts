@@ -1,7 +1,7 @@
 import { Product } from "@/Interfaces/Product";
 import { Sale } from "@/Interfaces/Sale";
 import { CustomError } from "@/lib/CustomError";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 
 export async function createSale({
   payload,
@@ -33,6 +33,28 @@ export async function getAllSales(): Promise<Sale[]> {
     return sales;
   } catch (error: any) {
     console.log("error fetching sales:", error);
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}
+
+export async function updateSale({
+  saleId,
+  salePayload,
+}: {
+  saleId: string;
+  salePayload: any;
+}): Promise<void> {
+  try {
+    const response = await axios.patch(`/api/sale/${saleId}`, salePayload);
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+  } catch (error: any) {
+    console.log("error updating sale:", error);
+    if (isAxiosError(error) && error.response?.status === 404) {
+      throw new CustomError("Sale Not Found!", 404);
+    }
     throw new CustomError("Internal Sever Error!", 500);
   }
 }
