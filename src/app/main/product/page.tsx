@@ -120,7 +120,14 @@ const Page = () => {
           {MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.displayName}
         </Link>
       )}
-      <CartLink />
+      {(hasPermission(
+        myPermissions!,
+        MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+      ) ||
+        hasPermission(
+          myPermissions!,
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
+        )) && <CartLink />}
       <form
         ref={formRef}
         onSubmit={(e) => {

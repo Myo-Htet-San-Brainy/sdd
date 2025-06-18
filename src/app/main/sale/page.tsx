@@ -1,6 +1,10 @@
 "use client";
 
+import AllowedPermissions from "@/components/AllowedPermissions";
 import { Sale } from "@/Interfaces/Sale";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { hasPermission } from "@/lib/utils";
+import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetSales } from "@/query/sale";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
@@ -8,6 +12,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
+  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
+    useGetMyPermissions();
   const {
     data: sales,
     isPending: isPendingSales,
@@ -32,6 +38,25 @@ const Page = () => {
     setCart(cartProducts);
     router.push(`/main/product`);
   };
+
+  if (isFetchingMyPermissions) {
+    return <div>checking permission...</div>;
+  }
+  if (
+    !hasPermission(
+      myPermissions!,
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name
+    )
+  ) {
+    return (
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.displayName
+        }
+        myPermissions={myPermissions!}
+      />
+    );
+  }
 
   if (isPendingSales || isFetchingSales) {
     return <p>Loading sales...</p>;

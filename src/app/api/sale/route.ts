@@ -2,9 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSale, getAllSales, updateStockAfterSale } from "@/db/sale";
 import { getProductById } from "@/db/product";
 import { getUserById } from "@/db/user";
+import { verifyPermission } from "@/lib/serverUtils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
     const { soldProducts, buyer } = await req.json();
 
     await createSale({ soldProducts, buyer });
@@ -25,6 +37,17 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
+
     const rawSales = await getAllSales();
 
     const formattedSales = await Promise.all(

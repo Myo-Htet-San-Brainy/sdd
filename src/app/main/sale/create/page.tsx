@@ -1,5 +1,9 @@
 "use client";
 
+import AllowedPermissions from "@/components/AllowedPermissions";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { hasPermission } from "@/lib/utils";
+import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useCreateSaleMutation, useUpdateSaleMutation } from "@/query/sale";
 import { useGetUsers } from "@/query/user";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
@@ -9,6 +13,8 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 const Page = () => {
+  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
+    useGetMyPermissions();
   const { cart, clearCart, buyer, setBuyer } = useCartStore();
   const { updatedSaleId, setUpdatedSaleId } = useUpdatedSaleIdStore();
   const total = useCartStore((state) => state.totalPrice());
@@ -21,6 +27,26 @@ const Page = () => {
   const { mutate: createSaleMutate } = useCreateSaleMutation();
   const { mutate: updateSaleMutate } = useUpdateSaleMutation();
   const router = useRouter();
+
+  if (isFetchingMyPermissions) {
+    return <div>checking permission...</div>;
+  }
+  if (
+    !hasPermission(
+      myPermissions!,
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+    )
+  ) {
+    return (
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.displayName
+        }
+        myPermissions={myPermissions!}
+      />
+    );
+  }
+
   if (cart.length <= 0) {
     return <p>no items in cart yet!</p>;
   }

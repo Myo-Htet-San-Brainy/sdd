@@ -1,10 +1,14 @@
 import { Product as ProductI } from "@/Interfaces/Product";
-import { isItemInList } from "@/lib/utils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { hasPermission, isItemInList } from "@/lib/utils";
+import { useGetMyPermissions } from "@/query/miscellaneous";
 import { CartProduct, useBookmarkedProductsStore, useCartStore } from "@/store";
 import Link from "next/link";
 import React from "react";
 
 const Product = ({ product }: { product: ProductI }) => {
+  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
+    useGetMyPermissions();
   const { addToBookmark, removeFromBookmark, bookmarkedProducts } =
     useBookmarkedProductsStore();
   const isBookmarked = isItemInList(product, bookmarkedProducts);
@@ -33,34 +37,45 @@ const Product = ({ product }: { product: ProductI }) => {
           <button onClick={() => addToBookmark(product)}>bookmark this</button>
         )}
       </div>
-      <div>
-        {isInCart ? (
-          <div>
-            <button onClick={() => removeFromCart(product._id)}>remove</button>
-            <p>{(cartProduct as CartProduct).itemsToSell}</p>
-            <button
-              disabled={
-                product.noOfItemsInStock <=
-                (cartProduct as CartProduct).itemsToSell
-              }
-              onClick={() => addToCart(product)}
-            >
-              add
-            </button>
-          </div>
-        ) : (
-          <div>
-            <button disabled>remove</button>
-            <p>0</p>
-            <button
-              disabled={product.noOfItemsInStock <= 0}
-              onClick={() => addToCart(product)}
-            >
-              add
-            </button>
-          </div>
-        )}
-      </div>
+      {(hasPermission(
+        myPermissions!,
+        MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+      ) ||
+        hasPermission(
+          myPermissions!,
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
+        )) && (
+        <div>
+          {isInCart ? (
+            <div>
+              <button onClick={() => removeFromCart(product._id)}>
+                remove
+              </button>
+              <p>{(cartProduct as CartProduct).itemsToSell}</p>
+              <button
+                disabled={
+                  product.noOfItemsInStock <=
+                  (cartProduct as CartProduct).itemsToSell
+                }
+                onClick={() => addToCart(product)}
+              >
+                add
+              </button>
+            </div>
+          ) : (
+            <div>
+              <button disabled>remove</button>
+              <p>0</p>
+              <button
+                disabled={product.noOfItemsInStock <= 0}
+                onClick={() => addToCart(product)}
+              >
+                add
+              </button>
+            </div>
+          )}
+        </div>
+      )}
       <Link
         href={{
           pathname: `/main/product/${product._id}`,
