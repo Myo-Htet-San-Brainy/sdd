@@ -12,8 +12,13 @@ import {
   DrawerTitle,
   DrawerDescription,
 } from "@/components/BuildingBlocks/Drawer";
+import React from "react";
 
-const BookmarkedProductsPopUp = () => {
+const BookmarkedProductsPopUp = ({
+  myPermissions,
+}: {
+  myPermissions?: string[];
+}) => {
   const { bookmarkedProducts } = useBookmarkedProductsStore();
   const { isOpenBookmarkedProductsPopUp, setIsOpenBookmarkedProductsPopUp } =
     usePopUpsStore();
@@ -38,7 +43,13 @@ const BookmarkedProductsPopUp = () => {
               </DrawerTitle>
               <DrawerDescription className="">
                 {bookmarkedProducts.map((product) => {
-                  return <Product key={product._id} product={product} />;
+                  return (
+                    <Product
+                      key={product._id}
+                      product={product}
+                      myPermissions={myPermissions}
+                    />
+                  );
                 })}
               </DrawerDescription>
             </DrawerHeader>

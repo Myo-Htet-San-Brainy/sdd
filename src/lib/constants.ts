@@ -83,4 +83,18 @@ export const MODULES_AND_PERMISSIONS = {
       displayName: "Delete Sale",
     },
   },
+  REPORT: {
+    displayName: "Reports & Analytics",
+    link: "/main/report",
+    PERMISSION_LOW_STOCK_ALERT: {
+      name: "REPORT:LOW_STOCK_ALERT",
+      displayName: "View Low Stock Alerts",
+      link: "/main/report/low-stock",
+    },
+    PERMISSION_COMMISSION: {
+      name: "REPORT:COMMISSION",
+      displayName: "View Monthly Commission Reports",
+      link: "/main/report/commission",
+    },
+  },
 };

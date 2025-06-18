@@ -92,7 +92,13 @@ const Page = () => {
       content = (
         <p>
           {products.map((product) => {
-            return <Product key={product._id} product={product} />;
+            return (
+              <Product
+                key={product._id}
+                product={product}
+                myPermissions={myPermissions}
+              />
+            );
           })}
         </p>
       );
@@ -111,7 +117,7 @@ const Page = () => {
 
   return (
     <div>
-      <BookmarkedProductsPopUp />
+      <BookmarkedProductsPopUp myPermissions={myPermissions} />
       {hasPermission(
         myPermissions!,
         MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name

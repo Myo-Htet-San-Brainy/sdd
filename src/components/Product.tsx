@@ -6,9 +6,13 @@ import { CartProduct, useBookmarkedProductsStore, useCartStore } from "@/store";
 import Link from "next/link";
 import React from "react";
 
-const Product = ({ product }: { product: ProductI }) => {
-  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
-    useGetMyPermissions();
+const Product = ({
+  product,
+  myPermissions,
+}: {
+  product: ProductI;
+  myPermissions?: string[];
+}) => {
   const { addToBookmark, removeFromBookmark, bookmarkedProducts } =
     useBookmarkedProductsStore();
   const isBookmarked = isItemInList(product, bookmarkedProducts);
@@ -16,6 +20,7 @@ const Product = ({ product }: { product: ProductI }) => {
   const products = cart.map((val) => val.product);
   const isInCart = isItemInList(product, products);
   const cartProduct = cart.find((val) => val.product._id === product._id);
+
   return (
     <div>
       <p>

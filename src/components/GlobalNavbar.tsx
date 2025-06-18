@@ -44,19 +44,45 @@ const GlobalNavbar = () => {
               </DrawerTitle>
               <DrawerDescription className="">
                 {Object.values(MODULES_AND_PERMISSIONS).map((module) => {
-                  return (
-                    hasPermission(
-                      myPermissions!,
-                      module.PERMISSION_READ.name
-                    ) && (
-                      <Link
-                        href={module.PERMISSION_READ.link}
-                        className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
-                      >
-                        {module.PERMISSION_READ.displayName}
-                      </Link>
-                    )
-                  );
+                  if ("PERMISSION_READ" in module) {
+                    const { PERMISSION_READ } = module;
+                    return (
+                      hasPermission(myPermissions!, PERMISSION_READ.name) && (
+                        <Link
+                          key={PERMISSION_READ.name}
+                          href={PERMISSION_READ.link}
+                          className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                        >
+                          {PERMISSION_READ.displayName}
+                        </Link>
+                      )
+                    );
+                  } else {
+                    // Filter and safely type the permission keys
+                    const permissionEntries = Object.entries(module).filter(
+                      ([key, value]) =>
+                        key.startsWith("PERMISSION_") &&
+                        typeof value === "object" &&
+                        "name" in value &&
+                        typeof value.name === "string"
+                    ) as [string, { name: string }][]; // 👈 Force TS to understand
+
+                    const hasAnyPermission = permissionEntries.some(
+                      ([_, perm]) => hasPermission(myPermissions!, perm.name)
+                    );
+
+                    return (
+                      hasAnyPermission && (
+                        <Link
+                          key={module.displayName}
+                          href={module.link}
+                          className="mt-2 w-full p-2 flex gap-2 hover:bg-slate-200 transition-colors"
+                        >
+                          {module.displayName}
+                        </Link>
+                      )
+                    );
+                  }
                 })}
               </DrawerDescription>
             </DrawerHeader>

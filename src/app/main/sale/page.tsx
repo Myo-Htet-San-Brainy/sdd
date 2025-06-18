@@ -106,12 +106,17 @@ const Page = () => {
           </div>
 
           {/* Update Sale Button */}
-          <button
-            onClick={() => handleUpdateClick(sale)}
-            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
-          >
-            Update Sale
-          </button>
+          {hasPermission(
+            myPermissions!,
+            MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
+          ) && (
+            <button
+              onClick={() => handleUpdateClick(sale)}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+            >
+              Update Sale
+            </button>
+          )}
         </div>
       ))}
     </div>
