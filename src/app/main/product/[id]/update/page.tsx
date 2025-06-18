@@ -15,8 +15,15 @@ import { productSchema } from "../../create/page";
 import { useParams, useRouter } from "next/navigation";
 import { CustomError } from "@/lib/CustomError";
 import { useQueryClient } from "@tanstack/react-query";
+import { useGetMyPermissions } from "@/query/miscellaneous";
+import { hasPermission } from "@/lib/utils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import AllowedPermissions from "@/components/AllowedPermissions";
 
 const Page = () => {
+  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
+    useGetMyPermissions();
+
   const [isNewBrand, setIsNewBrand] = useState(false);
   const [isNewSource, setIsNewSource] = useState(false);
   const [isNewLocation, setIsNewLocation] = useState(false);
@@ -74,6 +81,25 @@ const Page = () => {
       });
     }
   }, [product]);
+
+  if (isFetchingMyPermissions) {
+    return <div>checking permission...</div>;
+  }
+  if (
+    !hasPermission(
+      myPermissions!,
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.name
+    )
+  ) {
+    return (
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.displayName
+        }
+        myPermissions={myPermissions!}
+      />
+    );
+  }
 
   if (isFetchingProductMeta) {
     return <p>Preping Update Product Form...</p>;

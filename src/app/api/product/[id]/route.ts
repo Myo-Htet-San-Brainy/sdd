@@ -1,11 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getProductById, updateProductById } from "@/db/product";
+import { verifyPermission } from "@/lib/serverUtils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
     const { id } = params;
 
     const product = await getProductById(id);
@@ -29,6 +41,16 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
     const { id } = await params;
     const product = await getProductById(id);
 

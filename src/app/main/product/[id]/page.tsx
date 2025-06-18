@@ -1,7 +1,11 @@
 "use client";
 
+import AllowedPermissions from "@/components/AllowedPermissions";
 import { Product } from "@/Interfaces/Product";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
+import { hasPermission } from "@/lib/utils";
+import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductById } from "@/query/product";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -21,6 +25,8 @@ const dummyProduct: Omit<Product, "_id"> = {
 };
 
 const Page = () => {
+  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
+    useGetMyPermissions();
   const { id }: { id?: string } = useParams();
   const {
     data: product,
@@ -47,6 +53,25 @@ const Page = () => {
       queryClient.invalidateQueries({ queryKey: ["products-meta"] });
     }
   }, [isErrorProduct]);
+
+  if (isFetchingMyPermissions) {
+    return <div>checking permission...</div>;
+  }
+  if (
+    !hasPermission(
+      myPermissions!,
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
+    )
+  ) {
+    return (
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.displayName
+        }
+        myPermissions={myPermissions!}
+      />
+    );
+  }
 
   if (isPendingProduct || isFetchingProduct) {
     return <p>loading product details...</p>;
@@ -85,12 +110,17 @@ const Page = () => {
           />
         )}
       </div>
-      <Link
-        href={`/main/product/${product._id}/update`}
-        className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
-      >
-        Update
-      </Link>
+      {hasPermission(
+        myPermissions!,
+        MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.name
+      ) && (
+        <Link
+          href={`/main/product/${product._id}/update`}
+          className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+        >
+          Update
+        </Link>
+      )}
     </div>
   );
 };

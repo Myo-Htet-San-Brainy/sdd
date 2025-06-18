@@ -6,6 +6,10 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCreateProductMutation, useGetProductMeta } from "@/query/product";
 import toast from "react-hot-toast";
+import { useGetMyPermissions } from "@/query/miscellaneous";
+import { hasPermission } from "@/lib/utils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import AllowedPermissions from "@/components/AllowedPermissions";
 
 const dummyBrands = ["Nike", "Adidas", "Puma"];
 const dummySources = ["Factory", "Distributor", "Local"];
@@ -46,6 +50,9 @@ export const productSchema = z.object({
 });
 
 const Page = () => {
+  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
+    useGetMyPermissions();
+
   const [isNewBrand, setIsNewBrand] = useState(false);
   const [isNewSource, setIsNewSource] = useState(false);
   const [isNewLocation, setIsNewLocation] = useState(false);
@@ -81,6 +88,25 @@ const Page = () => {
     isFetching: isFetchingProductMeta,
     isError: isErrorProductMeta,
   } = useGetProductMeta({ brand: true, source: true, location: true });
+
+  if (isFetchingMyPermissions) {
+    return <div>checking permission...</div>;
+  }
+  if (
+    !hasPermission(
+      myPermissions!,
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
+    )
+  ) {
+    return (
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.displayName
+        }
+        myPermissions={myPermissions!}
+      />
+    );
+  }
 
   if (isFetchingProductMeta) {
     return <p>Preping Create Product Form...</p>;

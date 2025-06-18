@@ -62,4 +62,25 @@ export const MODULES_AND_PERMISSIONS = {
       displayName: "Delete Product",
     },
   },
+  SALE: {
+    displayName: "Manage Sales",
+    PERMISSION_READ: {
+      name: "SALE:READ",
+      displayName: "View Sales",
+      link: "/main/sale",
+    },
+    PERMISSION_CREATE: {
+      name: "SALE:CREATE",
+      displayName: "Create Sales",
+      link: "/main/sale/create",
+    },
+    PERMISSION_UPDATE: {
+      name: "SALE:UPDATE",
+      displayName: "Update Sale",
+    },
+    PERMISSION_DELETE: {
+      name: "SALE:DELETE",
+      displayName: "Delete Sale",
+    },
+  },
 };

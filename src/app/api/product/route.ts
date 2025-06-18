@@ -34,6 +34,17 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
+
     const body = await req.json();
 
     const result = await createProduct(body);

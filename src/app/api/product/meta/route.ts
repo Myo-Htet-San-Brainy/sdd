@@ -1,8 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllProductsFieldValues } from "@/db/product";
+import { verifyPermission } from "@/lib/serverUtils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 
 export async function GET(req: NextRequest) {
   try {
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
     const searchParams = req.nextUrl.searchParams;
     const brand = searchParams.get("brand") === "true";
     const source = searchParams.get("source") === "true";

@@ -64,7 +64,9 @@ const Page = () => {
   ) {
     return (
       <AllowedPermissions
-        actionNotPermitted={MODULES_AND_PERMISSIONS.PRODUCT.displayName}
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.displayName
+        }
         myPermissions={myPermissions!}
       />
     );
