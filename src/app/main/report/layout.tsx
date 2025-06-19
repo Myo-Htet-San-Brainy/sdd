@@ -1,5 +1,6 @@
 "use client";
 
+import { MyPermissionsContext, useMyPermissionsContext } from "@/context";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
@@ -11,6 +12,7 @@ const layout = ({
 }>) => {
   const { data: myPermissions, isFetching: isFetchingMyPermissions } =
     useGetMyPermissions();
+
   if (isFetchingMyPermissions) {
     return <div>checking permission...</div>;
   }
@@ -56,8 +58,11 @@ const layout = ({
             ) : null
           )}
       </nav>
-
-      {children}
+      <MyPermissionsContext
+        value={{ myPermissions: myPermissions!, isFetchingMyPermissions }}
+      >
+        {children}
+      </MyPermissionsContext>
     </div>
   );
 };

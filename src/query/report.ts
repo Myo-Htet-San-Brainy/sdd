@@ -1,5 +1,5 @@
 import { CustomError } from "@/lib/CustomError";
-import { getLowStockProducts } from "@/services/report";
+import { getCommissionReports, getLowStockProducts } from "@/services/report";
 import {
   createRole,
   deleteRole,
@@ -21,5 +21,16 @@ export const useGetLowStockProducts = () => {
   return useQuery({
     queryFn: getLowStockProducts,
     queryKey: ["low-stock products"],
+  });
+};
+
+export const useGetCommissionReports = (params: {
+  commissionerId: string;
+  date: string;
+}) => {
+  return useQuery({
+    queryFn: () => getCommissionReports(params),
+    queryKey: ["commission reports", params.commissionerId, params.date],
+    enabled: Boolean(params.commissionerId),
   });
 };

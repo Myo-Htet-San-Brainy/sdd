@@ -15,3 +15,10 @@ export interface SoldProduct {
   sellingPrice: number;
   itemsToSell: number;
 }
+
+export interface CommissionReport {
+  saleId: string;
+  date: string;
+  total: number;
+  commissionAmount: number;
+}

@@ -3,13 +3,38 @@
 import Link from "next/link";
 import { useGetLowStockProducts } from "@/query/report";
 import { Product } from "@/Interfaces/Product";
+import { useGetMyPermissions } from "@/query/miscellaneous";
+import { hasPermission } from "@/lib/utils";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import AllowedPermissions from "@/components/AllowedPermissions";
+import { useMyPermissionsContext } from "@/context";
 
 const Page = () => {
+  const { myPermissions, isFetchingMyPermissions } = useMyPermissionsContext();
   const {
     data: lowStockProducts,
     isFetching,
     isError,
   } = useGetLowStockProducts();
+
+  if (isFetchingMyPermissions) {
+    return <div>checking permission...</div>;
+  }
+  if (
+    !hasPermission(
+      myPermissions!,
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_LOW_STOCK_ALERT.name
+    )
+  ) {
+    return (
+      <AllowedPermissions
+        actionNotPermitted={
+          MODULES_AND_PERMISSIONS.REPORT.PERMISSION_LOW_STOCK_ALERT.displayName
+        }
+        myPermissions={myPermissions!}
+      />
+    );
+  }
 
   if (isFetching) return <p className="text-gray-500">Loading data...</p>;
   if (isError) return <p className="text-red-500">Something went wrong 😢</p>;
