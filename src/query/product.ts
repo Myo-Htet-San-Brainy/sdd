@@ -47,6 +47,7 @@ export const useCreateProductMutation = () => {
     onSuccess(data, variables) {
       queryClient.invalidateQueries({ queryKey: ["products"] });
       queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
     },
   });
 };
@@ -87,6 +88,7 @@ export const useUpdateProductMutation = () => {
       });
       queryClient.invalidateQueries({ queryKey: ["product", productId] });
       queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
     },
     onError(error, variables, context) {
       const { productPayload, productId } = variables;
@@ -96,6 +98,7 @@ export const useUpdateProductMutation = () => {
         });
         queryClient.invalidateQueries({ queryKey: ["product", productId] });
         queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+        queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
       }
     },
   });

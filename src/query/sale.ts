@@ -39,6 +39,9 @@ export const useCreateSaleMutation = () => {
       soldProducts.forEach(({ _id }: { _id: string }) => {
         queryClient.invalidateQueries({ queryKey: ["product", _id] });
       });
+
+      queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
+      queryClient.invalidateQueries({ queryKey: ["commission reports"] });
     },
   });
 };
@@ -60,6 +63,8 @@ export const useUpdateSaleMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["sales"] });
 
       queryClient.invalidateQueries({ queryKey: ["sale", saleId] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
+      queryClient.invalidateQueries({ queryKey: ["commission reports"] });
     },
   });
 };
