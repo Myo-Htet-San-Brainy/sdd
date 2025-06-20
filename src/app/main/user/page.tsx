@@ -1,11 +1,9 @@
 "use client";
-import AllowedPermissions from "@/components/AllowedPermissions";
-import FallbackPermissions from "@/components/FallbackPermissions";
+
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
-import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
+import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
 import { useDeleteUserMutation, useGetUsers } from "@/query/user";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
@@ -21,17 +19,21 @@ const Page = () => {
     isError: isErrorUsers,
   } = useGetUsers({});
   const { mutate } = useDeleteUserMutation();
+  const queryClient = useQueryClient();
+
   function handleDeleteUser(userId: string) {
     mutate(
       { userId },
       {
-        onSuccess(data, variables, context) {
+        onSuccess() {
           toast.success("User Deleted!");
+          queryClient.invalidateQueries({ queryKey: ["users"] });
         },
-        onError(error, variables, context) {
+        onError(error) {
           if (error instanceof CustomError) {
             if (error.status === 404) {
               toast.success("User Deleted!");
+              queryClient.invalidateQueries({ queryKey: ["users"] });
             } else {
               toast.error("User Deletion Failed!");
             }
@@ -42,8 +44,13 @@ const Page = () => {
   }
 
   if (isFetchingMyPermissions) {
-    return <div>checking permission...</div>;
+    return (
+      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
+        <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
+      </div>
+    );
   }
+
   if (
     !hasPermission(
       myPermissions!,
@@ -51,64 +58,103 @@ const Page = () => {
     )
   ) {
     return (
-      <AllowedPermissions
-        actionNotPermitted={MODULES_AND_PERMISSIONS.USER.displayName}
-        myPermissions={myPermissions!}
-      />
+      <p className="mt-6 text-center text-red-700">
+        You are not permitted to view{" "}
+        {MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.displayName}.
+      </p>
     );
   }
 
   if (isFetchingUsers) {
-    return <div>fetching users...</div>;
-  }
-  if (isErrorUsers) {
     return (
-      <FallbackPermissions
-        myPermissions={myPermissions!}
-        errorAction={MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name}
-        errorActionTitle={"getting users"}
-      />
+      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
+        <p className="text-zinc-800 animate-pulse">Getting users...</p>
+      </div>
     );
   }
+
+  if (isErrorUsers) {
+    return (
+      <p className="mt-6 text-center text-red-700">
+        Something went wrong while getting users for you...
+      </p>
+    );
+  }
+
   return (
-    <div>
+    <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8 mx-auto">
       {hasPermission(
         myPermissions!,
         MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.name
       ) && (
-        <Link href={MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.link}>
-          {MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.displayName}
-        </Link>
+        <div className="mb-6">
+          <Link
+            href={MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.link}
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+          >
+            {MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.displayName}
+          </Link>
+        </div>
       )}
-      {users?.map((user) => {
-        return (
-          <div key={user._id}>
-            <p>{user.username}</p>
-            <p>{user.role}</p>
-            <p>{user.commissionRate && user.commissionRate}</p>
-            <p>{user.phoneNumber}</p>
-            <p>{user.address}</p>
-            <p>{user.isActive ? "active" : "inactive"}</p>
-            {hasPermission(
-              myPermissions!,
-              MODULES_AND_PERMISSIONS.USER.PERMISSION_UPDATE.name
-            ) && (
-              <Link href={`/main/user/${user._id}/update`}>
-                {MODULES_AND_PERMISSIONS.USER.PERMISSION_UPDATE.displayName}
-              </Link>
-            )}
-            {hasPermission(
-              myPermissions!,
-              MODULES_AND_PERMISSIONS.USER.PERMISSION_DELETE.name
-            ) && (
-              <button onClick={() => handleDeleteUser(user._id)}>
-                {MODULES_AND_PERMISSIONS.USER.PERMISSION_DELETE.displayName}
-              </button>
-            )}
+
+      <div className="space-y-6">
+        {users?.map((user) => (
+          <div
+            key={user._id}
+            className="border border-zinc-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all bg-white"
+          >
+            <h2 className="text-xl font-semibold text-zinc-800 mb-2">
+              {user.username}
+            </h2>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-y-2 text-sm text-zinc-700">
+              <p>
+                <span className="font-medium">Role:</span> {user.role}
+              </p>
+              <p>
+                <span className="font-medium">Commission:</span>{" "}
+                {user.commissionRate ?? "-"}
+              </p>
+              <p>
+                <span className="font-medium">Phone:</span> {user.phoneNumber}
+              </p>
+              <p>
+                <span className="font-medium">Address:</span> {user.address}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span>{" "}
+                {user.isActive ? "Active" : "Inactive"}
+              </p>
+            </div>
+
+            <div className="mt-4 flex gap-4">
+              {hasPermission(
+                myPermissions!,
+                MODULES_AND_PERMISSIONS.USER.PERMISSION_UPDATE.name
+              ) && (
+                <Link
+                  href={`/main/user/${user._id}/update`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {MODULES_AND_PERMISSIONS.USER.PERMISSION_UPDATE.displayName}
+                </Link>
+              )}
+              {hasPermission(
+                myPermissions!,
+                MODULES_AND_PERMISSIONS.USER.PERMISSION_DELETE.name
+              ) && (
+                <button
+                  onClick={() => handleDeleteUser(user._id)}
+                  className="text-red-700 hover:underline"
+                >
+                  {MODULES_AND_PERMISSIONS.USER.PERMISSION_DELETE.displayName}
+                </button>
+              )}
+            </div>
           </div>
-        );
-      })}
-    </div>
+        ))}
+      </div>
+    </section>
   );
 };
 

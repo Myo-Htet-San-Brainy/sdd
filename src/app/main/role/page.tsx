@@ -1,9 +1,8 @@
 "use client";
-import AllowedPermissions from "@/components/AllowedPermissions";
-import FallbackPermissions from "@/components/FallbackPermissions";
+
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
-import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
+import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
 import { useQueryClient } from "@tanstack/react-query";
@@ -20,16 +19,17 @@ const Page = () => {
     isError: isErrorRoles,
   } = useGetRoles();
   const { mutate } = useDeleteRoleMutation();
-  const queryClient = useQueryClient(); // ✨ get query client
+  const queryClient = useQueryClient();
+
   function handleDeleteRole(roleId: string) {
-    // console.log("delete role...");
     mutate(
       { roleId },
       {
-        onSuccess(data, variables, context) {
+        onSuccess() {
           toast.success("Role Deleted!");
+          queryClient.invalidateQueries({ queryKey: ["roles"] });
         },
-        onError(error, variables, context) {
+        onError(error) {
           if (error instanceof CustomError) {
             if (error.status === 404) {
               toast.success("Role Deleted!");
@@ -42,9 +42,15 @@ const Page = () => {
       }
     );
   }
+
   if (isFetchingMyPermissions) {
-    return <div>checking permission...</div>;
+    return (
+      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50 ">
+        <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
+      </div>
+    );
   }
+
   if (
     !hasPermission(
       myPermissions!,
@@ -52,64 +58,93 @@ const Page = () => {
     )
   ) {
     return (
-      <AllowedPermissions
-        actionNotPermitted={MODULES_AND_PERMISSIONS.ROLE.displayName}
-        myPermissions={myPermissions!}
-      />
+      <p className="mt-6 text-center text-red-700">
+        You are not permitted to view{" "}
+        {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.displayName}.
+      </p>
     );
   }
 
   if (isFetchingRoles) {
-    return <div>fetching roles...</div>;
-  }
-  if (isErrorRoles) {
     return (
-      <FallbackPermissions
-        myPermissions={myPermissions!}
-        errorAction={MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name}
-        errorActionTitle={"getting roles"}
-      />
+      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50 ">
+        <p className="text-zinc-800 animate-pulse">Getting roles...</p>
+      </div>
     );
   }
+
+  if (isErrorRoles) {
+    return (
+      <p className="mt-6 text-center text-red-700">
+        Something went wrong while getting roles for you...
+      </p>
+    );
+  }
+
   return (
-    <div>
+    <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8 mx-auto">
       {hasPermission(
         myPermissions!,
         MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.name
       ) && (
-        <Link href={MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.link}>
-          {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.displayName}
-        </Link>
+        <div className="mb-6">
+          <Link
+            href={MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.link}
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
+          >
+            {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.displayName}
+          </Link>
+        </div>
       )}
-      {roles?.map((role) => {
-        return (
-          <div key={role._id}>
-            <h1>{role.name}</h1>
-            <div>
+
+      <div className="space-y-6">
+        {roles?.map((role) => (
+          <div
+            key={role._id}
+            className="border border-zinc-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-all bg-white"
+          >
+            <h2 className="text-xl font-semibold text-zinc-800">{role.name}</h2>
+
+            <div className="mt-2 flex flex-wrap gap-2 text-sm text-zinc-700">
               {role.permissions.map((permission) => (
-                <p key={permission}>{permission}</p>
+                <span
+                  key={permission}
+                  className="bg-zinc-100 text-zinc-800 px-2 py-1 rounded-md"
+                >
+                  {permission}
+                </span>
               ))}
             </div>
-            {hasPermission(
-              myPermissions!,
-              MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
-            ) && (
-              <Link href={`/main/role/${role._id}/update`}>
-                {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.displayName}
-              </Link>
-            )}
-            {hasPermission(
-              myPermissions!,
-              MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.name
-            ) && (
-              <button onClick={() => handleDeleteRole(role._id)}>
-                {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.displayName}
-              </button>
-            )}
+
+            <div className="mt-4 flex gap-4">
+              {hasPermission(
+                myPermissions!,
+                MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.name
+              ) && (
+                <Link
+                  href={`/main/role/${role._id}/update`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_UPDATE.displayName}
+                </Link>
+              )}
+
+              {hasPermission(
+                myPermissions!,
+                MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.name
+              ) && (
+                <button
+                  onClick={() => handleDeleteRole(role._id)}
+                  className="text-red-700 hover:underline"
+                >
+                  {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_DELETE.displayName}
+                </button>
+              )}
+            </div>
           </div>
-        );
-      })}
-    </div>
+        ))}
+      </div>
+    </section>
   );
 };
 
