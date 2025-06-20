@@ -3,12 +3,7 @@ const layout = ({
 }: Readonly<{
   children: React.ReactNode;
 }>) => {
-  return (
-    <>
-      <div>Product Nav</div>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };
 
 export default layout;

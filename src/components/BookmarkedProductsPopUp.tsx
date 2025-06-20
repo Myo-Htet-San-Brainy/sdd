@@ -56,8 +56,11 @@ const BookmarkedProductsPopUp = ({
           )}
         </DrawerContent>
       </Drawer>
-      <button onClick={() => setIsOpenBookmarkedProductsPopUp(true)}>
-        open bookmark
+      <button
+        onClick={() => setIsOpenBookmarkedProductsPopUp(true)}
+        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
+      >
+        Open Bookmarks
       </button>
     </>
   );

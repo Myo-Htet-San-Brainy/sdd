@@ -54,7 +54,11 @@ const Page = () => {
   const { cart } = useCartStore();
 
   if (isFetchingMyPermissions) {
-    return <div>checking permission...</div>;
+    return (
+      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
+        <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
+      </div>
+    );
   }
   if (
     !hasPermission(
@@ -63,12 +67,10 @@ const Page = () => {
     )
   ) {
     return (
-      <AllowedPermissions
-        actionNotPermitted={
-          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.displayName
-        }
-        myPermissions={myPermissions!}
-      />
+      <p className="mt-6 text-center text-red-700">
+        You are not permitted to view{" "}
+        {MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.displayName}.
+      </p>
     );
   }
 
@@ -78,29 +80,45 @@ const Page = () => {
   // console.log(isErrorProducts);
 
   if (isFetchingProducts) {
-    content = <p>fetching...</p>;
+    content = (
+      <div className="min-h-[300px] flex justify-center items-center">
+        <p className="text-zinc-500 animate-pulse">🔄 Fetching products...</p>
+      </div>
+    );
   } else if (isPendingProducts) {
-    content = <p>start</p>;
-  }
-
-  if (isErrorProducts) {
-    content = <p>error getting products with such type</p>;
-  } else if (products) {
+    content = (
+      <div className="min-h-[300px] flex justify-center items-center">
+        <p className="text-zinc-500">🚀 Ready To Fetch...</p>
+      </div>
+    );
+  } else if (isErrorProducts) {
+    content = (
+      <div className="min-h-[300px] flex justify-center items-center">
+        <p className="text-red-600 font-medium">
+          ❌ Error fetching products. Please try again.
+        </p>
+      </div>
+    );
+  } else {
     if (products.length <= 0) {
-      content = <p>no products with such type</p>;
+      content = (
+        <div className="min-h-[300px] flex justify-center items-center">
+          <p className="text-red-600 font-semibold">
+            😕 No products found with that type.
+          </p>
+        </div>
+      );
     } else {
       content = (
-        <p>
-          {products.map((product) => {
-            return (
-              <Product
-                key={product._id}
-                product={product}
-                myPermissions={myPermissions}
-              />
-            );
-          })}
-        </p>
+        <div className="grid grid-cols-6 gap-4">
+          {products.map((product) => (
+            <Product
+              key={product._id}
+              product={product}
+              myPermissions={myPermissions}
+            />
+          ))}
+        </div>
       );
     }
   }
@@ -116,31 +134,41 @@ const Page = () => {
   }
 
   return (
-    <div>
-      <BookmarkedProductsPopUp myPermissions={myPermissions} />
-      {hasPermission(
-        myPermissions!,
-        MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
-      ) && (
-        <Link href={MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.link}>
-          {MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.displayName}
-        </Link>
-      )}
-      {(hasPermission(
-        myPermissions!,
-        MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
-      ) ||
-        hasPermission(
+    <div className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8">
+      {/* 🔺 Top Actions Row */}
+      <div className="flex justify-end gap-3 mb-8">
+        <BookmarkedProductsPopUp myPermissions={myPermissions} />
+
+        {hasPermission(
           myPermissions!,
-          MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
-        )) && <CartLink />}
+          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
+        ) && (
+          <Link
+            href={MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.link}
+            className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-md transition"
+          >
+            {MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.displayName}
+          </Link>
+        )}
+
+        {(hasPermission(
+          myPermissions!,
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+        ) ||
+          hasPermission(
+            myPermissions!,
+            MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
+          )) && <CartLink />}
+      </div>
+
+      {/* 🔍 Centered Search Form */}
       <form
         ref={formRef}
         onSubmit={(e) => {
           e.preventDefault();
-          handleSearch(); // pass it to your handler or set it to state
+          handleSearch();
         }}
-        className="flex items-center gap-2 my-4"
+        className="max-w-xl mx-auto flex  gap-2 items-stretch relative"
       >
         <input
           type="text"
@@ -150,39 +178,41 @@ const Page = () => {
             setType(value);
             setSuggestionPrompt(value);
           }}
-          placeholder="Search by product type..."
-          className="border px-4 py-2 rounded-md w-full max-w-xs"
-          onFocus={(e) => {
-            const currentValue = e.target.value;
-            setSuggestionPrompt(currentValue);
-          }}
+          placeholder="🔍 Search product type..."
+          className="border border-zinc-300 text-zinc-500 placeholder-zinc-500 px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-red-600"
+          onFocus={(e) => setSuggestionPrompt(e.target.value)}
         />
-        <button
-          disabled={isFetchingProducts}
-          type="submit"
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
-        >
-          Search
-        </button>
-        <div>
-          {suggestions?.map((suggestion) => {
-            return (
+
+        {/* 🔽 Suggestions dropdown like YouTube */}
+        {suggestions && suggestions.length > 0 && (
+          <div className="absolute top-[100%] left-0 w-full bg-white border border-zinc-300 rounded-md shadow-md z-10 mt-1">
+            {suggestions.map((suggestion) => (
               <button
+                type="button"
                 key={suggestion}
-                onClick={(e) => {
+                onClick={() => {
                   setSearchInput(suggestion);
                   setType(suggestion);
                   setSuggestionPrompt("");
                 }}
+                className="w-full text-left px-4 py-2 hover:bg-zinc-100 text-zinc-700"
               >
                 {suggestion}
               </button>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
+        <button
+          disabled={isFetchingProducts}
+          type="submit"
+          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition w-full sm:w-fit self-end"
+        >
+          Search
+        </button>
       </form>
 
-      {content}
+      {/* 📦 Content */}
+      <div className="mt-10">{content}</div>
     </div>
   );
 };
