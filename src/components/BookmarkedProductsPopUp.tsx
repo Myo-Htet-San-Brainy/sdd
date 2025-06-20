@@ -31,29 +31,36 @@ const BookmarkedProductsPopUp = ({
         onOpenChange={(newState) => setIsOpenBookmarkedProductsPopUp(newState)}
       >
         <DrawerContent>
-          {bookmarkedProducts.length <= 0 ? (
-            <div className="w-[400px] h-full grid place-items-center">
-              No Bookmarked Products...
-            </div>
-          ) : (
-            <DrawerHeader className="w-[400px]">
-              <DrawerTitle className="flex justify-between">
-                <h1>Bookmarked Products</h1>
-                <DrawerClose>close</DrawerClose>
-              </DrawerTitle>
-              <DrawerDescription className="">
-                {bookmarkedProducts.map((product) => {
-                  return (
-                    <Product
-                      key={product._id}
-                      product={product}
-                      myPermissions={myPermissions}
-                    />
-                  );
-                })}
-              </DrawerDescription>
-            </DrawerHeader>
-          )}
+          <div className="w-[400px] h-full">
+            {bookmarkedProducts.length <= 0 ? (
+              <div className=" h-full grid place-items-center">
+                No Bookmarked Products...
+              </div>
+            ) : (
+              <div className="p-2 h-full flex flex-col">
+                <div className="flex justify-between p-2">
+                  <h1 className="text-red-600">Bookmarked Products</h1>
+                  <button
+                    className="text-red-600"
+                    onClick={() => setIsOpenBookmarkedProductsPopUp(false)}
+                  >
+                    close
+                  </button>
+                </div>
+                <div className="grow overflow-y-scroll flex flex-col gap-2">
+                  {bookmarkedProducts.map((product) => {
+                    return (
+                      <Product
+                        key={product._id}
+                        product={product}
+                        myPermissions={myPermissions}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
         </DrawerContent>
       </Drawer>
       <button
