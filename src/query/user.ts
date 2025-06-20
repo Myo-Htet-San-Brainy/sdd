@@ -48,7 +48,9 @@ export const useUpdateUserMutation = () => {
     onSuccess(data, variables, context) {
       queryClient.invalidateQueries({ queryKey: ["users"] });
       queryClient.invalidateQueries({ queryKey: ["user", variables.userId] });
-      queryClient.invalidateQueries({ queryKey: ["commission reports"] });
+      queryClient.invalidateQueries({
+        queryKey: ["commission reports", variables.userId],
+      });
     },
     onError(error, variables, context) {
       if (error instanceof CustomError && error.status === 404) {
