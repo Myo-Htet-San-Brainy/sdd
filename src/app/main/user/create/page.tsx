@@ -25,10 +25,13 @@ export const createUserSchema = z.object({
     .string()
     .min(1, "Active status is required")
     .transform((val) => val === "true"),
-  commissionRate: z.string().transform((val) => {
-    if (val.trim() === "") return null;
-    return Number(val);
-  }),
+  commissionRate: z
+    .number()
+    .min(0)
+    .transform((val) => {
+      if (val === 0) return null;
+      return val;
+    }),
 });
 
 const Page = () => {

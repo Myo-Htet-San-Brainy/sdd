@@ -1,39 +1,45 @@
 "use client";
+
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { getAllPermissions, hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useGetRole, useGetRoles, useUpdateRoleMutation } from "@/query/role";
+import { useGetRoles } from "@/query/role";
+import { useGetUser, useUpdateUserMutation } from "@/query/user";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import toast from "react-hot-toast";
-import { X } from "lucide-react";
 import { CustomError } from "@/lib/CustomError";
-import AllowedPermissions from "@/components/AllowedPermissions";
-import { useGetUser, useUpdateUserMutation } from "@/query/user";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createUserSchema } from "../../create/page";
+import { SubmitButton } from "@/components/SubmitButton";
 
 const Page = () => {
-  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
-    useGetMyPermissions();
+  const {
+    data: myPermissions,
+    isFetching: isFetchingMyPermissions,
+    isPending: isPendingMyPermissions,
+  } = useGetMyPermissions();
+
   const { id } = useParams<{ id: string }>();
   const {
     data: user,
     isFetching: isFetchingUser,
+    isPending: isPendingUser,
     isError: isErrorUser,
     error: errorUser,
   } = useGetUser({ id });
+
   const {
     data: roles,
     isFetching: isFetchingRoles,
+    isPending: isPendingRoles,
     isError: isErrorRoles,
-    error: errorRoles,
   } = useGetRoles();
-  const { mutate } = useUpdateUserMutation();
 
+  const { mutate, isPending: isPendingUpdateUser } = useUpdateUserMutation();
   const {
     register,
     handleSubmit,
@@ -42,6 +48,9 @@ const Page = () => {
   } = useForm({
     resolver: zodResolver(createUserSchema),
   });
+
+  const queryClient = useQueryClient();
+  const router = useRouter();
 
   useEffect(() => {
     if (user) {
@@ -52,27 +61,27 @@ const Page = () => {
         address: user.address,
         phoneNumber: user.phoneNumber,
         isActive: user.isActive ? "true" : "false",
-        commissionRate:
-          user.commissionRate === null ? "" : String(user.commissionRate), // convert back to string for RHF
+        commissionRate: user.commissionRate ?? 0,
       });
     }
   }, [user]);
 
-  const queryClient = useQueryClient(); // ✨ get query client
-
   useEffect(() => {
-    if (errorUser) {
-      if (errorUser instanceof CustomError && errorUser.status === 404) {
-        queryClient.invalidateQueries({ queryKey: ["users"] });
-      }
+    if (errorUser instanceof CustomError && errorUser.status === 404) {
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     }
   }, [isErrorUser]);
 
-  const router = useRouter();
-
-  if (isFetchingMyPermissions) {
-    return <div>checking permission...</div>;
+  if (isFetchingMyPermissions || isPendingMyPermissions) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-zinc-600 animate-pulse text-center">
+          Checking permissions...
+        </p>
+      </div>
+    );
   }
+
   if (
     !hasPermission(
       myPermissions!,
@@ -80,33 +89,46 @@ const Page = () => {
     )
   ) {
     return (
-      <AllowedPermissions
-        myPermissions={myPermissions!}
-        actionNotPermitted={
-          MODULES_AND_PERMISSIONS.USER.PERMISSION_UPDATE.displayName
-        }
-      />
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-red-600 text-lg font-medium text-center">
+          You are not permitted to update users.
+        </p>
+      </div>
     );
   }
 
-  if (isFetchingUser || isFetchingRoles) {
-    return <div>preparing update user form...</div>;
+  if (isFetchingUser || isFetchingRoles || isPendingUser || isPendingRoles) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-zinc-600 animate-pulse text-center">
+          Preparing update user form...
+        </p>
+      </div>
+    );
   }
 
   if (isErrorUser) {
     return (
-      <div>
-        <p>{errorUser.message || "Something went wrong!"}</p>
-        <Link href={"/main/user"}>Update other Users</Link>
+      <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center bg-zinc-50 space-y-2">
+        <p className="text-red-600 text-center text-lg font-medium">
+          {errorUser.message || "Something went wrong!"}
+        </p>
+        <Link href="/main/user" className="text-blue-600 hover:underline">
+          Update other Users
+        </Link>
       </div>
     );
   }
 
   if (isErrorRoles) {
     return (
-      <div>
-        <p>{"Something went wrong while preping update user form!"}</p>
-        <Link href={"/main/user"}>View Users</Link>
+      <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center bg-zinc-50 space-y-2">
+        <p className="text-red-600 text-center text-lg font-medium">
+          Something went wrong while preparing update user form!
+        </p>
+        <Link href="/main/user" className="text-blue-600 hover:underline">
+          View Users
+        </Link>
       </div>
     );
   }
@@ -115,108 +137,130 @@ const Page = () => {
     mutate(
       { userId: id, userPayload: data },
       {
-        onSuccess(data, variables, context) {
+        onSuccess: () => {
           toast.success("User Updated!");
           router.push("/main/user");
         },
-        onError(error, variables, context) {
+        onError: (error) => {
           if (error instanceof CustomError) {
             if (error.status === 404) {
-              toast.error(
-                "This product has just been removed by other admins!"
-              );
-              router.push("/main/product");
+              toast.error("This user has just been removed by another admin!");
+              router.push("/main/user");
             } else {
-              toast.error("Smth went wrong!");
+              toast.error("Something went wrong!");
             }
           }
         },
       }
     );
   };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label>Username</label>
-        <input
-          {...register("username")}
-          placeholder="Ko Aung"
-          className="input"
-        />
-        {errors.username && <p>{errors.username.message}</p>}
-      </div>
+    <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white border border-zinc-200 shadow-md rounded-2xl max-w-2xl mx-auto p-6 space-y-6"
+      >
+        <h1 className="text-xl font-semibold text-red-600 border-b pb-2">
+          Update User
+        </h1>
 
-      <div>
-        <label>Password</label>
-        <input
-          type="password"
-          {...register("password")}
-          placeholder="••••••••"
-          className="input"
-        />
-        {errors.password && <p>{errors.password.message}</p>}
-      </div>
+        {[
+          { label: "Username", name: "username", type: "text" },
+          { label: "Password", name: "password", type: "password" },
+          { label: "Address", name: "address", type: "text" },
+          { label: "Phone Number", name: "phoneNumber", type: "text" },
+        ].map(({ label, name, type }) => (
+          <div key={name}>
+            <label className="block font-medium text-zinc-700 mb-1">
+              {label}:
+            </label>
+            <input
+              type={type}
+              {...register(
+                name as
+                  | "username"
+                  | "password"
+                  | "commissionRate"
+                  | "address"
+                  | "phoneNumber"
+              )}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            />
+            {errors[name as keyof typeof errors] && (
+              <p className="text-sm text-red-500 mt-1">
+                {errors[name as keyof typeof errors]?.message as string}
+              </p>
+            )}
+          </div>
+        ))}
 
-      <div>
-        <label>Role</label>
-        <select {...register("role")} className="select">
-          <option value="">Please select a role</option>
-          {roles?.map((role) => {
-            return (
+        {/* 🔹 Number Inputs */}
+        {[{ label: "Commission Rate", name: "commissionRate" }].map(
+          ({ label, name }) => (
+            <div key={name}>
+              <label className="block font-medium text-zinc-700 mb-1">
+                {label}:
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                {...register(name as "commissionRate", { valueAsNumber: true })}
+                className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+              />
+              {errors[name as keyof typeof errors] && (
+                <p className="text-sm text-red-500 mt-1">
+                  {errors[name as keyof typeof errors]?.message as string}
+                </p>
+              )}
+            </div>
+          )
+        )}
+
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">Role:</label>
+          <select
+            {...register("role")}
+            className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+          >
+            <option value="">Please select a role</option>
+            {roles?.map((role) => (
               <option key={role._id} value={role.name}>
                 {role.name}
               </option>
-            );
-          })}
-        </select>
-        {errors.role && <p>{errors.role.message}</p>}
-      </div>
+            ))}
+          </select>
+          {errors.role && (
+            <p className="text-sm text-red-500 mt-1">{errors.role.message}</p>
+          )}
+        </div>
 
-      <div>
-        <label>Address</label>
-        <input
-          {...register("address")}
-          placeholder="No. 25, Yangon Street"
-          className="input"
-        />
-        {errors.address && <p>{errors.address.message}</p>}
-      </div>
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Is Active:
+          </label>
+          <select
+            {...register("isActive")}
+            className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+          >
+            <option value="">Please select active status</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+          {errors.isActive && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors.isActive.message}
+            </p>
+          )}
+        </div>
 
-      <div>
-        <label>Phone Number</label>
-        <input
-          {...register("phoneNumber")}
-          placeholder="09-123456789"
-          className="input"
-        />
-        {errors.phoneNumber && <p>{errors.phoneNumber.message}</p>}
-      </div>
-
-      <div>
-        <label>Is Active</label>
-        <select {...register("isActive")} className="select">
-          <option value="">Please select active status.</option>
-          <option value="true">yes</option>
-          <option value="false">no</option>
-        </select>
-        {errors.isActive && <p>{errors.isActive.message}</p>}
-      </div>
-
-      <div>
-        <label>Commission Rate</label>
-        <input
-          type="number"
-          {...register("commissionRate")}
-          placeholder="0.00"
-          className="input"
-        />
-        {errors.commissionRate && <p>{errors.commissionRate.message}</p>}
-      </div>
-
-      <button type="submit" className="btn">
-        Update User
-      </button>
-    </form>
+        <div className="pt-4">
+          <SubmitButton isLoading={isPendingUpdateUser}>
+            Update User
+          </SubmitButton>
+        </div>
+      </form>
+    </div>
   );
 };
 

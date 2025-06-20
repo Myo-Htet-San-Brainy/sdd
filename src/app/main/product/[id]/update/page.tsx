@@ -93,12 +93,11 @@ const Page = () => {
     )
   ) {
     return (
-      <AllowedPermissions
-        actionNotPermitted={
-          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.displayName
-        }
-        myPermissions={myPermissions!}
-      />
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-red-600 text-lg font-medium text-center">
+          You are not permitted to update products.
+        </p>
+      </div>
     );
   }
 
