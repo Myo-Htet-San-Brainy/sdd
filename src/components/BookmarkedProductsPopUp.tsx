@@ -33,7 +33,7 @@ const BookmarkedProductsPopUp = ({
         <DrawerContent>
           <div className="w-[400px] h-full">
             {bookmarkedProducts.length <= 0 ? (
-              <div className=" h-full grid place-items-center">
+              <div className=" h-full grid place-items-center text-red-600">
                 No Bookmarked Products...
               </div>
             ) : (

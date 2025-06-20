@@ -18,7 +18,7 @@ export async function GET(
         { status: permissionCheck.status }
       );
     }
-    const { id } = params;
+    const { id } = await params;
 
     const product = await getProductById(id);
 
