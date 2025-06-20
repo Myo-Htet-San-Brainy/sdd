@@ -25,7 +25,7 @@ export const productSchema = z.object({
   noOfItemsInStock: z.number().int().min(0),
   buyingPrice: z.number().min(0),
   sellingPrice: z.number().min(0),
-  description: z.string().optional(),
+  description: z.string(),
   lowStockThreshold: z.number().int().min(0),
 });
 
