@@ -1,26 +1,24 @@
 "use client";
 
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { getAllPermissions, hasPermission } from "@/lib/utils";
+import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import AllowedPermissions from "@/components/AllowedPermissions";
 import { useCreateUserMutation } from "@/query/user";
-
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetRoles } from "@/query/role";
 import Link from "next/link";
 import toast from "react-hot-toast";
+import { SubmitButton } from "@/components/SubmitButton";
 
 // 🧠 Schema
-
 export const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(3, "Password must be at least 3 characters"),
-  role: z.string().min(1, "Role is required"), // 🚫 can't be empty
-  address: z.string().min(1, "Address is required"), // 🚫 can't be empty
-  phoneNumber: z.string().min(1, "Phone number is required"), // 🚫 same here
+  role: z.string().min(1, "Role is required"),
+  address: z.string().min(1, "Address is required"),
+  phoneNumber: z.string().min(1, "Phone number is required"),
   isActive: z
     .string()
     .min(1, "Active status is required")
@@ -28,23 +26,24 @@ export const createUserSchema = z.object({
   commissionRate: z
     .number()
     .min(0)
-    .transform((val) => {
-      if (val === 0) return null;
-      return val;
-    }),
+    .transform((val) => (val === 0 ? null : val)),
 });
 
 const Page = () => {
-  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
-    useGetMyPermissions();
+  const {
+    data: myPermissions,
+    isFetching: isFetchingMyPermissions,
+    isPending: isPendingMyPermissions,
+  } = useGetMyPermissions();
+
   const {
     data: roles,
     isFetching: isFetchingRoles,
     isError: isErrorRoles,
-    error: errorRoles,
+    isPending: isPendingRoles,
   } = useGetRoles();
 
-  const { mutate } = useCreateUserMutation();
+  const { mutate, isPending: isCreatingUser } = useCreateUserMutation();
 
   const {
     register,
@@ -56,23 +55,30 @@ const Page = () => {
     defaultValues: {
       role: "",
       isActive: "",
+      commissionRate: 0,
     },
   });
 
   const onSubmit = (data: any) => {
     mutate(data, {
-      onSuccess(data, variables, context) {
-        toast.success("Created User!");
+      onSuccess: () => {
+        toast.success("User created!");
         reset();
       },
-      onError(error, variables, context) {
-        toast.error("User Creation Failed!");
+      onError: () => {
+        toast.error("User creation failed!");
       },
     });
   };
 
-  if (isFetchingMyPermissions) {
-    return <div>checking permission...</div>;
+  if (isFetchingMyPermissions || isPendingMyPermissions) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
+        <p className="text-red-600 text-lg font-medium">
+          Checking permission...
+        </p>
+      </div>
+    );
   }
 
   if (
@@ -82,111 +88,176 @@ const Page = () => {
     )
   ) {
     return (
-      <AllowedPermissions
-        actionNotPermitted={
-          MODULES_AND_PERMISSIONS.USER.PERMISSION_CREATE.displayName
-        }
-        myPermissions={myPermissions!}
-      />
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
+        <p className="text-red-600 text-lg font-medium text-center">
+          You are not permitted to create users.
+        </p>
+      </div>
     );
   }
 
-  if (isFetchingRoles) {
-    return <div>preparing create user form...</div>;
+  if (isFetchingRoles || isPendingRoles) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
+        <p className="text-red-600 text-lg font-medium">Preparing form...</p>
+      </div>
+    );
   }
 
   if (isErrorRoles) {
     return (
-      <div>
-        <p>{"Something went wrong while preping create user form!"}</p>
-        <Link href={"/main/user"}>View Users</Link>
+      <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center gap-2 bg-zinc-100">
+        <p className="text-red-600 text-lg font-medium text-center">
+          Something went wrong while prepping the create user form!
+        </p>
+        <Link href={"/main/user"} className="text-blue-600 underline">
+          View Users
+        </Link>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
-        <label>Username</label>
-        <input
-          {...register("username")}
-          placeholder="Ko Aung"
-          className="input"
-        />
-        {errors.username && <p>{errors.username.message}</p>}
-      </div>
+    <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white border border-zinc-200 shadow-md rounded-2xl max-w-2xl mx-auto p-6 space-y-6"
+      >
+        <h1 className="text-xl font-semibold text-red-600 border-b pb-2">
+          Create New User
+        </h1>
 
-      <div>
-        <label>Password</label>
-        <input
-          type="password"
-          {...register("password")}
-          placeholder="••••••••"
-          className="input"
-        />
-        {errors.password && <p>{errors.password.message}</p>}
-      </div>
+        {/** Username */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Username
+          </label>
+          <input
+            {...register("username")}
+            placeholder="Ko Aung"
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          {errors.username && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.username.message}
+            </p>
+          )}
+        </div>
 
-      <div>
-        <label>Role</label>
-        <select {...register("role")} className="select">
-          <option value="">Please select a role</option>
-          {roles?.map((role) => {
-            return (
+        {/** Password */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Password
+          </label>
+          <input
+            type="password"
+            {...register("password")}
+            placeholder="••••••••"
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.password.message}
+            </p>
+          )}
+        </div>
+
+        {/** Role */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">Role</label>
+          <select
+            {...register("role")}
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            <option value="">Please select a role</option>
+            {roles?.map((role) => (
               <option key={role._id} value={role.name}>
                 {role.name}
               </option>
-            );
-          })}
-        </select>
-        {errors.role && <p>{errors.role.message}</p>}
-      </div>
+            ))}
+          </select>
+          {errors.role && (
+            <p className="text-red-500 text-sm mt-1">{errors.role.message}</p>
+          )}
+        </div>
 
-      <div>
-        <label>Address</label>
-        <input
-          {...register("address")}
-          placeholder="No. 25, Yangon Street"
-          className="input"
-        />
-        {errors.address && <p>{errors.address.message}</p>}
-      </div>
+        {/** Address */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Address
+          </label>
+          <input
+            {...register("address")}
+            placeholder="No. 25, Yangon Street"
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          {errors.address && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.address.message}
+            </p>
+          )}
+        </div>
 
-      <div>
-        <label>Phone Number</label>
-        <input
-          {...register("phoneNumber")}
-          placeholder="09-123456789"
-          className="input"
-        />
-        {errors.phoneNumber && <p>{errors.phoneNumber.message}</p>}
-      </div>
+        {/** Phone */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Phone Number
+          </label>
+          <input
+            {...register("phoneNumber")}
+            placeholder="09-123456789"
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          {errors.phoneNumber && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.phoneNumber.message}
+            </p>
+          )}
+        </div>
 
-      <div>
-        <label>Is Active</label>
-        <select {...register("isActive")} className="select">
-          <option value="">Please select active status.</option>
-          <option value="true">yes</option>
-          <option value="false">no</option>
-        </select>
-        {errors.isActive && <p>{errors.isActive.message}</p>}
-      </div>
+        {/** isActive */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Is Active
+          </label>
+          <select
+            {...register("isActive")}
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            <option value="">Please select active status</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+          {errors.isActive && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.isActive.message}
+            </p>
+          )}
+        </div>
 
-      <div>
-        <label>Commission Rate</label>
-        <input
-          type="number"
-          {...register("commissionRate")}
-          placeholder="0.00"
-          className="input"
-        />
-        {errors.commissionRate && <p>{errors.commissionRate.message}</p>}
-      </div>
+        {/** Commission Rate */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Commission Rate
+          </label>
+          <input
+            type="number"
+            {...register("commissionRate", { valueAsNumber: true })}
+            placeholder="0.00"
+            className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          {errors.commissionRate && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.commissionRate.message}
+            </p>
+          )}
+        </div>
 
-      <button type="submit" className="btn">
-        Create User
-      </button>
-    </form>
+        <div className="pt-4">
+          <SubmitButton isLoading={isCreatingUser}>Create User</SubmitButton>
+        </div>
+      </form>
+    </div>
   );
 };
 
