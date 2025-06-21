@@ -8,16 +8,19 @@ import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetSales } from "@/query/sale";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 const Page = () => {
-  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
-    useGetMyPermissions();
+  const {
+    data: myPermissions,
+    isFetching: isFetchingMyPermissions,
+    isPending: isPendingMyPermissions,
+  } = useGetMyPermissions();
   const {
     data: sales,
     isPending: isPendingSales,
     isFetching: isFetchingSales,
+
     isError: isErrorSales,
   } = useGetSales();
 
@@ -36,10 +39,12 @@ const Page = () => {
     router.push(`/main/product`);
   };
 
-  if (isFetchingMyPermissions) {
+  if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
-      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
-        <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-zinc-600 animate-pulse text-center">
+          Checking permissions...
+        </p>
       </div>
     );
   }
@@ -51,32 +56,40 @@ const Page = () => {
     )
   ) {
     return (
-      <p className="mt-6 text-center text-red-700">
-        You are not permitted to view{" "}
-        {MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.displayName}.
-      </p>
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-red-600 text-center text-lg font-medium">
+          You are not permitted to view{" "}
+          {MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.displayName}.
+        </p>
+      </div>
     );
   }
 
   if (isPendingSales || isFetchingSales) {
     return (
-      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
-        <p className="text-zinc-800 animate-pulse">Loading sales...</p>
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-zinc-600 animate-pulse text-center">
+          Loading sales...
+        </p>
       </div>
     );
   }
 
   if (isErrorSales) {
     return (
-      <p className="mt-6 text-center text-red-700">
-        Error while loading sales...
-      </p>
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-red-600 text-center font-medium">
+          Error while loading sales...
+        </p>
+      </div>
     );
   }
 
   if (sales.length <= 0) {
     return (
-      <p className="mt-6 text-center text-zinc-700">No sales recorded yet.</p>
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-zinc-500 text-center">No sales recorded yet.</p>
+      </div>
     );
   }
 
@@ -86,7 +99,7 @@ const Page = () => {
         {sales.map((sale) => (
           <div
             key={sale._id}
-            className="bg-white rounded-xl shadow-sm hover:shadow-md transition border border-zinc-200 p-4 flex flex-col justify-between"
+            className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between"
           >
             <div className="space-y-2">
               <div className="text-sm text-zinc-500">
@@ -102,7 +115,7 @@ const Page = () => {
                     key={idx}
                     className="bg-zinc-50 p-2 rounded-md border border-zinc-200 text-sm space-y-1"
                   >
-                    <div className="font-semibold text-blue-600">
+                    <div className="font-semibold text-red-600">
                       {sp.product.type.join(", ")}
                     </div>
                     <div className="text-zinc-700">
@@ -125,7 +138,7 @@ const Page = () => {
             ) && (
               <button
                 onClick={() => handleUpdateClick(sale)}
-                className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
               >
                 Update Sale
               </button>
