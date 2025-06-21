@@ -2,12 +2,6 @@ import { User } from "@/Interfaces/User";
 import { CustomError } from "@/lib/CustomError";
 import axios from "axios";
 
-//get roles fn
-// no parameters
-
-//return Role[]
-//check if 200
-
 export async function getUsers(params: { role?: string }): Promise<User[]> {
   try {
     const response = await axios.get(`/api/user`, {

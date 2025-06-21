@@ -5,10 +5,14 @@ import Link from "next/link";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import React from "react";
+import { signOut } from "next-auth/react";
 
 const GlobalNavbar = () => {
   const { data: myPermissions, isFetching: isMyPermissionsFetching } =
     useGetMyPermissions();
+  function handleSignOut() {
+    signOut();
+  }
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-50">
@@ -67,6 +71,8 @@ const GlobalNavbar = () => {
             })}
           </div>
         )}
+
+        <button onClick={handleSignOut}>Sign Out</button>
       </div>
     </nav>
   );

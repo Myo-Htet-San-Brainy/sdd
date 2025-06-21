@@ -38,3 +38,30 @@ export async function verifyPermission(
 
   return { ok: true, session };
 }
+
+export async function verifyAnyPermission(
+  requiredPermissions: string[]
+): Promise<
+  | { ok: true; session: Awaited<ReturnType<typeof getServerSession>> }
+  | { ok: false; status: number; message: string }
+> {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return { ok: false, status: 401, message: "Unauthorized" };
+  }
+
+  const userRole = session.user.role;
+  const role = await getRoleByName(userRole);
+
+  // Check if at least one required permission exists in role's permissions
+  const hasRequiredPermission = requiredPermissions.some((permission) =>
+    hasPermission(role?.permissions, permission)
+  );
+
+  if (!hasRequiredPermission) {
+    return { ok: false, status: 403, message: "Forbidden" };
+  }
+
+  return { ok: true, session };
+}

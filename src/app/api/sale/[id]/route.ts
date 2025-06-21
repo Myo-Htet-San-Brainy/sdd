@@ -9,7 +9,7 @@ export async function PATCH(
 ) {
   try {
     const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.name
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
     );
 
     if (!permissionCheck.ok) {

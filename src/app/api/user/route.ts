@@ -1,14 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createRole, getAllRoles } from "@/db/role";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { hashPassword, verifyPermission } from "@/lib/serverUtils";
+import {
+  hashPassword,
+  verifyAnyPermission,
+  verifyPermission,
+} from "@/lib/serverUtils";
 import { createUser, getAllUsers, getUsersByRole } from "@/db/user";
 
 export async function GET(req: NextRequest) {
   try {
-    const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name
-    );
+    const permissionCheck = await verifyAnyPermission([
+      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name,
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name,
+    ]);
 
     if (!permissionCheck.ok) {
       return NextResponse.json(
