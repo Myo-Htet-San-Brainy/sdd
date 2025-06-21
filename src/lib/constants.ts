@@ -97,4 +97,17 @@ export const MODULES_AND_PERMISSIONS = {
       link: "/main/report/commission",
     },
   },
+  MESSAGE: {
+    displayName: "",
+    PERMISSION_UPDATE: {
+      name: "MESSAGE:UPDATE",
+      displayName: "Update Message",
+      link: "",
+    },
+    PERMISSION_READ: {
+      name: "MESSAGE:READ",
+      displayName: "View Message",
+      link: "/main/message/",
+    },
+  },
 };

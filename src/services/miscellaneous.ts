@@ -1,3 +1,4 @@
+import { CustomError } from "@/lib/CustomError";
 import axios from "axios";
 
 export async function getMyPermissions(): Promise<string[]> {
@@ -13,6 +14,38 @@ export async function getMyPermissions(): Promise<string[]> {
   } catch (error: any) {
     console.log("error fetching permissions:", error);
     throw error;
+  }
+}
+
+export interface Message {
+  content: string;
+}
+
+export async function getMessage(): Promise<Message> {
+  try {
+    const response = await axios.get("/api/message");
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+
+    return response.data.message;
+  } catch (error: any) {
+    console.log("Error fetching message:", error);
+    throw new CustomError("Smth Went Wrong!", 500);
+  }
+}
+
+export async function updateMessage(content: string): Promise<void> {
+  try {
+    const response = await axios.patch("/api/message", { content });
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+  } catch (error: any) {
+    console.log("Error updating message:", error);
+    throw new CustomError("Smth Went Wrong!", 500);
   }
 }
 

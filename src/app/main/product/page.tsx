@@ -22,8 +22,11 @@ import React, { useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 const Page = () => {
-  const { data: myPermissions, isFetching: isFetchingMyPermissions } =
-    useGetMyPermissions();
+  const {
+    data: myPermissions,
+    isFetching: isFetchingMyPermissions,
+    isPending: isPendingMyPermissions,
+  } = useGetMyPermissions();
   const [type, setType] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [suggestionPrompt, setSuggestionPrompt] = useState("");
@@ -53,7 +56,7 @@ const Page = () => {
   const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
   const { cart } = useCartStore();
 
-  if (isFetchingMyPermissions) {
+  if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
       <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
         <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
