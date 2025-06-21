@@ -2,7 +2,6 @@
 
 import { getCsrfToken } from "next-auth/react";
 import { useEffect, useState } from "react";
-import Link from "next/link";
 
 export default function SignIn() {
   const [csrfToken, setCsrfToken] = useState<string | undefined>();
@@ -16,10 +15,10 @@ export default function SignIn() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
-        <div className="flex justify-center mb-6">
-          <div className="w-12 h-12 bg-indigo-600 rounded-full flex items-center justify-center">
+    <div className="min-h-screen bg-gradient-to-br from-red-50 to-zinc-100 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl border border-zinc-200 shadow-lg p-8 space-y-6">
+        <div className="flex justify-center">
+          <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6 text-white"
@@ -35,24 +34,24 @@ export default function SignIn() {
           </div>
         </div>
 
-        <h1 className="text-2xl font-bold text-center text-gray-900 mb-2">
-          Welcome back
+        <h1 className="text-2xl font-bold text-center text-zinc-900">
+          🏍️ Shwe Da Dar
         </h1>
-        <p className="text-gray-600 text-center mb-8">
-          Sign in to coordinate with your friends
+        <p className="text-center text-zinc-600 text-sm">
+          Best Motorcycle Accessories & Parts Shop In Town
         </p>
 
         <form
           method="post"
           action="/api/auth/callback/credentials"
-          className="space-y-6"
+          className="space-y-5 pt-4"
         >
           <input name="csrfToken" type="hidden" value={csrfToken} />
 
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-zinc-700 mb-1"
             >
               Username
             </label>
@@ -61,15 +60,15 @@ export default function SignIn() {
               name="username"
               type="text"
               required
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
               placeholder="Enter your username"
+              className="w-full px-4 py-3 rounded-lg border border-zinc-300 text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
             />
           </div>
 
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-zinc-700 mb-1"
             >
               Password
             </label>
@@ -78,28 +77,18 @@ export default function SignIn() {
               name="password"
               type="password"
               required
-              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
               placeholder="Enter your password"
+              className="w-full px-4 py-3 rounded-lg border border-zinc-300 text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 shadow-md"
+            className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-4 rounded-lg transition duration-300 shadow-md"
           >
             Sign in
           </button>
         </form>
-
-        <div className="mt-6 text-center text-sm text-gray-500">
-          Don't have an account?{" "}
-          <Link
-            href="/signUp"
-            className="font-medium text-indigo-600 hover:text-indigo-500"
-          >
-            Sign up
-          </Link>
-        </div>
       </div>
     </div>
   );

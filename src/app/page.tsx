@@ -1,35 +1,28 @@
 "use client";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
 
+import { signIn } from "next-auth/react";
 import React from "react";
 
 const Page = () => {
-  const router = useRouter();
-
   function handleSignIn() {
     signIn(undefined, { callbackUrl: "/main" });
   }
 
-  function handleSignUp() {
-    router.push("/auth/signup");
-  }
   return (
-    <div>
-      <div className="flex items-center space-x-4">
-        <button
-          className="text-indigo-700 hover:text-indigo-900 font-medium px-4 py-2"
-          onClick={handleSignIn}
-        >
-          Sign In
-        </button>
-        {/* <button
-          onClick={handleSignUp}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg font-medium transition duration-300"
-        >
-          Sign Up
-        </button> */}
-      </div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-red-50 to-zinc-100 px-4 text-center">
+      <h1 className="text-5xl font-extrabold text-red-600 mb-4">
+        🏍️ Shwe Da Dar
+      </h1>
+      <p className="text-lg text-zinc-700 mb-10">
+        Best Motorcycle Accessories & Parts Shop In Town
+      </p>
+
+      <button
+        onClick={handleSignIn}
+        className="bg-red-600 hover:bg-red-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow transition"
+      >
+        Sign In to Continue
+      </button>
     </div>
   );
 };
