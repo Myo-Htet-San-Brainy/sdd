@@ -8,7 +8,7 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { useMyPermissionsContext } from "@/context";
 
 const Page = () => {
-  const { myPermissions, isFetchingMyPermissions } = useMyPermissionsContext();
+  const { myPermissions } = useMyPermissionsContext();
   const {
     data: lowStockProducts,
     isPending,
@@ -16,17 +16,15 @@ const Page = () => {
     isError,
   } = useGetLowStockProducts();
 
-  if (isFetchingMyPermissions) {
-    return (
-      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
-        <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
-      </div>
-    );
-  }
+  // Check if user has permission to view products
+  const hasProductReadPermission = hasPermission(
+    myPermissions,
+    MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
+  );
 
   if (
     !hasPermission(
-      myPermissions!,
+      myPermissions,
       MODULES_AND_PERMISSIONS.REPORT.PERMISSION_LOW_STOCK_ALERT.name
     )
   ) {
@@ -69,45 +67,70 @@ const Page = () => {
       </h1>
 
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
-        {lowStockProducts.map((product: Product) => (
-          <Link
-            key={product._id}
-            href={`/main/product/${product._id}`}
-            className="bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm hover:bg-red-100 transition-colors"
-          >
-            <div className="text-sm text-zinc-800 font-medium">
-              {product.type.join(", ")}
+        {lowStockProducts.map((product: Product) =>
+          hasProductReadPermission ? (
+            <Link
+              key={product._id}
+              href={`/main/product/${product._id}`}
+              className="bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm hover:bg-red-100 transition-colors"
+            >
+              <ProductCardContent product={product} />
+            </Link>
+          ) : (
+            <div
+              key={product._id}
+              className="bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm"
+            >
+              <ProductCardContent product={product} />
             </div>
-
-            {product.description && (
-              <div className="text-xs text-zinc-600 truncate">
-                {product.description}
-              </div>
-            )}
-
-            {product.brand && (
-              <div className="text-xs text-zinc-500">{product.brand}</div>
-            )}
-
-            <div className="mt-2 text-xs text-red-700 font-semibold">
-              In Stock: {product.noOfItemsInStock}
-            </div>
-
-            <div className="text-xs text-zinc-700">
-              Threshold: {product.lowStockThreshold ?? "Not Set"}
-            </div>
-
-            <div className="mt-2 text-xs text-zinc-600">
-              Location: <span className="font-medium">{product.location}</span>
-            </div>
-
-            <div className="text-xs text-zinc-600">
-              Source: <span className="font-medium">{product.source}</span>
-            </div>
-          </Link>
-        ))}
+          )
+        )}
       </div>
     </section>
+  );
+};
+
+// Extracted product card content as a separate component to avoid duplication
+const ProductCardContent = ({ product }: { product: Product }) => {
+  return (
+    <>
+      <div className="flex flex-wrap gap-2 mb-1">
+        {product.type.map((type) => (
+          <span
+            key={type}
+            className="text-xs font-bold bg-red-100 text-red-700 p-2 rounded-lg"
+          >
+            {type}
+          </span>
+        ))}
+      </div>
+
+      {product.description && (
+        <div className="text-xs text-zinc-600 truncate">
+          {product.description}
+        </div>
+      )}
+
+      {product.brand && (
+        <div className="text-xs text-zinc-500">{product.brand}</div>
+      )}
+
+      <div className="mt-2 text-xs text-red-700 font-semibold">
+        In Stock: {product.noOfItemsInStock}
+      </div>
+
+      <div className="text-xs text-zinc-700">
+        Threshold: {product.lowStockThreshold ?? "Not Set"}
+      </div>
+
+      <div className="mt-2 text-xs text-zinc-600">
+        Location: <span className="font-medium">{product.location}</span>
+      </div>
+
+      <div className="text-xs text-zinc-600">
+        Source: <span className="font-medium">{product.source}</span>
+      </div>
+    </>
   );
 };
 
