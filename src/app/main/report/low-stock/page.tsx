@@ -5,7 +5,6 @@ import { useGetLowStockProducts } from "@/query/report";
 import { Product } from "@/Interfaces/Product";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import AllowedPermissions from "@/components/AllowedPermissions";
 import { useMyPermissionsContext } from "@/context";
 
 const Page = () => {
@@ -68,37 +67,46 @@ const Page = () => {
       <h1 className="text-2xl font-bold text-red-700 mb-6">
         Low Stock Alerts 🚨
       </h1>
-      <ul className="space-y-4">
+
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-6">
         {lowStockProducts.map((product: Product) => (
-          <li key={product._id}>
-            <Link
-              href={`/main/product/${product._id}`}
-              className="block border border-red-200 bg-red-50 rounded-xl p-4 shadow-sm hover:bg-red-100 transition-colors"
-            >
-              <div className="font-semibold text-zinc-800 text-lg">
-                {product.brand}
-                {product.description && ` - ${product.description}`}
+          <Link
+            key={product._id}
+            href={`/main/product/${product._id}`}
+            className="bg-red-50 border border-red-200 rounded-xl p-3 shadow-sm hover:bg-red-100 transition-colors"
+          >
+            <div className="text-sm text-zinc-800 font-medium">
+              {product.type.join(", ")}
+            </div>
+
+            {product.description && (
+              <div className="text-xs text-zinc-600 truncate">
+                {product.description}
               </div>
-              <div className="text-sm text-zinc-700 mt-1">
-                In Stock:{" "}
-                <span className="font-bold text-red-700">
-                  {product.noOfItemsInStock}
-                </span>
-              </div>
-              <div className="text-sm text-zinc-700">
-                Threshold:{" "}
-                <span className="font-bold">
-                  {product.lowStockThreshold ?? "Not Set"}
-                </span>
-              </div>
-              <div className="text-sm text-zinc-600 mt-2">
-                Location:{" "}
-                <span className="font-medium">{product.location}</span>
-              </div>
-            </Link>
-          </li>
+            )}
+
+            {product.brand && (
+              <div className="text-xs text-zinc-500">{product.brand}</div>
+            )}
+
+            <div className="mt-2 text-xs text-red-700 font-semibold">
+              In Stock: {product.noOfItemsInStock}
+            </div>
+
+            <div className="text-xs text-zinc-700">
+              Threshold: {product.lowStockThreshold ?? "Not Set"}
+            </div>
+
+            <div className="mt-2 text-xs text-zinc-600">
+              Location: <span className="font-medium">{product.location}</span>
+            </div>
+
+            <div className="text-xs text-zinc-600">
+              Source: <span className="font-medium">{product.source}</span>
+            </div>
+          </Link>
         ))}
-      </ul>
+      </div>
     </section>
   );
 };

@@ -127,7 +127,7 @@ const Page = () => {
           <div className="pt-4">
             <Link
               href={`/main/product/${product._id}/update`}
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+              className="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
             >
               Update Product
             </Link>
