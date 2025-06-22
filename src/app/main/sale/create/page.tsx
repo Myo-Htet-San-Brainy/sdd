@@ -18,7 +18,8 @@ const Page = () => {
     isFetching: isFetchingMyPermissions,
     isPending: isPendingMyPermissions,
   } = useGetMyPermissions();
-  const { cart, clearCart, buyer, setBuyer } = useCartStore();
+  const { cart, clearCart, buyer, setBuyer, addToCart, removeFromCart } =
+    useCartStore();
   const { updatedSaleId, setUpdatedSaleId } = useUpdatedSaleIdStore();
   const total = useCartStore((state) => state.totalPrice());
 
@@ -153,8 +154,33 @@ const Page = () => {
                 Price: {val.product.sellingPrice} × {val.itemsToSell} ={" "}
                 {val.product.sellingPrice * val.itemsToSell}
               </div>
+
+              {/* Added Cart Controls */}
+              <div className="flex items-center justify-between border-t pt-3 mt-3">
+                <button
+                  onClick={() => removeFromCart(val.product._id)}
+                  className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors"
+                >
+                  -
+                </button>
+                <p className="text-sm text-zinc-700 font-medium">
+                  {val.itemsToSell}
+                </p>
+                <button
+                  disabled={val.product.noOfItemsInStock <= val.itemsToSell}
+                  onClick={() => addToCart(val.product)}
+                  className={`px-3 py-1 rounded-md transition-colors ${
+                    val.product.noOfItemsInStock <= val.itemsToSell
+                      ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+                      : "bg-green-600 text-white hover:bg-green-700"
+                  }`}
+                >
+                  +
+                </button>
+              </div>
             </div>
           ))}
+
           <p className="text-right text-lg font-semibold text-zinc-800">
             Total: {total}
           </p>
@@ -181,7 +207,7 @@ const Page = () => {
             isLoading={isCreating || isUpdating}
             onClick={handleSell}
           >
-            Sell
+            {updatedSaleId ? "Update" : "Sell"}
           </SubmitButton>
         </div>
       </div>

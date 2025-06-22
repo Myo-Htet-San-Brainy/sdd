@@ -70,7 +70,7 @@ const Product = ({
             <>
               <button
                 onClick={() => removeFromCart(product._id)}
-                className="px-3 py-1 bg-zinc-200 hover:bg-zinc-300 text-zinc-800 rounded-md"
+                className="px-3 py-1 bg-red-100 hover:bg-red-200 text-red-700 rounded-md transition-colors"
               >
                 -
               </button>
@@ -83,11 +83,11 @@ const Product = ({
                   (cartProduct as CartProduct).itemsToSell
                 }
                 onClick={() => addToCart(product)}
-                className={`px-3 py-1 rounded-md ${
+                className={`px-3 py-1 rounded-md transition-colors ${
                   product.noOfItemsInStock <=
                   (cartProduct as CartProduct).itemsToSell
                     ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
-                    : "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-green-600 text-white hover:bg-green-700"
                 }`}
               >
                 +
@@ -105,10 +105,10 @@ const Product = ({
               <button
                 disabled={product.noOfItemsInStock <= 0}
                 onClick={() => addToCart(product)}
-                className={`px-3 py-1 rounded-md ${
+                className={`px-3 py-1 rounded-md transition-colors ${
                   product.noOfItemsInStock <= 0
                     ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
-                    : "bg-red-600 text-white hover:bg-red-700"
+                    : "bg-green-600 text-white hover:bg-green-700"
                 }`}
               >
                 +
