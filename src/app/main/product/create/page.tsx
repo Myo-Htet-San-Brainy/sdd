@@ -19,7 +19,7 @@ export const productSchema = z.object({
       })
     )
     .min(1, "At least one type is required"),
-  brand: z.string().min(1, "Brand is required"),
+  brand: z.string(),
   source: z.string().min(1, "Source is required"),
   location: z.string().min(1, "Location is required"),
   noOfItemsInStock: z.number().int().min(0),
@@ -174,15 +174,45 @@ const Page = () => {
           )}
         </div>
 
+        {/* Brand */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">Brand</label>
+          {isNewBrand ? (
+            <input
+              {...register("brand")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            />
+          ) : (
+            <select
+              {...register("brand")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            >
+              <option value="" className="">
+                No Brand
+              </option>
+              {productMeta.brands?.map((opt: string) => (
+                <option key={opt} value={opt} className="">
+                  {opt}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsNewBrand((prev) => !prev)}
+            className="text-blue-600 text-sm mt-1 hover:underline"
+          >
+            {isNewBrand ? `Use Select` : `+ Add New Brand`}
+          </button>
+          {errors["brand"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors["brand"]?.message as string}
+            </p>
+          )}
+        </div>
+
         {/* 🔹 Select/Toggle Fields */}
         {[
-          {
-            label: "Brand",
-            name: "brand",
-            isNew: isNewBrand,
-            toggle: setIsNewBrand,
-            options: productMeta.brands,
-          },
           {
             label: "Source",
             name: "source",
@@ -204,12 +234,12 @@ const Page = () => {
             </label>
             {isNew ? (
               <input
-                {...register(name as "brand" | "source" | "location")}
+                {...register(name as "source" | "location")}
                 className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
               />
             ) : (
               <select
-                {...register(name as "brand" | "source" | "location")}
+                {...register(name as "source" | "location")}
                 className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
               >
                 <option value="" className="">

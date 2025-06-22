@@ -105,15 +105,11 @@ const ProductCardContent = ({ product }: { product: Product }) => {
         ))}
       </div>
 
-      {product.description && (
-        <div className="text-xs text-zinc-600 truncate">
-          {product.description}
-        </div>
-      )}
+      <div className="text-xs text-zinc-600 truncate">
+        {product.description}
+      </div>
 
-      {product.brand && (
-        <div className="text-xs text-zinc-500">{product.brand}</div>
-      )}
+      <div className="text-xs text-zinc-500">{product.brand}</div>
 
       <div className="mt-2 text-xs text-red-700 font-semibold">
         In Stock: {product.noOfItemsInStock}

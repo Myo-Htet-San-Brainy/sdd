@@ -108,24 +108,34 @@ const Page = () => {
               <div className="text-sm text-zinc-600">
                 👤 Buyer: {sale.buyer?.username || "N/A"}
               </div>
+              <div className="text-sm font-medium text-green-600">
+                💰 Total:{" "}
+                {sale.soldProducts.reduce(
+                  (sum, sp) => sum + sp.itemsToSell * sp.sellingPrice,
+                  0
+                )}{" "}
+                MMK
+              </div>
 
               <div className="border-t pt-2 max-h-56 overflow-y-auto pr-1 space-y-2">
                 {sale.soldProducts.map((sp, idx) => (
                   <div
                     key={idx}
-                    className="bg-zinc-50 p-2 rounded-md border border-zinc-200 text-sm space-y-1"
+                    className="bg-zinc-50 p-2 rounded-md border border-zinc-200 text-sm flex justify-between items-center"
                   >
-                    <div className="font-semibold text-red-600">
-                      {sp.product.type.join(", ")}
+                    <div className="space-y-1">
+                      <div className="font-semibold text-red-600">
+                        {sp.product.type.join(", ")}
+                      </div>
+                      <div className="text-zinc-500 text-xs">
+                        {sp.product.brand}
+                      </div>
+                      <div className="text-zinc-700 text-xs">
+                        {sp.product.description}
+                      </div>
                     </div>
-                    <div className="text-zinc-700">
-                      {sp.product.description}
-                    </div>
-                    <div className="text-zinc-600">
-                      Brand: {sp.product.brand}
-                    </div>
-                    <div className="text-zinc-500">
-                      Sold: {sp.itemsToSell} × {sp.sellingPrice} MMK
+                    <div className="text-red-600 font-medium ml-2">
+                      {sp.itemsToSell} × {sp.sellingPrice} MMK
                     </div>
                   </div>
                 ))}

@@ -98,7 +98,7 @@ const Page = () => {
           {product.description && (
             <Detail label="Description" value={product.description} />
           )}
-          <Detail label="Brand" value={product.brand} />
+          {product.brand && <Detail label="Brand" value={product.brand} />}
           <Detail label="Items in Stock" value={product.noOfItemsInStock} />
           <Detail
             label="Selling Price"

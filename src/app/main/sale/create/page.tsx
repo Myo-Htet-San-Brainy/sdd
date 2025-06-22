@@ -121,6 +121,11 @@ const Page = () => {
     }
   }
 
+  function handleClearCart() {
+    clearCart();
+    toast.success("Cart cleared successfully!");
+  }
+
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
       <div className="max-w-3xl mx-auto bg-white border border-zinc-200 shadow-md rounded-2xl p-6 space-y-6">
@@ -202,7 +207,13 @@ const Page = () => {
           </select>
         </div>
 
-        <div className="pt-4">
+        <div className="pt-4 flex justify-end gap-4">
+          <button
+            onClick={handleClearCart}
+            className="px-6 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl transition-colors"
+          >
+            Clear Cart
+          </button>
           <SubmitButton
             isLoading={isCreating || isUpdating}
             onClick={handleSell}

@@ -36,7 +36,7 @@ const Product = ({
 
       {/* Description */}
       <p className="text-zinc-800 font-semibold text-lg">
-        {product.description && `${product.description}`}
+        {product.description}
       </p>
 
       {/* Brand */}
