@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetMyPermissions } from "@/query/miscellaneous";
+import { useGetMyAccount, useGetMyPermissions } from "@/query/miscellaneous";
 import Link from "next/link";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
@@ -12,13 +12,7 @@ import { useGetUser } from "@/query/user";
 const GlobalNavbar = () => {
   const { data: myPermissions, isFetching: isMyPermissionsFetching } =
     useGetMyPermissions();
-  const session = useSession();
-  const id = (session.data?.user as { id: string; role: string; name: string })
-    ?.id;
-
-  const { data: profile } = useGetUser({ id });
-  console.log("profile", profile);
-  console.log("id", id);
+  const { data: profile } = useGetMyAccount();
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-50">

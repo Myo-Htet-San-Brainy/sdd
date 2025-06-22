@@ -1,3 +1,4 @@
+import { User } from "@/Interfaces/User";
 import { CustomError } from "@/lib/CustomError";
 import axios from "axios";
 
@@ -14,6 +15,22 @@ export async function getMyPermissions(): Promise<string[]> {
   } catch (error: any) {
     console.log("error fetching permissions:", error);
     throw error;
+  }
+}
+
+export async function getMyAccount(): Promise<User> {
+  try {
+    const response = await axios.get("/api/user/me");
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+
+    const { me } = response.data;
+    return me;
+  } catch (error: any) {
+    console.log("error fetching my account:", error);
+    throw new CustomError("Smth Went Wrong!", 500);
   }
 }
 
