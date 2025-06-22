@@ -17,6 +17,8 @@ const GlobalNavbar = () => {
     ?.id;
 
   const { data: profile } = useGetUser({ id });
+  console.log("profile", profile);
+  console.log("id", id);
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-50">

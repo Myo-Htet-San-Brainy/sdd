@@ -12,7 +12,7 @@ const years = [2025, 2026, 2027, 2028, 2029, 2030];
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
 const Page = () => {
-  const { myPermissions, isFetchingMyPermissions } = useMyPermissionsContext();
+  const { myPermissions } = useMyPermissionsContext();
 
   const {
     data: commissioners,
@@ -37,17 +37,9 @@ const Page = () => {
     isError: isErrorCommissionRps,
   } = useGetCommissionReports({ commissionerId, date: date.toISOString() });
 
-  if (isFetchingMyPermissions) {
-    return (
-      <div className="w-full min-h-[calc(100vh-72px)] py-6 text-center bg-zinc-50">
-        <p className="text-zinc-800 animate-pulse">Checking permissions...</p>
-      </div>
-    );
-  }
-
   if (
     !hasPermission(
-      myPermissions!,
+      myPermissions,
       MODULES_AND_PERMISSIONS.REPORT.PERMISSION_COMMISSION.name
     )
   ) {
