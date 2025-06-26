@@ -20,17 +20,19 @@ export async function GET(
 ) {
   try {
     const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name
+      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name
     );
 
     if (!permissionCheck.ok) {
+      if (permissionCheck.status === 403) {
+      }
       return NextResponse.json(
         { error: permissionCheck.message },
         { status: permissionCheck.status }
       );
     }
 
-    // 5. Return roles
+    // 5. Return users
     const { id } = await params;
     const data = await getUserById(id);
     if (!data) {

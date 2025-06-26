@@ -2,18 +2,38 @@ import { NextRequest, NextResponse } from "next/server";
 import { createRole, getAllRoles } from "@/db/role";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import {
+  authenticateSession,
   hashPassword,
   verifyAnyPermission,
   verifyPermission,
+  verifyPermissions,
 } from "@/lib/serverUtils";
 import { createUser, getAllUsers, getUsersByRole } from "@/db/user";
 
 export async function GET(req: NextRequest) {
   try {
-    const permissionCheck = await verifyAnyPermission([
-      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name,
-      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name,
-    ]);
+    // 1. Authenticate Session
+    const authResult = await authenticateSession();
+    if (!authResult.ok) {
+      return NextResponse.json(
+        { error: authResult.message },
+        { status: authResult.status }
+      );
+    }
+    const { session } = authResult; // Now session is guaranteed to be valid
+
+    // 2. Check Permissions
+    const requiredPermissions = [
+      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name, // Full read permission
+      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ_ONLY_NAMES.name, // Basic read permission
+      // Add ADMIN:FULL_ACCESS here if you want it to also grant full access
+      // MODULES_AND_PERMISSIONS.USER.ADMIN_ACCESS.name,
+    ];
+
+    const permissionCheck = await verifyPermissions(
+      session,
+      requiredPermissions
+    );
 
     if (!permissionCheck.ok) {
       return NextResponse.json(
@@ -22,13 +42,25 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    const { matchedPermission } = permissionCheck; // Get the specific permission that allowed access
+
+    // 3. Determine if only names should be returned based on matchedPermission
+    let isOnlyNames = false;
+    if (matchedPermission === "USER:READ_ONLY_NAMES") {
+      isOnlyNames = true;
+    }
+    // If you have an ADMIN:FULL_ACCESS permission, you might explicitly set isOnlyNames = false if matchedPermission is ADMIN:FULL_ACCESS
+
     const searchParams = req.nextUrl.searchParams;
-    const role = searchParams.get("role");
+    const role = searchParams.get("role"); // Still allow filtering by role
+
     let users;
     if (role) {
-      users = await getUsersByRole(role);
+      // Pass the isOnlyNames flag to the database function
+      users = await getUsersByRole(role, isOnlyNames);
     } else {
-      users = await getAllUsers();
+      // Pass the isOnlyNames flag to the database function
+      users = await getAllUsers(isOnlyNames);
     }
 
     return NextResponse.json({ users: users || [] }, { status: 200 });
@@ -40,7 +72,6 @@ export async function GET(req: NextRequest) {
     );
   }
 }
-
 export async function POST(req: NextRequest) {
   try {
     const permissionCheck = await verifyPermission(

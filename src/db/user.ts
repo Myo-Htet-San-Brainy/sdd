@@ -1,22 +1,46 @@
+// src/lib/db-users.ts (or wherever your DB functions are)
 import { getCollection } from "@/lib/mongodb";
-import { ObjectId } from "mongodb"; // 💡 important for _id!
+import { ObjectId } from "mongodb";
 
-export async function getAllUsers() {
+export async function getAllUsers(isOnlyNames: boolean = false) {
   const userCollection = await getCollection("user");
-  return await userCollection
-    .find({}, { projection: { password: 0 } }) // 🚫 exclude 'password'
-    .toArray();
+  let projection: { [key: string]: number } = { password: 0 }; // Always exclude password
+
+  if (isOnlyNames) {
+    projection = { _id: 1, username: 1 }; // Only include _id, name, and id (if you store both)
+    // Adjust these fields based on what your "basic info" truly entails.
+    // If your user model has an `id` field separate from `_id`, include it.
+    // Assuming `name` is the field for username/name.
+  }
+
+  return await userCollection.find({}, { projection }).toArray();
 }
 
-export async function getUsersByRole(role: string) {
+export async function getUsersByRole(
+  role: string,
+  isOnlyNames: boolean = false
+) {
   const userCollection = await getCollection("user");
+  let projection: { [key: string]: number } = { password: 0 }; // Always exclude password
+
+  if (isOnlyNames) {
+    projection = { _id: 1, username: 1 }; // Only include _id, name, and id (if you store both)
+  }
+
   return await userCollection
     .find(
       { role }, // Filter by the specified role
-      { projection: { password: 0 } } // 🚫 exclude 'password'
+      { projection }
     )
     .toArray();
 }
+
+// And ensure your getUserById (for individual user fetch) does NOT use isOnlyNames
+// as it should always return full details if authorized.
+// export async function getUserById(id: string) {
+//   const userCollection = await getCollection("user");
+//   return await userCollection.findOne({ _id: new ObjectId(id) }, { projection: { password: 0 } });
+// }
 
 export async function createUser(user: any) {
   const userCollection = await getCollection("user");

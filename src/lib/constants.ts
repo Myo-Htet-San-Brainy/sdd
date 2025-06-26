@@ -27,6 +27,11 @@ export const MODULES_AND_PERMISSIONS = {
       displayName: "View Users",
       link: "/main/user",
     },
+    PERMISSION_READ_ONLY_NAMES: {
+      name: "USER:READ_ONLY_NAMES",
+      displayName: "View Only User Names",
+      link: "",
+    },
     PERMISSION_CREATE: {
       name: "USER:CREATE",
       displayName: "Create Users",

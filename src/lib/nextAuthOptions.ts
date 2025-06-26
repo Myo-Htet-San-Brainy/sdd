@@ -1,10 +1,11 @@
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
+import { NextAuthOptions } from "next-auth";
 
 const SIGN_IN_URL_LOCAL = "http://localhost:3000";
 const SIGN_IN_URL_PROD = "";
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -22,7 +23,11 @@ export const authOptions = {
           if (res.status === 200) {
             const { userId, userRole } = res.data;
             //userId, role, username
-            return { id: userId, name: credentials?.username, role: userRole };
+            return {
+              id: userId,
+              name: credentials?.username || "",
+              role: userRole,
+            };
           } else {
             throw new Error("Login failed, please try again later");
           }
@@ -46,8 +51,9 @@ export const authOptions = {
       },
     }),
   ],
+
   callbacks: {
-    async jwt({ token, user }: { token: any; user?: any }) {
+    async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
         token.role = user.role;
@@ -55,7 +61,7 @@ export const authOptions = {
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }) {
       session.user.id = token.id;
       session.user.role = token.role;
       session.user.name = token.name;
