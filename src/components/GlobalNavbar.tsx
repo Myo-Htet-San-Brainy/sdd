@@ -12,7 +12,7 @@ import { useGetUser } from "@/query/user";
 const GlobalNavbar = () => {
   const { data: myPermissions, isFetching: isMyPermissionsFetching } =
     useGetMyPermissions();
-  const { data: profile } = useGetMyAccount();
+  const { data: profile } = useGetUser({ id: "own" });
 
   return (
     <nav className="w-full bg-white border-b border-gray-200 px-6 py-4 shadow-sm z-50">

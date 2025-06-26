@@ -11,7 +11,12 @@ import {
   updateRole,
 } from "@/db/role";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { hashPassword, verifyPermission } from "@/lib/serverUtils";
+import {
+  authenticateSession,
+  hashPassword,
+  verifyPermission,
+  verifyPermissions,
+} from "@/lib/serverUtils";
 import { deleteUserById, getUserById, updateUser } from "@/db/user";
 
 export async function GET(
@@ -19,21 +24,47 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name
+    const { id } = await params;
+
+    // Authenticate Session
+    const authResult = await authenticateSession();
+    if (!authResult.ok) {
+      return NextResponse.json(
+        { error: authResult.message },
+        { status: authResult.status }
+      );
+    }
+    const { session } = authResult; // Now session is guaranteed to be valid
+
+    //check wanting own resource
+    if (id === "own") {
+      const id = session?.user.id;
+      const data = await getUserById(id!);
+      if (!data) {
+        // handle not found
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+      return NextResponse.json({ user: data }, { status: 200 });
+    }
+
+    // Check Permissions
+    const requiredPermissions = [
+      MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name, // Full read permission
+    ];
+
+    const permissionCheck = await verifyPermissions(
+      session,
+      requiredPermissions
     );
 
     if (!permissionCheck.ok) {
-      if (permissionCheck.status === 403) {
-      }
       return NextResponse.json(
         { error: permissionCheck.message },
         { status: permissionCheck.status }
       );
     }
 
-    // 5. Return users
-    const { id } = await params;
+    //  Return users
     const data = await getUserById(id);
     if (!data) {
       // handle not found

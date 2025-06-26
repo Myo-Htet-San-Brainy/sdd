@@ -26,7 +26,6 @@ export const useGetUser = ({ id }: { id: string }) => {
   return useQuery({
     queryFn: () => getUser({ id }),
     queryKey: ["user", id],
-    enabled: Boolean(id),
   });
 };
 
