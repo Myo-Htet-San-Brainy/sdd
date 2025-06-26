@@ -178,20 +178,24 @@ const Page = () => {
         {/* 🔽 Suggestions dropdown */}
         {suggestions && suggestions.length > 0 && (
           <div className="absolute top-[100%] left-0 w-full bg-white border border-zinc-300 rounded-md shadow-md z-10 mt-1">
-            {suggestions.map((suggestion) => (
-              <button
-                type="button"
-                key={suggestion}
-                onClick={() => {
-                  setSearchInput(suggestion);
-                  setType(suggestion);
-                  setSuggestionPrompt("");
-                }}
-                className="w-full text-left px-4 py-2 hover:bg-zinc-100 text-zinc-700"
-              >
-                {suggestion}
-              </button>
-            ))}
+            {(suggestions as string[]).map(
+              (
+                suggestion // <--- Add the type assertion here
+              ) => (
+                <button
+                  type="button"
+                  key={suggestion}
+                  onClick={() => {
+                    setSearchInput(suggestion);
+                    setType(suggestion);
+                    setSuggestionPrompt("");
+                  }}
+                  className="w-full text-left px-4 py-2 hover:bg-zinc-100 text-zinc-700"
+                >
+                  {suggestion}
+                </button>
+              )
+            )}
           </div>
         )}
 

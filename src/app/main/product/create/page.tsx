@@ -1,10 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCreateProductMutation, useGetProductMeta } from "@/query/product";
+import {
+  useCreateProductMutation,
+  useGetProductMeta,
+  useGetSuggestions,
+} from "@/query/product";
 import toast from "react-hot-toast";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { hasPermission } from "@/lib/utils";
@@ -31,12 +35,23 @@ export const productSchema = z.object({
 
 const Page = () => {
   const { data: myPermissions, isFetching, isPending } = useGetMyPermissions();
+  const [suggestionPrompt, setSuggestionPrompt] = useState<{
+    value: string;
+    index: number;
+  } | null>(null);
+
   const {
     data: productMeta,
     isFetching: isMetaFetching,
     isPending: isMetaPending,
     isError: isMetaError,
   } = useGetProductMeta({ brand: true, source: true, location: true });
+
+  const { data: suggestions } = useGetSuggestions({
+    type: suggestionPrompt?.value || "",
+    mode: "arrays",
+  });
+
   const { mutate, isPending: isPendingCreateProduct } =
     useCreateProductMutation();
 
@@ -49,6 +64,8 @@ const Page = () => {
     handleSubmit,
     control,
     reset,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(productSchema),
@@ -67,6 +84,21 @@ const Page = () => {
 
   const { fields, append, remove } = useFieldArray({ name: "type", control });
 
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        setSuggestionPrompt(null);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   const onSubmit = (data: any) => {
     const type = data.type.map((item: any) => item.value);
     mutate(
@@ -83,6 +115,16 @@ const Page = () => {
     );
   };
 
+  const handleSuggestionClick = (suggestionArray: string[]) => {
+    const modifiedSugs = suggestionArray.map((sug) => {
+      return { value: sug };
+    });
+    setValue("type", modifiedSugs);
+
+    setSuggestionPrompt(null);
+  };
+
+  // --- Permission and Loading States (Unchanged) ---
   if (isFetching || isPending) {
     return (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
@@ -128,9 +170,11 @@ const Page = () => {
     );
   }
 
+  // --- Main Render ---
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
       <form
+        ref={formRef}
         onSubmit={handleSubmit(onSubmit)}
         className="bg-white border border-zinc-200 shadow-md rounded-2xl max-w-2xl mx-auto p-6 space-y-6"
       >
@@ -138,27 +182,60 @@ const Page = () => {
           Create New Product
         </h1>
 
-        {/* 🔹 Type Fields */}
+        {/* 🔹 Type Fields with Suggestions */}
         <div>
           <label className="block font-medium text-zinc-700 mb-1">
             Type(s):
           </label>
           <div className="space-y-2">
             {fields.map((field, index) => (
-              <div key={field.id} className="flex items-center gap-2">
+              <div key={field.id} className="flex items-center gap-2 relative">
                 <input
                   {...register(`type.${index}.value`)}
                   className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+                  onChange={(e) => {
+                    setValue(`type.${index}.value`, e.target.value);
+                    setSuggestionPrompt({ value: e.target.value, index });
+                  }}
+                  onFocus={() => {
+                    // Correctly get the current value for the focused input
+                    const currentValue = getValues(`type.${index}.value`);
+                    setSuggestionPrompt({ value: currentValue || "", index });
+                  }}
                 />
                 {index > 0 && (
                   <button
                     type="button"
-                    onClick={() => remove(index)}
+                    onClick={() => {
+                      remove(index);
+                      if (suggestionPrompt?.index === index) {
+                        setSuggestionPrompt(null);
+                      }
+                    }}
                     className="text-sm text-red-500 hover:underline"
                   >
                     Remove
                   </button>
                 )}
+
+                {/* Suggestions dropdown for THIS specific input */}
+                {suggestionPrompt?.index === index &&
+                  suggestions &&
+                  (suggestions as string[][]).length > 0 && (
+                    <div className="absolute top-[calc(100%+4px)] left-0 w-full bg-white border border-zinc-300 rounded-md shadow-md z-20">
+                      {(suggestions as string[][]).map((suggestionArray, i) => (
+                        <button
+                          type="button"
+                          key={`${suggestionArray.join("-")}-${i}`}
+                          // Pass the entire suggestionArray (e.g., ['ball', 'ee']) to the handler
+                          onClick={() => handleSuggestionClick(suggestionArray)}
+                          className="w-full text-left px-4 py-2 hover:bg-zinc-100 text-zinc-700"
+                        >
+                          {suggestionArray.join(", ")}
+                        </button>
+                      ))}
+                    </div>
+                  )}
               </div>
             ))}
             <button
@@ -170,7 +247,9 @@ const Page = () => {
             </button>
           </div>
           {errors.type && (
-            <p className="text-sm text-red-500 mt-1">{errors.type.message}</p>
+            <p className="text-sm text-red-500 mt-1">
+              {errors.type.message as string}
+            </p>
           )}
         </div>
 
