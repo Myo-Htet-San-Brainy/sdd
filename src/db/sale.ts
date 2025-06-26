@@ -38,7 +38,13 @@ export async function updateSale(id: string, salePayload: any) {
   );
 }
 
-export async function getSaleById(id: string) {
+export async function getSaleByFilter(filter: Record<string, any>) {
   const saleCollection = await getCollection("sale");
-  return await saleCollection.findOne({ _id: new ObjectId(id) });
+
+  // Convert _id to ObjectId if present
+  if (filter._id) {
+    filter._id = new ObjectId(filter._id);
+  }
+
+  return await saleCollection.findOne(filter);
 }

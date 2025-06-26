@@ -6,7 +6,7 @@ import {
   getRoles,
   updateRole,
 } from "@/services/role";
-import { createSale, getAllSales, updateSale } from "@/services/sale";
+import { createSale, getAllSales, getSale, updateSale } from "@/services/sale";
 import {
   createUser,
   deleteUser,
@@ -50,6 +50,19 @@ export const useGetSales = () => {
   return useQuery({
     queryFn: getAllSales,
     queryKey: ["sales"],
+  });
+};
+
+export const useGetSale = ({
+  isOwn,
+  saleId,
+}: {
+  isOwn?: string;
+  saleId: string;
+}) => {
+  return useQuery({
+    queryFn: () => getSale({ saleId, isOwn }),
+    queryKey: ["sale", saleId],
   });
 };
 

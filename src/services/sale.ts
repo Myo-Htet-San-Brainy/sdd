@@ -37,6 +37,32 @@ export async function getAllSales(): Promise<Sale[]> {
   }
 }
 
+export async function getSale({
+  saleId,
+  isOwn,
+}: {
+  saleId: string;
+  isOwn?: string;
+}): Promise<Sale[]> {
+  try {
+    const response = await axios.get(`/api/sale/${saleId}`, {
+      params: {
+        isOwn,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+
+    const { sale } = response.data;
+    return sale;
+  } catch (error: any) {
+    console.log("error fetching sale:", error);
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}
+
 export async function updateSale({
   saleId,
   salePayload,
