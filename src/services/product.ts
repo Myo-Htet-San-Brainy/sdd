@@ -39,9 +39,14 @@ export async function getProductsByType(type: string): Promise<Product[]> {
   }
 }
 
-export async function getMatchingProductTypes(type: string): Promise<string[]> {
+export async function getMatchingProductTypes(
+  type: string,
+  mode: "types" | "arrays"
+): Promise<string[]> {
   try {
-    const response = await axios.get(`/api/product/suggestions?type=${type}`);
+    const response = await axios.get(
+      `/api/product/suggestions?type=${type}&mode=${mode}`
+    );
 
     if (response.status !== 200) {
       throw new Error("Error fetching suggestions!");

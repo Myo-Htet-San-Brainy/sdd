@@ -1,60 +1,63 @@
 "use client";
-import AllowedPermissions from "@/components/AllowedPermissions";
-import BookmarkedProductsPopUp from "@/components/BookmarkedProductsPopUp";
-import CartLink from "@/components/CartLink";
-import FallbackPermissions from "@/components/FallbackPermissions";
+
 import Product from "@/components/Product";
+import CartLink from "@/components/CartLink";
+import BookmarkedProductsPopUp from "@/components/BookmarkedProductsPopUp";
+import Link from "next/link";
+import toast from "react-hot-toast";
+import React, { useEffect, useRef, useState } from "react";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { CustomError } from "@/lib/CustomError";
-import { hasAnyModulePermission, hasPermission } from "@/lib/utils";
+import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
-import { useDeleteRoleMutation, useGetRoles } from "@/query/role";
-import { useDeleteUserMutation, useGetUsers } from "@/query/user";
-import {
-  useBookmarkedProductsStore,
-  useCartStore,
-  usePopUpsStore,
-} from "@/store";
-import { useQueryClient } from "@tanstack/react-query";
-import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
-import toast from "react-hot-toast";
+import { useCartStore } from "@/store";
 
 const Page = () => {
+  const [type, setType] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [suggestionPrompt, setSuggestionPrompt] = useState("");
+
   const {
     data: myPermissions,
     isFetching: isFetchingMyPermissions,
     isPending: isPendingMyPermissions,
   } = useGetMyPermissions();
-  const [type, setType] = useState("");
-  const [searchInput, setSearchInput] = useState("");
-  const [suggestionPrompt, setSuggestionPrompt] = useState("");
+
   const {
     data: products,
     isFetching: isFetchingProducts,
     isError: isErrorProducts,
     isPending: isPendingProducts,
   } = useGetProductsByType({ type: searchInput });
-  const formRef: React.RefObject<HTMLFormElement | null> = useRef(null);
+
+  const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
+
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const { cart } = useCartStore(); // may be used elsewhere
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Check if click occurred outside the form
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
         setSuggestionPrompt("");
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
-  const { cart } = useCartStore();
+  function handleSearch() {
+    const trimmedType = type.trim();
+    if (!trimmedType) {
+      toast.error("Please enter a product type");
+      return;
+    }
+    setSuggestionPrompt("");
+    setSearchInput(trimmedType);
+  }
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -63,6 +66,7 @@ const Page = () => {
       </div>
     );
   }
+
   if (
     !hasPermission(
       myPermissions!,
@@ -77,10 +81,7 @@ const Page = () => {
     );
   }
 
-  let content;
-  // console.log(isPendingProducts);
-  // console.log(isFetchingProducts);
-  // console.log(isErrorProducts);
+  let content = null;
 
   if (isFetchingProducts) {
     content = (
@@ -102,38 +103,26 @@ const Page = () => {
         </p>
       </div>
     );
+  } else if (products?.length <= 0) {
+    content = (
+      <div className="min-h-[300px] flex justify-center items-center">
+        <p className="text-red-600 font-semibold">
+          😕 No products found with that type.
+        </p>
+      </div>
+    );
   } else {
-    if (products.length <= 0) {
-      content = (
-        <div className="min-h-[300px] flex justify-center items-center">
-          <p className="text-red-600 font-semibold">
-            😕 No products found with that type.
-          </p>
-        </div>
-      );
-    } else {
-      content = (
-        <div className="grid grid-cols-6 gap-4">
-          {products.map((product) => (
-            <Product
-              key={product._id}
-              product={product}
-              myPermissions={myPermissions}
-            />
-          ))}
-        </div>
-      );
-    }
-  }
-
-  function handleSearch() {
-    const trimmedType = type.trim();
-    if (!trimmedType) {
-      toast.error("Please enter a product type");
-      return;
-    }
-    setSuggestionPrompt("");
-    setSearchInput(trimmedType);
+    content = (
+      <div className="grid grid-cols-6 gap-4">
+        {products.map((product) => (
+          <Product
+            key={product._id}
+            product={product}
+            myPermissions={myPermissions}
+          />
+        ))}
+      </div>
+    );
   }
 
   return (
@@ -171,7 +160,7 @@ const Page = () => {
           e.preventDefault();
           handleSearch();
         }}
-        className="max-w-xl mx-auto flex  gap-2 items-stretch relative"
+        className="max-w-xl mx-auto flex gap-2 items-stretch relative"
       >
         <input
           type="text"
@@ -186,7 +175,7 @@ const Page = () => {
           onFocus={(e) => setSuggestionPrompt(e.target.value)}
         />
 
-        {/* 🔽 Suggestions dropdown like YouTube */}
+        {/* 🔽 Suggestions dropdown */}
         {suggestions && suggestions.length > 0 && (
           <div className="absolute top-[100%] left-0 w-full bg-white border border-zinc-300 rounded-md shadow-md z-10 mt-1">
             {suggestions.map((suggestion) => (
@@ -205,6 +194,7 @@ const Page = () => {
             ))}
           </div>
         )}
+
         <button
           disabled={isFetchingProducts}
           type="submit"
@@ -214,7 +204,7 @@ const Page = () => {
         </button>
       </form>
 
-      {/* 📦 Content */}
+      {/* 📦 Products Content */}
       <div className="mt-10">{content}</div>
     </div>
   );

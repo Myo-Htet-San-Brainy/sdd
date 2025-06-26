@@ -31,9 +31,15 @@ export const useGetProductsByType = ({ type }: { type: string }) => {
   });
 };
 
-export const useGetSuggestions = ({ type }: { type: string }) => {
+export const useGetSuggestions = ({
+  type,
+  mode = "types",
+}: {
+  type: string;
+  mode?: "types" | "arrays";
+}) => {
   return useQuery({
-    queryFn: () => getMatchingProductTypes(type),
+    queryFn: () => getMatchingProductTypes(type, mode),
     queryKey: ["suggestions", type],
     enabled: Boolean(type),
   });

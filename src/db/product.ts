@@ -59,6 +59,40 @@ export async function getMatchingProductTypes(type: string) {
   return result.map((item) => item._id);
 }
 
+export async function getUniqueTypeArraysOfMatchedProducts(type: string) {
+  const productCollection = await getCollection("product");
+
+  const pipeline = [
+    {
+      $match: {
+        type: { $elemMatch: { $regex: type, $options: "i" } },
+      },
+    },
+    {
+      $project: {
+        type: 1,
+      },
+    },
+  ];
+
+  const result = await productCollection.aggregate(pipeline).toArray();
+
+  const seen = new Set<string>();
+  const uniqueTypeArrays: string[][] = [];
+
+  for (const product of result) {
+    const typeArr = product.type;
+    const key = JSON.stringify(typeArr.sort()); // sort to treat ["ball", "sport"] same as ["sport", "ball"]
+
+    if (!seen.has(key)) {
+      seen.add(key);
+      uniqueTypeArrays.push(typeArr);
+    }
+  }
+
+  return uniqueTypeArrays;
+}
+
 export async function createProduct(product: any) {
   const productCollection = await getCollection("product");
   return await productCollection.insertOne(product);
