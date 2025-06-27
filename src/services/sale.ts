@@ -42,8 +42,8 @@ export async function getSale({
   isOwn,
 }: {
   saleId: string;
-  isOwn?: string;
-}): Promise<Sale[]> {
+  isOwn?: "own";
+}): Promise<Sale> {
   try {
     const response = await axios.get(`/api/sale/${saleId}`, {
       params: {

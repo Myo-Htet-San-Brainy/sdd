@@ -7,7 +7,6 @@ import { createProduct, getProductsByType } from "@/db/product";
 
 export async function GET(req: NextRequest) {
   try {
-    // throw new Error("TE");
     const permissionCheck = await verifyPermission(
       MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
     );
@@ -18,11 +17,36 @@ export async function GET(req: NextRequest) {
         { status: permissionCheck.status }
       );
     }
+
     const searchParams = req.nextUrl.searchParams;
     const type = searchParams.get("type");
 
     const products = await getProductsByType(type!);
-    return NextResponse.json({ products: products || [] }, { status: 200 });
+
+    const brands = new Set<string>();
+    const descriptions = new Set<string>();
+
+    for (const product of products || []) {
+      if (product.brand) {
+        brands.add(product.brand);
+      } else {
+        brands.add("no brand");
+      }
+      if (product.description) {
+        descriptions.add(product.description);
+      } else {
+        descriptions.add("no description");
+      }
+    }
+
+    return NextResponse.json(
+      {
+        products: products || [],
+        distinctBrands: [...brands],
+        distinctDescriptions: [...descriptions],
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Get products error:", error);
     return NextResponse.json(

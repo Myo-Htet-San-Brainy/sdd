@@ -1,6 +1,5 @@
 "use client";
 
-import Product from "@/components/Product";
 import CartLink from "@/components/CartLink";
 import BookmarkedProductsPopUp from "@/components/BookmarkedProductsPopUp";
 import Link from "next/link";
@@ -11,11 +10,16 @@ import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
 import { useCartStore } from "@/store";
+import { Product as ProductI } from "@/Interfaces/Product";
+import Product from "@/components/Product";
 
 const Page = () => {
   const [type, setType] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [suggestionPrompt, setSuggestionPrompt] = useState("");
+  const [products, setProducts] = useState<ProductI[] | undefined>(undefined);
+  // New state for filters
+  const [filter, setFilter] = useState({ brand: "", description: "" });
 
   const {
     data: myPermissions,
@@ -24,7 +28,7 @@ const Page = () => {
   } = useGetMyPermissions();
 
   const {
-    data: products,
+    data, // This 'data' now contains products, distinctBrands, distinctDescriptions
     isFetching: isFetchingProducts,
     isError: isErrorProducts,
     isPending: isPendingProducts,
@@ -49,6 +53,30 @@ const Page = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (data?.products) {
+      let filteredProducts = data.products;
+
+      // Apply brand filter
+      if (filter.brand) {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.brand === filter.brand
+        );
+      }
+
+      // Apply description filter
+      if (filter.description) {
+        filteredProducts = filteredProducts.filter(
+          (product) => product.description === filter.description
+        );
+      }
+
+      setProducts(filteredProducts);
+    } else {
+      setProducts(undefined); // Reset products if no data or data.products is empty/undefined
+    }
+  }, [data, filter]); // Re-run effect when data or filter changes
+
   function handleSearch() {
     const trimmedType = type.trim();
     if (!trimmedType) {
@@ -57,6 +85,8 @@ const Page = () => {
     }
     setSuggestionPrompt("");
     setSearchInput(trimmedType);
+    // Reset filters when a new search is performed
+    setFilter({ brand: "", description: "" });
   }
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
@@ -84,12 +114,14 @@ const Page = () => {
   let content = null;
 
   if (isFetchingProducts) {
+    // Check for undefined to differentiate initial state
     content = (
       <div className="min-h-[300px] flex justify-center items-center">
         <p className="text-zinc-500 animate-pulse">🔄 Fetching products...</p>
       </div>
     );
   } else if (isPendingProducts) {
+    // This state indicates query is not yet started or has no data
     content = (
       <div className="min-h-[300px] flex justify-center items-center">
         <p className="text-zinc-500">🚀 Ready To Fetch...</p>
@@ -103,17 +135,24 @@ const Page = () => {
         </p>
       </div>
     );
-  } else if (products?.length <= 0) {
+  } else if (!products) {
+    content = (
+      <div className="min-h-[300px] flex justify-center items-center">
+        <p className="text-zinc-500 animate-pulse">🔄 Fetching products...</p>
+      </div>
+    );
+  } else if (products.length <= 0) {
+    // Check filtered products length
     content = (
       <div className="min-h-[300px] flex justify-center items-center">
         <p className="text-red-600 font-semibold">
-          😕 No products found with that type.
+          😕 No products found with that type or matching filters.
         </p>
       </div>
     );
   } else {
     content = (
-      <div className="grid grid-cols-6 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         {products.map((product) => (
           <Product
             key={product._id}
@@ -176,11 +215,11 @@ const Page = () => {
         />
 
         {/* 🔽 Suggestions dropdown */}
-        {suggestions && suggestions.length > 0 && (
+        {suggestionPrompt && suggestions && suggestions.length > 0 && (
           <div className="absolute top-[100%] left-0 w-full bg-white border border-zinc-300 rounded-md shadow-md z-10 mt-1">
             {(suggestions as string[]).map(
               (
-                suggestion // <--- Add the type assertion here
+                suggestion // <--- Type assertion here for safety
               ) => (
                 <button
                   type="button"
@@ -189,6 +228,8 @@ const Page = () => {
                     setSearchInput(suggestion);
                     setType(suggestion);
                     setSuggestionPrompt("");
+                    // Reset filters when a suggestion is clicked
+                    setFilter({ brand: "", description: "" });
                   }}
                   className="w-full text-left px-4 py-2 hover:bg-zinc-100 text-zinc-700"
                 >
@@ -207,6 +248,68 @@ const Page = () => {
           Search
         </button>
       </form>
+
+      {/* ⚙️ Filters Section */}
+      {searchInput &&
+        data &&
+        (data.distinctBrands.length > 0 ||
+          data.distinctDescriptions.length > 0) && (
+          <div className="max-w-xl mx-auto flex flex-wrap gap-4 mt-6 p-4 border border-zinc-200 rounded-lg bg-white shadow-sm">
+            {data.distinctBrands.length > 0 && (
+              <div className="flex-1 min-w-[150px]">
+                <label
+                  htmlFor="brand-filter"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
+                >
+                  Brand:
+                </label>
+                <select
+                  id="brand-filter"
+                  value={filter.brand}
+                  onChange={(e) =>
+                    setFilter({ ...filter, brand: e.target.value })
+                  }
+                  className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
+                >
+                  <option value="">All Brands</option>{" "}
+                  {/* "nothing selected" option */}
+                  {data.distinctBrands.map((brand) => (
+                    <option key={brand} value={brand}>
+                      {brand}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {data.distinctDescriptions.length > 0 && (
+              <div className="flex-1 min-w-[150px]">
+                <label
+                  htmlFor="description-filter"
+                  className="block text-sm font-medium text-zinc-700 mb-1"
+                >
+                  Description:
+                </label>
+                <select
+                  id="description-filter"
+                  value={filter.description}
+                  onChange={(e) =>
+                    setFilter({ ...filter, description: e.target.value })
+                  }
+                  className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
+                >
+                  <option value="">All Descriptions</option>{" "}
+                  {/* "nothing selected" option */}
+                  {data.distinctDescriptions.map((description) => (
+                    <option key={description} value={description}>
+                      {description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+        )}
 
       {/* 📦 Products Content */}
       <div className="mt-10">{content}</div>

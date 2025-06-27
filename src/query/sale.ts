@@ -57,12 +57,13 @@ export const useGetSale = ({
   isOwn,
   saleId,
 }: {
-  isOwn?: string;
-  saleId: string;
+  isOwn?: "own";
+  saleId?: string;
 }) => {
   return useQuery({
-    queryFn: () => getSale({ saleId, isOwn }),
+    queryFn: () => getSale({ saleId: saleId as string, isOwn }),
     queryKey: ["sale", saleId],
+    enabled: Boolean(saleId),
   });
 };
 

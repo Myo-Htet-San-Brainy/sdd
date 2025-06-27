@@ -13,10 +13,11 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const userCol = await getCollection("user");
+    // const userCol = await getCollection("user");
 
-    await userCol.deleteMany({
-      _id: { $ne: new ObjectId("683c2298de25e07b9ade7a14") },
-    });
+    // await userCol.deleteMany({
+    //   _id: { $ne: new ObjectId("683c2298de25e07b9ade7a14") },
+    // });
 
     return NextResponse.json({ message: "All data wiped ✨" }, { status: 200 });
   } catch (error) {
