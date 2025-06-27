@@ -1,6 +1,5 @@
 "use client";
 
-import AllowedPermissions from "@/components/AllowedPermissions";
 import { Sale } from "@/Interfaces/Sale";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
@@ -9,6 +8,7 @@ import { useGetSales } from "@/query/sale";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react"; // Import useRef and useState
 
 const Page = () => {
   const {
@@ -20,13 +20,19 @@ const Page = () => {
     data: sales,
     isPending: isPendingSales,
     isFetching: isFetchingSales,
-
     isError: isErrorSales,
   } = useGetSales();
 
   const router = useRouter();
   const { setUpdatedSaleId } = useUpdatedSaleIdStore();
   const { setCart, setBuyer } = useCartStore();
+
+  // 🎯 New: Ref to store references to each sale card element
+  const saleCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  // 🎯 New: State to control which sale card is highlighted
+  const [highlightedSaleId, setHighlightedSaleId] = useState<string | null>(
+    null
+  );
 
   const handleUpdateClick = (sale: Sale) => {
     setUpdatedSaleId(sale._id);
@@ -38,6 +44,36 @@ const Page = () => {
     setCart(cartProducts);
     router.push(`/main/product`);
   };
+
+  // 🎯 New: useEffect to handle scrolling and highlighting
+  useEffect(() => {
+    // Check if we are in the browser environment
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.substring(1); // Get the ID from the URL hash (e.g., #sale123 -> sale123)
+
+      // Only proceed if there's a hash and sales data has loaded
+      if (hash && sales && sales.length > 0) {
+        const targetCard = saleCardRefs.current[hash];
+
+        if (targetCard) {
+          // Scroll the card into view
+          targetCard.scrollIntoView({ behavior: "smooth", block: "center" });
+
+          // Apply the highlight animation
+          setHighlightedSaleId(hash);
+
+          // Remove the highlight after a delay
+          const timer = setTimeout(() => {
+            setHighlightedSaleId(null);
+            // Optionally, clear the hash from the URL to prevent re-scrolling on refresh
+            router.replace(window.location.pathname, { scroll: false });
+          }, 2500); // Highlight for 2.5 seconds
+
+          return () => clearTimeout(timer); // Cleanup timeout on component unmount or re-run
+        }
+      }
+    }
+  }, [sales, router]); // Depend on sales data and router for hash changes
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -99,11 +135,24 @@ const Page = () => {
         {sales.map((sale) => (
           <div
             key={sale._id}
-            className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm hover:shadow-md transition flex flex-col justify-between"
+            // 🎯 Assign ref to the card's div
+            ref={(el) => {
+              saleCardRefs.current[sale._id] = el;
+            }}
+            // 🎯 Conditionally apply highlight class based on state
+            className={`
+              bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm
+              ${
+                highlightedSaleId === sale._id
+                  ? "animate-highlight-pulse border-red-500 ring-4 ring-red-300" // Highlight styles
+                  : "hover:shadow-md transition" // Default styles, transition added for smooth hover
+              }
+              flex flex-col justify-between
+            `}
           >
             <div className="space-y-2">
               <div className="text-sm text-zinc-500">
-                🗓️ {format(new Date(sale.createdAt), "dd MMM yyyy, HH:mm")}
+                🗓️ {format(new Date(sale.createdAt), "dd MMM, HH:mm")}
               </div>
               <div className="text-sm text-zinc-600">
                 👤 Buyer: {sale.buyer?.username || "N/A"}

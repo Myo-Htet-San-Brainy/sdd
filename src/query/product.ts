@@ -40,7 +40,7 @@ export const useGetSuggestions = ({
 }) => {
   return useQuery({
     queryFn: () => getMatchingProductTypes(type, mode),
-    queryKey: ["suggestions", type],
+    queryKey: ["suggestions", type, mode],
     enabled: Boolean(type),
   });
 };

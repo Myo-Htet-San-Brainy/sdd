@@ -1,6 +1,6 @@
+// commission page
 "use client";
 
-import AllowedPermissions from "@/components/AllowedPermissions";
 import { useMyPermissionsContext } from "@/context";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
@@ -8,7 +8,7 @@ import { useGetCommissionReports } from "@/query/report";
 import { useGetUsers } from "@/query/user";
 import { useEffect, useState } from "react";
 import Link from "next/link"; // Import Link component
-import { CommissionReport } from "@/Interfaces/Sale";
+import { CommissionReport } from "@/Interfaces/Sale"; // Assuming CommissionReport is defined here or imported
 
 const years = [2025, 2026, 2027, 2028, 2029, 2030];
 const months = Array.from({ length: 12 }, (_, i) => i + 1);
@@ -33,7 +33,6 @@ const Page = () => {
 
   useEffect(() => {
     if (commissioners && commissioners.length > 0) {
-      // Added check for commissioners.length
       setCommissionerId(commissioners[0]._id);
     }
   }, [commissioners]);
@@ -77,7 +76,7 @@ const Page = () => {
 
   if (commissioners.length <= 0) {
     return (
-      <p className="text-center text-zinc-600  mt-6">
+      <p className="text-center text-zinc-600  mt-6">
         No Commissioners Registered...
       </p>
     );
@@ -116,17 +115,18 @@ const Page = () => {
           {/* Cards Section - MODIFIED */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 mt-4">
             {commissionRps.map((report, index) =>
-              hasSaleReadPermission ? (
+              hasSaleReadPermission && report.saleId ? ( // Ensure saleId exists before creating a link
                 <Link
-                  key={report.saleId || index} // Use report._id if available, otherwise index
-                  href={`/main/sale/${report.saleId}`} // Assuming a sale ID is part of the report or can be derived
-                  className="border border-zinc-200 bg-white p-4 rounded-xl shadow hover:shadow-md transition-all block" // Added block to Link
+                  key={report.saleId || index} // Use saleId for key, it's more stable
+                  // 🎯 IMPORTANT: Use the hash fragment to pass the saleId
+                  href={`/main/sale#${report.saleId}`}
+                  className="border border-zinc-200 bg-white p-4 rounded-xl shadow hover:shadow-md transition-all block"
                 >
                   <CommissionCardContent report={report} />
                 </Link>
               ) : (
                 <div
-                  key={report.saleId || index}
+                  key={report.saleId || index} // Fallback to _id or index if no saleId for some reason
                   className="border border-zinc-200 bg-white p-4 rounded-xl shadow" // No hover effect if not a link
                 >
                   <CommissionCardContent report={report} />
