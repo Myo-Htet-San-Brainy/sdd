@@ -27,16 +27,8 @@ export async function GET(req: NextRequest) {
     const descriptions = new Set<string>();
 
     for (const product of products || []) {
-      if (product.brand) {
-        brands.add(product.brand);
-      } else {
-        brands.add("no brand");
-      }
-      if (product.description) {
-        descriptions.add(product.description);
-      } else {
-        descriptions.add("no description");
-      }
+      brands.add(product.brand);
+      descriptions.add(product.description);
     }
 
     return NextResponse.json(

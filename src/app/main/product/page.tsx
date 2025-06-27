@@ -19,7 +19,10 @@ const Page = () => {
   const [suggestionPrompt, setSuggestionPrompt] = useState("");
   const [products, setProducts] = useState<ProductI[] | undefined>(undefined);
   // New state for filters
-  const [filter, setFilter] = useState({ brand: "", description: "" });
+  const [filter, setFilter] = useState({
+    brand: "all brands",
+    description: "all descriptions",
+  });
 
   const {
     data: myPermissions,
@@ -58,14 +61,14 @@ const Page = () => {
       let filteredProducts = data.products;
 
       // Apply brand filter
-      if (filter.brand) {
+      if (filter.brand !== "all brands") {
         filteredProducts = filteredProducts.filter(
           (product) => product.brand === filter.brand
         );
       }
 
       // Apply description filter
-      if (filter.description) {
+      if (filter.description !== "all descriptions") {
         filteredProducts = filteredProducts.filter(
           (product) => product.description === filter.description
         );
@@ -229,7 +232,10 @@ const Page = () => {
                     setType(suggestion);
                     setSuggestionPrompt("");
                     // Reset filters when a suggestion is clicked
-                    setFilter({ brand: "", description: "" });
+                    setFilter({
+                      brand: "all brands",
+                      description: "all descriptions",
+                    });
                   }}
                   className="w-full text-left px-4 py-2 hover:bg-zinc-100 text-zinc-700"
                 >
@@ -271,11 +277,11 @@ const Page = () => {
                   }
                   className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
                 >
-                  <option value="">All Brands</option>{" "}
+                  <option value="all brands">All Brands</option>{" "}
                   {/* "nothing selected" option */}
                   {data.distinctBrands.map((brand) => (
                     <option key={brand} value={brand}>
-                      {brand}
+                      {brand === "" ? "without brand" : brand}
                     </option>
                   ))}
                 </select>
@@ -298,11 +304,11 @@ const Page = () => {
                   }
                   className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
                 >
-                  <option value="">All Descriptions</option>{" "}
+                  <option value="all descriptions">All Descriptions</option>{" "}
                   {/* "nothing selected" option */}
                   {data.distinctDescriptions.map((description) => (
                     <option key={description} value={description}>
-                      {description}
+                      {description === "" ? "without description" : description}
                     </option>
                   ))}
                 </select>
