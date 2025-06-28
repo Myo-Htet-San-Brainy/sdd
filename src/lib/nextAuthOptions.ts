@@ -3,7 +3,7 @@ import axios from "axios";
 import { NextAuthOptions } from "next-auth";
 
 const SIGN_IN_URL_LOCAL = "http://localhost:3000";
-const SIGN_IN_URL_PROD = "";
+const SIGN_IN_URL_PROD = "https://sdd-taupe.vercel.app";
 
 export const authOptions: NextAuthOptions = {
   providers: [
