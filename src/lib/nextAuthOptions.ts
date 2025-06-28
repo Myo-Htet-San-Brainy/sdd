@@ -15,7 +15,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials, req) {
         try {
-          const res = await axios.post(`${SIGN_IN_URL_LOCAL}/api/auth/signIn`, {
+          const res = await axios.post(`${SIGN_IN_URL_PROD}/api/auth/signIn`, {
             username: credentials?.username,
             password: credentials?.password,
           });
