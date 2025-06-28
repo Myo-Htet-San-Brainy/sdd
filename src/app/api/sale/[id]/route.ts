@@ -26,7 +26,7 @@ export async function PATCH(
     const { id } = await params;
 
     // 🧠 Step 1: Ensure sale exists
-    const existingSale = await getSaleByFilter({ id });
+    const existingSale = await getSaleByFilter({ _id: id });
     if (!existingSale) {
       return NextResponse.json({ error: "Sale not found" }, { status: 404 });
     }
