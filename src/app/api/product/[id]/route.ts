@@ -5,7 +5,7 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const permissionCheck = await verifyPermission(

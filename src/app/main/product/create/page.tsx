@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   useCreateProductMutation,
@@ -14,24 +13,7 @@ import { useGetMyPermissions } from "@/query/miscellaneous";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { SubmitButton } from "@/components/SubmitButton";
-
-export const productSchema = z.object({
-  type: z
-    .array(
-      z.object({
-        value: z.string().min(1, "Each type must have at least 1 character"),
-      })
-    )
-    .min(1, "At least one type is required"),
-  brand: z.string(),
-  source: z.string().min(1, "Source is required"),
-  location: z.string().min(1, "Location is required"),
-  noOfItemsInStock: z.number().int().min(0),
-  buyingPrice: z.number().min(0),
-  sellingPrice: z.number().min(0),
-  description: z.string(),
-  lowStockThreshold: z.number().int().min(0),
-});
+import { productSchema } from "@/schema";
 
 const Page = () => {
   const { data: myPermissions, isFetching, isPending } = useGetMyPermissions();

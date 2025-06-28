@@ -13,8 +13,9 @@ import { CustomError } from "@/lib/CustomError";
 import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { createUserSchema } from "../../create/page";
+
 import { SubmitButton } from "@/components/SubmitButton";
+import { userSchema } from "@/schema";
 
 const Page = () => {
   const {
@@ -46,7 +47,7 @@ const Page = () => {
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(userSchema),
   });
 
   const queryClient = useQueryClient();

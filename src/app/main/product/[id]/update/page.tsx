@@ -15,10 +15,11 @@ import {
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { productSchema } from "../../create/page";
+
 import { CustomError } from "@/lib/CustomError";
-import AllowedPermissions from "@/components/AllowedPermissions";
+
 import { SubmitButton } from "@/components/SubmitButton";
+import { productSchema } from "@/schema";
 
 const Page = () => {
   const { data: myPermissions, isFetching, isPending } = useGetMyPermissions();

@@ -1,6 +1,5 @@
 "use client";
 
-import AllowedPermissions from "@/components/AllowedPermissions";
 import { Product } from "@/Interfaces/Product";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";

@@ -1,6 +1,5 @@
 "use client";
 
-import AllowedPermissions from "@/components/AllowedPermissions";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";

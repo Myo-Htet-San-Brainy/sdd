@@ -11,23 +11,7 @@ import { useGetRoles } from "@/query/role";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { SubmitButton } from "@/components/SubmitButton";
-
-// 🧠 Schema
-export const createUserSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
-  password: z.string().min(3, "Password must be at least 3 characters"),
-  role: z.string().min(1, "Role is required"),
-  address: z.string().min(1, "Address is required"),
-  phoneNumber: z.string().min(1, "Phone number is required"),
-  isActive: z
-    .string()
-    .min(1, "Active status is required")
-    .transform((val) => val === "true"),
-  commissionRate: z
-    .number()
-    .min(0)
-    .transform((val) => (val === 0 ? null : val)),
-});
+import { userSchema } from "@/schema";
 
 const Page = () => {
   const {
@@ -51,7 +35,7 @@ const Page = () => {
     reset,
     formState: { errors },
   } = useForm({
-    resolver: zodResolver(createUserSchema),
+    resolver: zodResolver(userSchema),
     defaultValues: {
       role: "",
       isActive: "",
