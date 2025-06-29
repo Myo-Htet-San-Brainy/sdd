@@ -45,7 +45,7 @@ const Page = () => {
         onClick={handleSignIn}
         className="bg-red-600 hover:bg-red-700 text-white text-lg font-semibold px-8 py-4 rounded-xl shadow transition"
       >
-        Sign In to Continue
+        Continue
       </button>
     </div>
   );

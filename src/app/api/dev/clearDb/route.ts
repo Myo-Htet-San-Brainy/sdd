@@ -13,11 +13,16 @@ export async function DELETE(req: NextRequest) {
 
   try {
     const userCol = await getCollection("user");
-    // const userCol = await getCollection("user");
+    const productCollection = await getCollection("product");
+    const saleCollection = await getCollection("sale");
+    const roleCollection = await getCollection("role");
 
-    // await userCol.deleteMany({
-    //   _id: { $ne: new ObjectId("683c2298de25e07b9ade7a14") },
-    // });
+    await userCol.deleteMany({
+      _id: { $ne: new ObjectId("683c2298de25e07b9ade7a14") },
+    });
+    await productCollection.deleteMany({});
+    await saleCollection.deleteMany({});
+    await roleCollection.deleteMany({});
 
     return NextResponse.json({ message: "All data wiped ✨" }, { status: 200 });
   } catch (error) {

@@ -193,15 +193,45 @@ const Page = () => {
           )}
         </div>
 
-        {/* Brand/Source/Location */}
+        {/* Brand */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">Brand</label>
+          {isNewBrand ? (
+            <input
+              {...register("brand")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            />
+          ) : (
+            <select
+              {...register("brand")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            >
+              <option value="" className="">
+                No Brand
+              </option>
+              {productMeta.brands?.map((opt: string) => (
+                <option key={opt} value={opt} className="">
+                  {opt}
+                </option>
+              ))}
+            </select>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsNewBrand((prev) => !prev)}
+            className="text-blue-600 text-sm mt-1 hover:underline"
+          >
+            {isNewBrand ? `Use Select` : `+ Add New Brand`}
+          </button>
+          {errors["brand"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors["brand"]?.message as string}
+            </p>
+          )}
+        </div>
+
+        {/* 🔹 Select/Toggle Fields */}
         {[
-          {
-            label: "Brand",
-            name: "brand",
-            isNew: isNewBrand,
-            toggle: setIsNewBrand,
-            options: productMeta.brands,
-          },
           {
             label: "Source",
             name: "source",
@@ -223,17 +253,19 @@ const Page = () => {
             </label>
             {isNew ? (
               <input
-                {...register(name as "brand" | "source" | "location")}
+                {...register(name as "source" | "location")}
                 className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
               />
             ) : (
               <select
-                {...register(name as "brand" | "source" | "location")}
+                {...register(name as "source" | "location")}
                 className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
               >
-                <option value="">Select a {label.toLowerCase()}</option>
+                <option value="" className="">
+                  Select a {label.toLowerCase()}
+                </option>
                 {options?.map((opt: string) => (
-                  <option key={opt} value={opt}>
+                  <option key={opt} value={opt} className="">
                     {opt}
                   </option>
                 ))}
