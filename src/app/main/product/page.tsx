@@ -41,8 +41,6 @@ const Page = () => {
 
   const formRef = useRef<HTMLFormElement | null>(null);
 
-  const { cart } = useCartStore(); // may be used elsewhere
-
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
@@ -89,8 +87,10 @@ const Page = () => {
     setSuggestionPrompt("");
     setSearchInput(trimmedType);
     // Reset filters when a new search is performed
-    setFilter({ brand: "", description: "" });
+    setFilter({ brand: "all brands", description: "all descriptions" });
   }
+
+  console.log("products", products);
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
