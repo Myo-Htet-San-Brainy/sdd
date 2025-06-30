@@ -11,12 +11,13 @@ export async function getProductById(id: string) {
   }
 }
 
-export async function getProductsByType(type: string) {
+export async function getProducts(filterObj: object = {}) {
   const productCollection = await getCollection("product");
+  console.log(filterObj);
 
   return await productCollection
     .find(
-      { type: type }, // Matches if 'type' exists in the type array of the product
+      filterObj, // Matches if 'type' exists in the type array of the product
       {
         projection: {
           type: 1,

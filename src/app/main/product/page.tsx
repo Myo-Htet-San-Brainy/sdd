@@ -9,7 +9,6 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
-import { useCartStore } from "@/store";
 import { Product as ProductI } from "@/Interfaces/Product";
 import Product from "@/components/Product";
 
