@@ -8,16 +8,16 @@ import { stringSimilarity } from "string-similarity-js";
 
 export async function GET(req: NextRequest) {
   try {
-    const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
-    );
+    // const permissionCheck = await verifyPermission(
+    //   MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
+    // );
 
-    if (!permissionCheck.ok) {
-      return NextResponse.json(
-        { error: permissionCheck.message },
-        { status: permissionCheck.status }
-      );
-    }
+    // if (!permissionCheck.ok) {
+    //   return NextResponse.json(
+    //     { error: permissionCheck.message },
+    //     { status: permissionCheck.status }
+    //   );
+    // }
 
     const searchParams = req.nextUrl.searchParams;
     const brand = searchParams.get("brand");
@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     if (brand) {
       filterObj.brand = brand;
     }
+
     const products = await getProducts(filterObj);
 
     const brands = new Set<string>();
@@ -63,24 +64,22 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // const permissionCheck = await verifyPermission(
-    //   MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
-    // );
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
+    );
 
-    // if (!permissionCheck.ok) {
-    //   return NextResponse.json(
-    //     { error: permissionCheck.message },
-    //     { status: permissionCheck.status }
-    //   );
-    // }
-
-    const searchParams = req.nextUrl.searchParams;
-    const isForSureNewProd = searchParams.get("isForSureNewProd") === "true";
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
 
     const body = await req.json();
+    const { isForSureNewProd, payload } = body;
 
     if (!isForSureNewProd) {
-      const { brand, type } = body;
+      const { brand, type } = payload;
 
       const existing = await getProducts({
         brand,
@@ -98,7 +97,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const result = await createProduct(body);
+    const result = await createProduct(payload);
 
     if (!result.acknowledged) {
       return NextResponse.json(

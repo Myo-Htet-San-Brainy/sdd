@@ -14,8 +14,17 @@ import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { SubmitButton } from "@/components/SubmitButton";
 import { productSchema } from "@/schema";
+import { CustomError } from "@/lib/CustomError";
+import Link from "next/link";
+import { Product } from "@/Interfaces/Product";
 
 const Page = () => {
+  const [conflictModal, setConflictModal] = useState<{
+    currentProduct: any;
+    similarProducts: Product[];
+    variables: any;
+  } | null>(null);
+
   const { data: myPermissions, isFetching, isPending } = useGetMyPermissions();
   const [suggestionPrompt, setSuggestionPrompt] = useState<{
     value: string;
@@ -90,8 +99,23 @@ const Page = () => {
           toast.success("Product Created!");
           reset();
         },
-        onError: () => {
-          toast.error("Creating Product Failed! Try again later...");
+        onError(error, variables, context) {
+          if (error instanceof CustomError) {
+            if (error.status === 409) {
+              // Open modal
+              setConflictModal({
+                currentProduct: {
+                  brand: variables.payload.brand,
+                  type: variables.payload.type,
+                  description: variables.payload.description,
+                },
+                similarProducts: error.body.similarProducts,
+                variables,
+              });
+            } else {
+              toast.error("Creating Product Failed! Try again later...");
+            }
+          }
         },
       }
     );
@@ -155,6 +179,75 @@ const Page = () => {
   // --- Main Render ---
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
+      {conflictModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg max-w-lg w-full space-y-4">
+            <h2 className="text-lg font-semibold text-red-600">
+              Similar Products Found
+            </h2>
+            <div className="space-y-2">
+              <h3 className="font-medium text-zinc-800">
+                Product You Tried to Create:
+              </h3>
+              <p className="text-sm text-zinc-700">
+                <strong>Brand:</strong>{" "}
+                {conflictModal.currentProduct.brand || "N/A"} <br />
+                <strong>Type:</strong>{" "}
+                {conflictModal.currentProduct.type.join(", ")} <br />
+                <strong>Description:</strong>{" "}
+                {conflictModal.currentProduct.description}
+              </p>
+            </div>
+            <div className="space-y-2">
+              <h3 className="font-medium text-zinc-800">Similar Products:</h3>
+              {conflictModal.similarProducts.map((prod, i) => (
+                <div key={prod._id} className="border p-2 rounded-md">
+                  <p className="text-sm text-zinc-800">
+                    <strong>Brand:</strong> {prod.brand || "N/A"} <br />
+                    <strong>Type:</strong> {prod.type.join(", ")} <br />
+                    <strong>Description:</strong> {prod.description}
+                  </p>
+                  <Link
+                    href={`/main/product/${prod._id}/update`}
+                    className="mt-1 text-red-600 text-sm hover:underline"
+                  >
+                    Update This Product
+                  </Link>
+                </div>
+              ))}
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={() => {
+                  mutate(
+                    {
+                      payload: conflictModal.variables.payload,
+                      isForSureNewProd: true,
+                    },
+                    {
+                      onSuccess: () => {
+                        toast.success("Product Created!");
+                        reset();
+                        setConflictModal(null);
+                      },
+                      onError: () => {
+                        toast.error(
+                          "Creating Product Failed! Try again later..."
+                        );
+                      },
+                    }
+                  );
+                  console.log("confirm create");
+                }}
+                className="px-4 py-2 bg-red-600 text-white rounded-md"
+              >
+                Confirm Create New
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form
         ref={formRef}
         onSubmit={handleSubmit(onSubmit)}
@@ -403,40 +496,3 @@ const Page = () => {
 };
 
 export default Page;
-
-//AI PROMPTS
-
-//use RHF and ZOD for validations
-//TYPE
-//type is a dynamic field.
-//its state - string[]
-//default state - ['']
-//thus, showing an text input field by default
-//should be a plus btn to add more name textinput field, also remove for each, well..the first default field won't have remove ofc
-//validations - the state array must have min 1 string, and the strings inside must have min 1 char
-//BRAND
-//brand could either be a select or an text input, controlled by combination of isNewBrand state(default - 'false')[false - select, true - an text input] and a button
-//default state - ''
-//select element - use dummy for eg select options
-//one select option with val '' and text 'Please select a brand'
-//validations - string must be min 1
-//SOURCE
-//exactly same as BRAND
-//noOfItemsInStock
-//a number input
-//validations - not optional, must be full no and >= 0
-//buyingPrice
-//a number input
-//validations - not optional, can be full or 1.3(point no) etc and >= 0
-//sellingPrice
-//exactly same as buyingPrice
-//description
-//textarea
-//default state - ''
-//validations - optional
-//lowStockThreshold
-//exactly same as noOfItemsInStock
-//location
-//exactly same as BRAND
-
-// follow the comments thoroughly and code

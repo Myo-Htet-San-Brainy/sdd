@@ -66,17 +66,29 @@ export async function getMatchingProductTypes(
 
 export async function createProduct({
   payload,
+  isForSureNewProd,
 }: {
   payload: any;
+  isForSureNewProd?: boolean;
 }): Promise<void> {
   try {
-    const response = await axios.post(`/api/product`, payload);
+    const response = await axios.post(`/api/product`, {
+      payload,
+      isForSureNewProd,
+    });
 
     if (response.status !== 201) {
       throw new Error("Error creating product!");
     }
   } catch (error: any) {
     console.log("error creating product:", error);
+    if (isAxiosError(error) && error.status === 409) {
+      throw new CustomError(
+        error.response?.data.error,
+        error.status,
+        error.response?.data
+      );
+    }
     throw new CustomError("Internal Sever Error!", 500);
   }
 }
