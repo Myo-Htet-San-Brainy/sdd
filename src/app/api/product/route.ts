@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
     }
 
     const searchParams = req.nextUrl.searchParams;
+    const brand = searchParams.get("brand");
     const type = searchParams.get("type");
     const location = searchParams.get("location");
 
@@ -29,6 +30,9 @@ export async function GET(req: NextRequest) {
     }
     if (location) {
       filterObj.location = location;
+    }
+    if (brand) {
+      filterObj.brand = brand;
     }
     const products = await getProducts(filterObj);
 
@@ -59,49 +63,49 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
-    );
+    // const permissionCheck = await verifyPermission(
+    //   MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
+    // );
 
-    if (!permissionCheck.ok) {
-      return NextResponse.json(
-        { error: permissionCheck.message },
-        { status: permissionCheck.status }
-      );
-    }
+    // if (!permissionCheck.ok) {
+    //   return NextResponse.json(
+    //     { error: permissionCheck.message },
+    //     { status: permissionCheck.status }
+    //   );
+    // }
 
-    const searchParams = req.nextUrl.searchParams;
-    const isForSureNewProd = searchParams.get("isForSureNewProd") === "true";
+    // const searchParams = req.nextUrl.searchParams;
+    // const isForSureNewProd = searchParams.get("isForSureNewProd") === "true";
 
     const body = await req.json();
 
-    if (!isForSureNewProd) {
-      const { brand, type, description } = body;
+    // if (!isForSureNewProd) {
+    //   const { brand, type, description } = body;
 
-      const existing = await getProducts({
-        brand,
-        type: { $in: type },
-      });
+    //   const existing = await getProducts({
+    //     brand,
+    //     type: { $in: type },
+    //   });
 
-      const duplicate = existing.find((prod) => {
-        const similarity = stringSimilarity(
-          prod.description || "",
-          description || ""
-        );
-        return similarity >= 0.9;
-      });
+    //   const duplicate = existing.find((prod) => {
+    //     const similarity = stringSimilarity(
+    //       prod.description || "",
+    //       description || ""
+    //     );
+    //     return similarity >= 0.8;
+    //   });
 
-      if (duplicate) {
-        return NextResponse.json(
-          {
-            error: "Similar product already exists.",
-            _id: duplicate._id,
-            similarity: "90%+",
-          },
-          { status: 409 }
-        );
-      }
-    }
+    //   if (duplicate) {
+    //     return NextResponse.json(
+    //       {
+    //         error: "Similar product already exists.",
+    //         _id: duplicate._id,
+    //         similarity: "90%+",
+    //       },
+    //       { status: 409 }
+    //     );
+    //   }
+    // }
 
     const result = await createProduct(body);
 
