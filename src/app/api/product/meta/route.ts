@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
         { status: permissionCheck.status }
       );
     }
+
     const searchParams = req.nextUrl.searchParams;
     const brand = searchParams.get("brand") === "true";
     const source = searchParams.get("source") === "true";
@@ -44,11 +45,45 @@ export async function GET(req: NextRequest) {
 
     const [brands, sources, locations] = await Promise.all(promises);
 
+    let groupedLocations: string[][] = [];
+
+    if (locations) {
+      const locMap = new Map<string, string[]>();
+
+      for (const loc of locations) {
+        if (typeof loc !== "string") continue;
+
+        if (!loc.includes("-")) {
+          // Handle single, non-dash locations as their own group
+          locMap.set(loc, [loc]);
+          continue;
+        }
+
+        const parts = loc.split("-");
+        const main = parts[0];
+        const section = parts[1];
+        const unit = parts[2];
+
+        if (!main || !section || !unit) continue;
+
+        const key = `${main}-${section}`;
+
+        if (!locMap.has(key)) {
+          locMap.set(key, []);
+        }
+
+        locMap.get(key)?.push(loc);
+      }
+
+      // Convert map values to array
+      groupedLocations = Array.from(locMap.values());
+    }
+
     return NextResponse.json(
       {
         brands,
         sources,
-        locations,
+        locations: groupedLocations,
       },
       { status: 200 }
     );

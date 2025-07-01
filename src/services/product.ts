@@ -87,7 +87,7 @@ export async function getProductMeta(params: {
   source?: boolean;
 }): Promise<{
   brands: string[] | null;
-  locations: string[] | null;
+  locations: string[][] | null;
   sources: string[] | null;
 }> {
   try {

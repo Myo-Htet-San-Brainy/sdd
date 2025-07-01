@@ -306,11 +306,30 @@ const Page = () => {
                 <option value="" className="">
                   Select a {label.toLowerCase()}
                 </option>
-                {options?.map((opt: string) => (
-                  <option key={opt} value={opt} className="">
-                    {opt}
-                  </option>
-                ))}
+                {name === "location"
+                  ? (options as string[][])?.flatMap((optArr, groupIndex) => {
+                      const colorEmoji = [
+                        "🔴",
+                        "🟢",
+                        "🔵",
+                        "🟣",
+                        "🟡",
+                        "🟤",
+                        "⚫",
+                        "⚪",
+                      ];
+                      const marker = colorEmoji[groupIndex % colorEmoji.length];
+                      return optArr.map((opt) => (
+                        <option value={opt} key={opt}>
+                          {marker} {opt}
+                        </option>
+                      ));
+                    })
+                  : (options as string[])?.map((opt) => (
+                      <option key={opt} value={opt} className="">
+                        {opt}
+                      </option>
+                    ))}
               </select>
             )}
             <button
