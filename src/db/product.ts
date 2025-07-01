@@ -1,5 +1,6 @@
 import { getCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb"; // 💡 important for _id!
+import stringSimilarity from "string-similarity-js";
 
 export async function getProductById(id: string) {
   const productCollection = await getCollection("product");
@@ -60,13 +61,14 @@ export async function getMatchingProductTypes(type: string) {
   return result.map((item) => item._id);
 }
 
-export async function getUniqueTypeArraysOfMatchedProducts(type: string) {
+export async function getUniqueTypeArraysOfMatchedProducts(inputType: string) {
   const productCollection = await getCollection("product");
 
+  // 1. Pull all products with type arrays
   const pipeline = [
     {
       $match: {
-        type: { $elemMatch: { $regex: type, $options: "i" } },
+        type: { $exists: true, $ne: [] },
       },
     },
     {
@@ -78,16 +80,27 @@ export async function getUniqueTypeArraysOfMatchedProducts(type: string) {
 
   const result = await productCollection.aggregate(pipeline).toArray();
 
+  // 2. Filter by similarity in JS
   const seen = new Set<string>();
   const uniqueTypeArrays: string[][] = [];
 
   for (const product of result) {
-    const typeArr = product.type;
-    const key = JSON.stringify(typeArr.sort()); // sort to treat ["ball", "sport"] same as ["sport", "ball"]
+    const typeArr: string[] = product.type;
 
-    if (!seen.has(key)) {
-      seen.add(key);
-      uniqueTypeArrays.push(typeArr);
+    const hasSimilar = typeArr.some((typeValue) => {
+      const similarity = stringSimilarity(
+        inputType.toLowerCase(),
+        typeValue.toLowerCase()
+      );
+      return similarity >= 0.2;
+    });
+
+    if (hasSimilar) {
+      const key = JSON.stringify([...typeArr].sort());
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueTypeArrays.push(typeArr);
+      }
     }
   }
 
