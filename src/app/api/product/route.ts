@@ -74,38 +74,29 @@ export async function POST(req: NextRequest) {
     //   );
     // }
 
-    // const searchParams = req.nextUrl.searchParams;
-    // const isForSureNewProd = searchParams.get("isForSureNewProd") === "true";
+    const searchParams = req.nextUrl.searchParams;
+    const isForSureNewProd = searchParams.get("isForSureNewProd") === "true";
 
     const body = await req.json();
 
-    // if (!isForSureNewProd) {
-    //   const { brand, type, description } = body;
+    if (!isForSureNewProd) {
+      const { brand, type } = body;
 
-    //   const existing = await getProducts({
-    //     brand,
-    //     type: { $in: type },
-    //   });
+      const existing = await getProducts({
+        brand,
+        type: { $in: type },
+      });
 
-    //   const duplicate = existing.find((prod) => {
-    //     const similarity = stringSimilarity(
-    //       prod.description || "",
-    //       description || ""
-    //     );
-    //     return similarity >= 0.8;
-    //   });
-
-    //   if (duplicate) {
-    //     return NextResponse.json(
-    //       {
-    //         error: "Similar product already exists.",
-    //         _id: duplicate._id,
-    //         similarity: "90%+",
-    //       },
-    //       { status: 409 }
-    //     );
-    //   }
-    // }
+      if (existing && existing.length > 0) {
+        return NextResponse.json(
+          {
+            error: "Similar products exists.",
+            similarProducts: existing,
+          },
+          { status: 409 }
+        );
+      }
+    }
 
     const result = await createProduct(body);
 
