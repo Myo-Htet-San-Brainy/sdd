@@ -4,6 +4,7 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hashPassword, verifyPermission } from "@/lib/serverUtils";
 import { createUser, getAllUsers } from "@/db/user";
 import { createProduct, getProducts } from "@/db/product";
+import { stringSimilarity } from "string-similarity-js";
 
 export async function GET(req: NextRequest) {
   try {
@@ -69,7 +70,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const searchParams = req.nextUrl.searchParams;
+    const isForSureNewProd = searchParams.get("isForSureNewProd") === "true";
+
     const body = await req.json();
+
+    if (!isForSureNewProd) {
+      const { brand, type, description } = body;
+
+      const existing = await getProducts({
+        brand,
+        type: { $in: type },
+      });
+
+      const duplicate = existing.find((prod) => {
+        const similarity = stringSimilarity(
+          prod.description || "",
+          description || ""
+        );
+        return similarity >= 0.9;
+      });
+
+      if (duplicate) {
+        return NextResponse.json(
+          {
+            error: "Similar product already exists.",
+            _id: duplicate._id,
+            similarity: "90%+",
+          },
+          { status: 409 }
+        );
+      }
+    }
 
     const result = await createProduct(body);
 
