@@ -18,6 +18,8 @@ import { CustomError } from "@/lib/CustomError";
 import Link from "next/link";
 import { Product } from "@/Interfaces/Product";
 
+const colorEmoji = ["🔴", "🟢", "🔵", "🟣", "🟡", "🟤", "⚫", "⚪"];
+
 const Page = () => {
   const [conflictModal, setConflictModal] = useState<{
     currentProduct: any;
@@ -374,80 +376,88 @@ const Page = () => {
           )}
         </div>
 
-        {/* 🔹 Select/Toggle Fields */}
-        {[
-          {
-            label: "Source",
-            name: "source",
-            isNew: isNewSource,
-            toggle: setIsNewSource,
-            options: productMeta.sources,
-          },
-          {
-            label: "Location",
-            name: "location",
-            isNew: isNewLocation,
-            toggle: setIsNewLocation,
-            options: productMeta.locations,
-          },
-        ].map(({ label, name, isNew, toggle, options }) => (
-          <div key={name}>
-            <label className="block font-medium text-zinc-700 mb-1">
-              {label}:
-            </label>
-            {isNew ? (
-              <input
-                {...register(name as "source" | "location")}
-                className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
-              />
-            ) : (
-              <select
-                {...register(name as "source" | "location")}
-                className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
-              >
-                <option value="" className="">
-                  Select a {label.toLowerCase()}
-                </option>
-                {name === "location"
-                  ? (options as string[][])?.flatMap((optArr, groupIndex) => {
-                      const colorEmoji = [
-                        "🔴",
-                        "🟢",
-                        "🔵",
-                        "🟣",
-                        "🟡",
-                        "🟤",
-                        "⚫",
-                        "⚪",
-                      ];
-                      const marker = colorEmoji[groupIndex % colorEmoji.length];
-                      return optArr.map((opt) => (
-                        <option value={opt} key={opt}>
-                          {marker} {opt}
-                        </option>
-                      ));
-                    })
-                  : (options as string[])?.map((opt) => (
-                      <option key={opt} value={opt} className="">
-                        {opt}
-                      </option>
-                    ))}
-              </select>
-            )}
-            <button
-              type="button"
-              onClick={() => toggle((prev) => !prev)}
-              className="text-blue-600 text-sm mt-1 hover:underline"
+        {/* 🔹 Source Field */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Source:
+          </label>
+          {isNewSource ? (
+            <input
+              {...register("source")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            />
+          ) : (
+            <select
+              {...register("source")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
             >
-              {isNew ? `Use Select` : `+ Add New ${label}`}
-            </button>
-            {errors[name as keyof typeof errors] && (
-              <p className="text-sm text-red-500 mt-1">
-                {errors[name as keyof typeof errors]?.message as string}
-              </p>
-            )}
-          </div>
-        ))}
+              <option value="" className="">
+                Select a source
+              </option>
+              {productMeta.sources &&
+                productMeta.sources.map((opt) => (
+                  <option key={opt} value={opt}>
+                    {opt}
+                  </option>
+                ))}
+            </select>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsNewSource((prev) => !prev)}
+            className="text-blue-600 text-sm mt-1 hover:underline"
+          >
+            {isNewSource ? `Use Select` : `+ Add New Source`}
+          </button>
+          {errors["source"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors["source"]?.message as string}
+            </p>
+          )}
+        </div>
+
+        {/* 🔹 Location Field */}
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Location:
+          </label>
+          {isNewLocation ? (
+            <input
+              {...register("location")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            />
+          ) : (
+            <select
+              {...register("location")}
+              className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+            >
+              <option value="" className="">
+                Select a location
+              </option>
+              {productMeta.locations &&
+                productMeta.locations.flatMap((optArr, groupIndex) => {
+                  const marker = colorEmoji[groupIndex % colorEmoji.length];
+                  return optArr.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {marker} {opt}
+                    </option>
+                  ));
+                })}
+            </select>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsNewLocation((prev) => !prev)}
+            className="text-blue-600 text-sm mt-1 hover:underline"
+          >
+            {isNewLocation ? `Use Select` : `+ Add New Location`}
+          </button>
+          {errors["location"] && (
+            <p className="text-sm text-red-500 mt-1">
+              {errors["location"]?.message as string}
+            </p>
+          )}
+        </div>
 
         {/* 🔹 Number Inputs */}
         {[
