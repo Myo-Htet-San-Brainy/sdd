@@ -34,6 +34,7 @@ export async function GET(req: NextRequest) {
     if (brand) {
       filterObj.brand = brand;
     }
+    console.log(filterObj);
 
     const products = await getProducts(filterObj);
 

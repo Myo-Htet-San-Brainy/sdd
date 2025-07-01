@@ -180,16 +180,18 @@ const Page = () => {
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
       {conflictModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg max-w-lg w-full space-y-4">
-            <h2 className="text-lg font-semibold text-red-600">
+        <div className="fixed inset-0 bg-red-600/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white/30 backdrop-blur-lg p-6 rounded-2xl max-w-lg w-full space-y-6 border border-red-200 shadow-lg">
+            <h2 className="text-lg font-semibold text-white">
               Similar Products Found
             </h2>
+
+            {/* Current Product */}
             <div className="space-y-2">
-              <h3 className="font-medium text-zinc-800">
+              <h3 className="font-medium text-white">
                 Product You Tried to Create:
               </h3>
-              <p className="text-sm text-zinc-700">
+              <p className="text-sm text-white">
                 <strong>Brand:</strong>{" "}
                 {conflictModal.currentProduct.brand || "N/A"} <br />
                 <strong>Type:</strong>{" "}
@@ -198,25 +200,32 @@ const Page = () => {
                 {conflictModal.currentProduct.description}
               </p>
             </div>
+
+            {/* Similar Products */}
             <div className="space-y-2">
-              <h3 className="font-medium text-zinc-800">Similar Products:</h3>
-              {conflictModal.similarProducts.map((prod, i) => (
-                <div key={prod._id} className="border p-2 rounded-md">
-                  <p className="text-sm text-zinc-800">
+              <h3 className="font-medium text-white">Similar Products:</h3>
+              {conflictModal.similarProducts.map((prod) => (
+                <div
+                  key={prod._id}
+                  className="border border-white/30 bg-white/20 backdrop-blur-md p-3 rounded-md flex items-start justify-between"
+                >
+                  <div className="text-sm text-white">
                     <strong>Brand:</strong> {prod.brand || "N/A"} <br />
                     <strong>Type:</strong> {prod.type.join(", ")} <br />
                     <strong>Description:</strong> {prod.description}
-                  </p>
+                  </div>
                   <Link
                     href={`/main/product/${prod._id}/update`}
-                    className="mt-1 text-red-600 text-sm hover:underline"
+                    className="ml-4 text-white underline hover:text-red-700 text-sm"
                   >
                     Update This Product
                   </Link>
                 </div>
               ))}
             </div>
-            <div className="flex justify-end gap-2 pt-4">
+
+            {/* Confirm */}
+            <div className="flex justify-end pt-4">
               <button
                 onClick={() => {
                   mutate(
@@ -239,7 +248,7 @@ const Page = () => {
                   );
                   console.log("confirm create");
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded-md"
+                className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-md"
               >
                 Confirm Create New
               </button>

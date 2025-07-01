@@ -75,15 +75,13 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    for (const update of locationUpdates) {
-      await productCollection.updateMany(
-        { location: update.old },
-        { $set: { location: update.new } }
-      );
-    }
+    await productCollection.updateMany(
+      { type: "Piston+Ring" },
+      { $set: { type: ["PistonNRing"] } }
+    );
 
     return NextResponse.json(
-      { message: "Locations updated successfully ✨" },
+      { message: "Piston+Ring types updated to PistonNRing successfully ✨" },
       { status: 200 }
     );
   } catch (error) {
