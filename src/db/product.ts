@@ -33,32 +33,41 @@ export async function getProducts(filterObj: object = {}) {
     .toArray();
 }
 
-export async function getMatchingProductTypes(type: string) {
+export async function getMatchingProductTypes(inputType: string) {
   const productCollection = await getCollection("product");
 
+  // 1️⃣ Get all type arrays
   const pipeline = [
     {
       $match: {
-        type: { $elemMatch: { $regex: type, $options: "i" } },
+        type: { $exists: true, $ne: [] },
       },
     },
     {
       $project: {
-        matchingTypes: {
-          $filter: {
-            input: "$type",
-            as: "t",
-            cond: { $regexMatch: { input: "$$t", regex: type, options: "i" } },
-          },
-        },
+        type: 1,
       },
     },
-    { $unwind: "$matchingTypes" },
-    { $group: { _id: "$matchingTypes" } },
   ];
 
   const result = await productCollection.aggregate(pipeline).toArray();
-  return result.map((item) => item._id);
+
+  // 2️⃣ Flatten all type strings
+  const allTypes = result.flatMap((doc) => doc.type);
+
+  // 3️⃣ Get unique types only
+  const uniqueTypes = [...new Set(allTypes)];
+
+  // 4️⃣ Filter by similarity
+  const matchingTypes = uniqueTypes.filter((typeValue) => {
+    const similarity = stringSimilarity(
+      inputType.toLowerCase(),
+      typeValue.toLowerCase()
+    );
+    return similarity >= 0.2;
+  });
+
+  return matchingTypes;
 }
 
 export async function getUniqueTypeArraysOfMatchedProducts(inputType: string) {
