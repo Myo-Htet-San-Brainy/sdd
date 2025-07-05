@@ -75,19 +75,44 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    await productCollection.updateMany(
-      { type: "Piston+Ring" },
-      { $set: { type: ["PistonNRing"] } }
-    );
+    // 1️⃣ Find products where ANY type array item has '+'
+    const productsWithPlus = await productCollection
+      .find({ type: { $elemMatch: { $regex: /\+/ } } })
+      .toArray();
+
+    if (!productsWithPlus.length) {
+      return NextResponse.json({
+        message: "No products with '+' in type array found.",
+      });
+    }
+
+    // 2️⃣ Loop & replace '+' in EACH type array item
+    const bulkOps = productsWithPlus.map((prod) => {
+      const updatedTypeArray = prod.type.map((t: string) =>
+        typeof t === "string" ? t.replace(/\+/g, "N") : t
+      );
+
+      return {
+        updateOne: {
+          filter: { _id: prod._id },
+          update: { $set: { type: updatedTypeArray } },
+        },
+      };
+    });
+
+    // 3️⃣ Bulk update
+    const result = await productCollection.bulkWrite(bulkOps);
 
     return NextResponse.json(
-      { message: "Piston+Ring types updated to PistonNRing successfully ✨" },
+      {
+        message: `Updated ${result.modifiedCount} products' type arrays successfully ✨`,
+      },
       { status: 200 }
     );
   } catch (error) {
-    console.error("[UPDATE_LOCATIONS_ERROR]", error);
+    console.error("[MANUAL_ARRAY_UPDATE_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to update locations" },
+      { error: "Failed to update products with array types." },
       { status: 500 }
     );
   }

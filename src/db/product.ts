@@ -33,6 +33,8 @@ export async function getProducts(filterObj: object = {}) {
     .toArray();
 }
 
+const SIMILARITY = 0.45;
+
 export async function getMatchingProductTypes(inputType: string) {
   const productCollection = await getCollection("product");
 
@@ -64,7 +66,7 @@ export async function getMatchingProductTypes(inputType: string) {
       inputType.toLowerCase(),
       typeValue.toLowerCase()
     );
-    return similarity >= 0.2;
+    return similarity >= SIMILARITY;
   });
 
   return matchingTypes;
@@ -101,7 +103,7 @@ export async function getUniqueTypeArraysOfMatchedProducts(inputType: string) {
         inputType.toLowerCase(),
         typeValue.toLowerCase()
       );
-      return similarity >= 0.2;
+      return similarity >= SIMILARITY;
     });
 
     if (hasSimilar) {
