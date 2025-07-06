@@ -6,7 +6,13 @@ import {
   getRoles,
   updateRole,
 } from "@/services/role";
-import { createSale, getAllSales, getSale, updateSale } from "@/services/sale";
+import {
+  createSale,
+  getAllSales,
+  getSale,
+  restockSale,
+  updateSale,
+} from "@/services/sale";
 import {
   createUser,
   deleteUser,
@@ -15,6 +21,7 @@ import {
   updateUser,
 } from "@/services/user";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
 export const useCreateSaleMutation = () => {
   const queryClient = useQueryClient();
@@ -79,6 +86,25 @@ export const useUpdateSaleMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["sale", saleId] });
       queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
       queryClient.invalidateQueries({ queryKey: ["commission reports"] });
+    },
+  });
+};
+
+export const useRestockSaleMutation = () => {
+  const queryClient = useQueryClient(); // ✨ get query client
+  return useMutation({
+    mutationFn: restockSale,
+    onSuccess(data, variables, context) {
+      const { typesOfRestockedProds, prodsToRestock } = variables;
+      typesOfRestockedProds.forEach((type) => {
+        queryClient.invalidateQueries({ queryKey: ["products", type] });
+      });
+      prodsToRestock.forEach(({ _id }: { _id: string }) => {
+        queryClient.invalidateQueries({ queryKey: ["product", _id] });
+      });
+    },
+    onError(error, variables, context) {
+      toast.error("failed to update the sale!");
     },
   });
 };

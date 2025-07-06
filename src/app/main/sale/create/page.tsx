@@ -67,6 +67,25 @@ const Page = () => {
     );
   }
 
+  if (cart.length <= 0 && updatedSaleId) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center bg-zinc-100">
+        <p className="text-zinc-600 text-lg mb-4">
+          No items left for this sale.
+        </p>
+        <button
+          onClick={() => {
+            // setUpdatedSaleId(null);
+            console.log("removed sale");
+          }}
+          className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors"
+        >
+          Remove Sale
+        </button>
+      </div>
+    );
+  }
+
   if (isFetchingBuyers || isPendingBuyers) {
     return (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
@@ -83,7 +102,7 @@ const Page = () => {
     );
   }
 
-  function handleSell() {
+  function handleCreateOrUpdateSale() {
     const b = buyer === "" ? null : buyer;
     const soldProducts = cart.map(({ product, itemsToSell }) => ({
       _id: product._id,
@@ -215,7 +234,7 @@ const Page = () => {
           </button>
           <SubmitButton
             isLoading={isCreating || isUpdating}
-            onClick={handleSell}
+            onClick={handleCreateOrUpdateSale}
           >
             {updatedSaleId ? "Update" : "Sell"}
           </SubmitButton>

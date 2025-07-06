@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSale, getAllSales, updateStockAfterSale } from "@/db/sale";
+import {
+  createSale,
+  getAllSales,
+  updateStockAfterTransaction,
+} from "@/db/sale";
 import { getProductById } from "@/db/product";
 import { getUserById } from "@/db/user";
 import { verifyPermission } from "@/lib/serverUtils";
@@ -20,7 +24,7 @@ export async function POST(req: NextRequest) {
     const { soldProducts, buyer } = await req.json();
 
     await createSale({ soldProducts, buyer });
-    await updateStockAfterSale(soldProducts);
+    await updateStockAfterTransaction(soldProducts, { mode: "decrease" });
 
     return NextResponse.json(
       { message: "Creating sale successful" },

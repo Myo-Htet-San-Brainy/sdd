@@ -4,7 +4,7 @@ import { Sale } from "@/Interfaces/Sale";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useGetSales } from "@/query/sale";
+import { useGetSales, useRestockSaleMutation } from "@/query/sale";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ const Page = () => {
     isFetching: isFetchingSales,
     isError: isErrorSales,
   } = useGetSales();
+  const { mutate: restockMutate } = useRestockSaleMutation();
 
   const router = useRouter();
   const { setUpdatedSaleId } = useUpdatedSaleIdStore();
@@ -34,15 +35,32 @@ const Page = () => {
     null
   );
 
-  const handleUpdateClick = (sale: Sale) => {
-    setUpdatedSaleId(sale._id);
-    setBuyer(sale.buyer ? sale.buyer._id : "");
-    const cartProducts = sale.soldProducts.map((item) => ({
-      product: item.product,
+  const handleUpdateClick = async (sale: Sale) => {
+    const prodsToRestock = sale.soldProducts.map((item) => ({
+      _id: item.product._id,
       itemsToSell: item.itemsToSell,
     }));
-    setCart(cartProducts);
-    router.push(`/main/product`);
+    const typesOfRestockedProds = [
+      ...new Set(
+        sale.soldProducts.flatMap((soldProd) => soldProd.product.type)
+      ),
+    ];
+    restockMutate(
+      { prodsToRestock, typesOfRestockedProds },
+      {
+        onSuccess(data, variables, context) {
+          setUpdatedSaleId(sale._id);
+          setBuyer(sale.buyer ? sale.buyer._id : "");
+          const cartProducts = sale.soldProducts.map((item) => ({
+            product: item.product,
+            itemsToSell: item.itemsToSell,
+          }));
+
+          setCart(cartProducts);
+          router.push(`/main/product`);
+        },
+      }
+    );
   };
 
   // 🎯 New: useEffect to handle scrolling and highlighting

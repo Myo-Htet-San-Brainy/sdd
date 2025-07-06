@@ -9,17 +9,33 @@ export async function createSale(salePayload: any) {
   });
 }
 
-export async function updateStockAfterSale(soldProducts: any[]) {
+export async function updateStockAfterTransaction(
+  products: { _id: string; itemsToSell: number }[],
+  options: { mode: "increase" | "decrease" }
+) {
   const productCollection = await getCollection("product");
 
-  const updates = soldProducts.map((product) =>
-    productCollection.updateOne(
-      { _id: new ObjectId(product._id) },
-      { $inc: { noOfItemsInStock: -product.itemsToSell } }
-    )
-  );
+  const incValue = options.mode === "increase" ? 1 : -1;
 
-  return await Promise.all(updates);
+  const bulkOps = products.map((product) => ({
+    updateOne: {
+      filter: { _id: new ObjectId(product._id) },
+      update: {
+        $inc: { noOfItemsInStock: product.itemsToSell * incValue },
+        $set: { lastUpdated: new Date() },
+      },
+    },
+  }));
+
+  const result = await productCollection.bulkWrite(bulkOps);
+
+  if (result.modifiedCount !== products.length) {
+    console.warn(
+      `Only ${result.modifiedCount} of ${products.length} products updated`
+    );
+  }
+
+  return result;
 }
 
 export async function getAllSales() {

@@ -84,3 +84,21 @@ export async function updateSale({
     throw new CustomError("Internal Sever Error!", 500);
   }
 }
+
+export async function restockSale({
+  prodsToRestock,
+}: {
+  prodsToRestock: { _id: string; itemsToSell: number }[];
+  typesOfRestockedProds: string[];
+}): Promise<void> {
+  try {
+    const response = await axios.patch(`/api/sale/restock`, prodsToRestock);
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+  } catch (error: any) {
+    console.log("error restocking sale:", error);
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}
