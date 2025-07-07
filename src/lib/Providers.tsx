@@ -7,7 +7,12 @@ import { SessionProvider } from "next-auth/react";
 import { ModalProvider } from "@/context/modalContext";
 
 export default function Providers({ children }: { children: ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: { queries: { staleTime: 1000 * 60 * 60 } },
+      })
+  );
 
   return (
     <ModalProvider>
