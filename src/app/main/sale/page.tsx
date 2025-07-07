@@ -9,6 +9,7 @@ import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react"; // Import useRef and useState
+import toast from "react-hot-toast";
 
 const Page = () => {
   const {
@@ -35,7 +36,7 @@ const Page = () => {
     null
   );
 
-  const handleUpdateClick = async (sale: Sale) => {
+  const handleUpdateClick = (sale: Sale) => {
     const prodsToRestock = sale.soldProducts.map((item) => ({
       _id: item.product._id,
       itemsToSell: item.itemsToSell,
@@ -45,19 +46,29 @@ const Page = () => {
         sale.soldProducts.flatMap((soldProd) => soldProd.product.type)
       ),
     ];
+    const prepUpdateSaleToast = toast.loading("Preparing update...");
     restockMutate(
       { prodsToRestock, typesOfRestockedProds },
       {
         onSuccess(data, variables, context) {
+          toast.success("Ready to update", { id: prepUpdateSaleToast });
           setUpdatedSaleId(sale._id);
           setBuyer(sale.buyer ? sale.buyer._id : "");
           const cartProducts = sale.soldProducts.map((item) => ({
-            product: item.product,
+            product: {
+              ...item.product,
+              noOfItemsInStock:
+                item.product.noOfItemsInStock + item.itemsToSell,
+            },
             itemsToSell: item.itemsToSell,
           }));
-
           setCart(cartProducts);
-          router.push(`/main/product`);
+          router.push(`/main/sale/create`);
+        },
+        onError(error, variables, context) {
+          toast.error("failed to update the sale!", {
+            id: prepUpdateSaleToast,
+          });
         },
       }
     );

@@ -8,6 +8,7 @@ import {
 } from "@/services/role";
 import {
   createSale,
+  deleteSale,
   getAllSales,
   getSale,
   restockSale,
@@ -103,8 +104,18 @@ export const useRestockSaleMutation = () => {
         queryClient.invalidateQueries({ queryKey: ["product", _id] });
       });
     },
-    onError(error, variables, context) {
-      toast.error("failed to update the sale!");
+  });
+};
+
+export const useDeleteSaleMutation = () => {
+  const queryClient = useQueryClient(); // ✨ get query client
+  return useMutation({
+    mutationFn: deleteSale,
+    onSuccess(data, variables, context) {
+      queryClient.invalidateQueries({ queryKey: ["sales"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
+      //improve - could target more granular cache
+      queryClient.invalidateQueries({ queryKey: ["commission reports"] });
     },
   });
 };

@@ -3,12 +3,16 @@
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useCreateSaleMutation, useUpdateSaleMutation } from "@/query/sale";
+import {
+  useCreateSaleMutation,
+  useDeleteSaleMutation,
+  useUpdateSaleMutation,
+} from "@/query/sale";
 import { useGetUsers } from "@/query/user";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import toast from "react-hot-toast";
+import toast, { ToastIcon } from "react-hot-toast";
 import { SubmitButton } from "@/components/SubmitButton";
 
 const Page = () => {
@@ -32,7 +36,28 @@ const Page = () => {
     useCreateSaleMutation();
   const { mutate: updateSaleMutate, isPending: isUpdating } =
     useUpdateSaleMutation();
+  const { mutate: deleteSaleMutate, isPending: isDeleting } =
+    useDeleteSaleMutation();
   const router = useRouter();
+
+  function handleDeleteSale() {
+    const toastId = toast.loading("Deleting the sale");
+    deleteSaleMutate(
+      { saleId: updatedSaleId as string },
+      {
+        onSuccess(data, variables, context) {
+          toast.success("Deleted Sale Successfully", { id: toastId });
+          clearCart();
+          setBuyer("");
+          router.push("/main/product");
+          setUpdatedSaleId(null);
+        },
+        onError(error, variables, context) {
+          toast.error("Deleting Sale Failed!", { id: toastId });
+        },
+      }
+    );
+  }
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -59,14 +84,6 @@ const Page = () => {
     );
   }
 
-  if (cart.length <= 0) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
-        <p className="text-zinc-600 text-lg">No items in cart yet!</p>
-      </div>
-    );
-  }
-
   if (cart.length <= 0 && updatedSaleId) {
     return (
       <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center bg-zinc-100">
@@ -74,14 +91,19 @@ const Page = () => {
           No items left for this sale.
         </p>
         <button
-          onClick={() => {
-            // setUpdatedSaleId(null);
-            console.log("removed sale");
-          }}
+          onClick={handleDeleteSale}
           className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors"
         >
           Remove Sale
         </button>
+      </div>
+    );
+  }
+
+  if (cart.length <= 0) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
+        <p className="text-zinc-600 text-lg">No items in cart yet!</p>
       </div>
     );
   }
@@ -119,6 +141,7 @@ const Page = () => {
         toast.success(updatedSaleId ? "Updated sale!" : "Created sale!");
         router.push("/main/product");
         clearCart();
+        setBuyer("");
         setUpdatedSaleId(null);
       },
       onError: () => {

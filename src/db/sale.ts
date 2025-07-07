@@ -9,6 +9,11 @@ export async function createSale(salePayload: any) {
   });
 }
 
+export async function deleteSale(id: string) {
+  const saleCollection = await getCollection("sale");
+  return await saleCollection.deleteOne({ _id: new ObjectId(id) });
+}
+
 export async function updateStockAfterTransaction(
   products: { _id: string; itemsToSell: number }[],
   options: { mode: "increase" | "decrease" }

@@ -21,12 +21,12 @@ export async function PATCH(req: NextRequest) {
         { status: permissionCheck.status }
       );
     }
-    const { prodsToRestock } = await req.json();
+    const prodsToRestock = await req.json();
     await updateStockAfterTransaction(prodsToRestock, { mode: "increase" });
 
     return NextResponse.json(
       { message: "Restock successful" },
-      { status: 201 }
+      { status: 200 }
     );
   } catch (error) {
     console.error("Restock error:", error);

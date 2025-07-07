@@ -102,3 +102,20 @@ export async function restockSale({
     throw new CustomError("Internal Sever Error!", 500);
   }
 }
+
+export async function deleteSale({
+  saleId,
+}: {
+  saleId: string;
+}): Promise<void> {
+  try {
+    const response = await axios.delete(`/api/sale/${saleId}`);
+
+    if (response.status !== 200) {
+      throw new Error("");
+    }
+  } catch (error: any) {
+    console.log("error deleting sale:", error);
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}

@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateSale, getSaleByFilter } from "@/db/sale"; // your new DB functions
+import {
+  updateSale,
+  getSaleByFilter,
+  updateStockAfterTransaction,
+  deleteSale,
+} from "@/db/sale"; // your new DB functions
 import {
   authenticateSession,
   verifyPermission,
@@ -42,6 +47,10 @@ export async function PATCH(
         { status: 500 }
       );
     }
+    // Decrease Stock
+    await updateStockAfterTransaction(salePayload.soldProducts, {
+      mode: "decrease",
+    });
 
     return NextResponse.json(
       { message: "Sale updated successfully!" },
@@ -117,6 +126,54 @@ export async function GET(
     return NextResponse.json({ sale }, { status: 200 });
   } catch (error) {
     console.error("Get sale error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // ✅ Permission check
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_DELETE.name
+    );
+
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
+
+    const { id } = await params;
+
+    // 🧠 Ensure sale exists
+    const existingSale = await getSaleByFilter({ _id: id });
+    if (!existingSale) {
+      return NextResponse.json({ error: "Sale not found" }, { status: 404 });
+    }
+
+    // 🗑️ Delete the sale
+    const result = await deleteSale(id);
+
+    if (!result.acknowledged) {
+      return NextResponse.json(
+        { error: "Failed to delete sale" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Sale deleted successfully!" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Delete sale error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
