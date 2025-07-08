@@ -280,7 +280,7 @@ const Page = () => {
                   {/* "nothing selected" option */}
                   {data.distinctBrands.map((brand) => (
                     <option key={brand} value={brand}>
-                      {brand === "" ? "without brand" : brand}
+                      {brand === "" ? "no brand" : brand}
                     </option>
                   ))}
                 </select>
@@ -307,7 +307,7 @@ const Page = () => {
                   {/* "nothing selected" option */}
                   {data.distinctDescriptions.map((description) => (
                     <option key={description} value={description}>
-                      {description === "" ? "without description" : description}
+                      {description === "" ? "no description" : description}
                     </option>
                   ))}
                 </select>

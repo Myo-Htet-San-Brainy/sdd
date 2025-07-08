@@ -72,13 +72,6 @@ const Page = () => {
   const { mutate, isPending: isPendingUpdateProduct } =
     useUpdateProductMutation();
 
-  useEffect(() => {
-    if (product) {
-      const type = product.type.map((value) => ({ value }));
-      reset({ ...product, type });
-    }
-  }, [product]);
-
   if (isFetching || isPending) {
     return (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
@@ -371,40 +364,3 @@ const Page = () => {
 };
 
 export default Page;
-
-//AI PROMPTS
-
-//use RHF and ZOD for validations
-//TYPE
-//type is a dynamic field.
-//its state - string[]
-//default state - ['']
-//thus, showing an text input field by default
-//should be a plus btn to add more name textinput field, also remove for each, well..the first default field won't have remove ofc
-//validations - the state array must have min 1 string, and the strings inside must have min 1 char
-//BRAND
-//brand could either be a select or an text input, controlled by combination of isNewBrand state(default - 'false')[false - select, true - an text input] and a button
-//default state - ''
-//select element - use dummy for eg select options
-//one select option with val '' and text 'Please select a brand'
-//validations - string must be min 1
-//SOURCE
-//exactly same as BRAND
-//noOfItemsInStock
-//a number input
-//validations - not optional, must be full no and >= 0
-//buyingPrice
-//a number input
-//validations - not optional, can be full or 1.3(point no) etc and >= 0
-//sellingPrice
-//exactly same as buyingPrice
-//description
-//textarea
-//default state - ''
-//validations - optional
-//lowStockThreshold
-//exactly same as noOfItemsInStock
-//location
-//exactly same as BRAND
-
-// follow the comments thoroughly and code
