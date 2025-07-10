@@ -31,6 +31,21 @@ export const useGetProductsByType = ({ type }: { type: string }) => {
   });
 };
 
+export const useGetSimilarProducts = ({
+  type,
+  brand,
+}: {
+  type: string;
+  brand: string;
+}) => {
+  return useQuery({
+    queryFn: () => getProducts({ type, brand }),
+    queryKey: ["products", type, brand],
+    enabled: Boolean(type) && Boolean(brand),
+    staleTime: 0,
+  });
+};
+
 export const useGetSuggestions = ({
   type,
   mode = "types",
