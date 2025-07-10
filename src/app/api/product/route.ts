@@ -8,16 +8,16 @@ import { stringSimilarity } from "string-similarity-js";
 
 export async function GET(req: NextRequest) {
   try {
-    // const permissionCheck = await verifyPermission(
-    //   MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
-    // );
+    const permissionCheck = await verifyPermission(
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name
+    );
 
-    // if (!permissionCheck.ok) {
-    //   return NextResponse.json(
-    //     { error: permissionCheck.message },
-    //     { status: permissionCheck.status }
-    //   );
-    // }
+    if (!permissionCheck.ok) {
+      return NextResponse.json(
+        { error: permissionCheck.message },
+        { status: permissionCheck.status }
+      );
+    }
 
     const searchParams = req.nextUrl.searchParams;
     const brand = searchParams.get("brand");
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
     if (brand) {
       filterObj.brand = brand;
     }
-    console.log(filterObj);
+    // console.log(filterObj);
 
     const products = await getProducts(filterObj);
 

@@ -35,7 +35,7 @@ const Page = () => {
     isError: isMetaError,
   } = useGetProductMeta({ brand: true, source: true, location: true });
 
-  const { mutate, isPending: isPendingCreateProduct } =
+  const { mutate: createProductMutate, isPending: isPendingCreateProduct } =
     useCreateProductMutation();
 
   const onSubmit = (data: any) => {
@@ -69,7 +69,6 @@ const Page = () => {
     );
   };
 
-  // --- Permission and Loading States (Unchanged) ---
   if (isFetching || isPending) {
     return (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">

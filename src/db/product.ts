@@ -12,24 +12,21 @@ export async function getProductById(id: string) {
   }
 }
 
-export async function getProducts(filterObj: object = {}) {
+export async function getProducts(
+  filterObj: object = {},
+  projectionObj: object = {
+    type: 1,
+    description: 1,
+    brand: 1,
+    noOfItemsInStock: 1,
+    sellingPrice: 1,
+    location: 1,
+  }
+) {
   const productCollection = await getCollection("product");
-  console.log(filterObj);
 
   return await productCollection
-    .find(
-      filterObj, // Matches if 'type' exists in the type array of the product
-      {
-        projection: {
-          type: 1,
-          description: 1,
-          brand: 1,
-          noOfItemsInStock: 1,
-          sellingPrice: 1,
-          location: 1,
-        },
-      }
-    )
+    .find(filterObj, { projection: projectionObj })
     .toArray();
 }
 
