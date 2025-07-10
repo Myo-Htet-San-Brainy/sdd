@@ -23,13 +23,15 @@ export async function getProductById(id: string): Promise<Product> {
   }
 }
 
-export async function getProductsByType(type: string): Promise<{
+export async function getProducts(filterObj: Object): Promise<{
   products: Product[];
   distinctBrands: string[];
   distinctDescriptions: string[];
 }> {
   try {
-    const response = await axios.get(`/api/product?type=${type}`);
+    const response = await axios.get(`/api/product`, {
+      params: filterObj,
+    });
 
     if (response.status !== 200) {
       throw new Error("Error fetching products!");

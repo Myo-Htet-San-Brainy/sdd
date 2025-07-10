@@ -4,7 +4,7 @@ import {
   getMatchingProductTypes,
   getProductById,
   getProductMeta,
-  getProductsByType,
+  getProducts,
   updateProduct,
 } from "@/services/product";
 import {
@@ -25,7 +25,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useGetProductsByType = ({ type }: { type: string }) => {
   return useQuery({
-    queryFn: () => getProductsByType(type),
+    queryFn: () => getProducts({ type }),
     queryKey: ["products", type],
     enabled: Boolean(type),
   });
