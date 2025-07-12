@@ -77,26 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { isForSureNewProd, payload } = body;
-
-    if (!isForSureNewProd) {
-      const { brand, type } = payload;
-
-      const existing = await getProducts({
-        brand,
-        type: { $in: type },
-      });
-
-      if (existing && existing.length > 0) {
-        return NextResponse.json(
-          {
-            error: "Similar products exists.",
-            similarProducts: existing,
-          },
-          { status: 409 }
-        );
-      }
-    }
+    const { payload } = body;
 
     const result = await createProduct(payload);
 

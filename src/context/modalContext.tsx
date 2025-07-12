@@ -1,23 +1,16 @@
 "use client";
 import { ModalDialog } from "@/components/ModalDialog";
-import { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState } from "react";
 
-export type ModalProps = {
+type ModalProps = {
   title: string;
-  message: string;
-  variant?: "danger" | "warning" | "info" | "success";
-  confirmText?: string;
-  cancelText?: string;
-  // Additional props for different modal types
-  formComponent?: React.ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
+  showCloseButton?: boolean;
+  // content: React.ComponentType<{ handleClose: (result?: any) => void }>;
+  // or if using JSX element:
+  content: React.ReactElement<{ handleClose: (result?: any) => void }>;
 };
-
 type ModalContextType = {
-  showModal: (props: ModalProps) => Promise<boolean>;
-  showConfirmation: (
-    props: Omit<ModalProps, "formComponent">
-  ) => Promise<boolean>;
   showFormModal: (props: ModalProps) => Promise<any>;
 };
 
@@ -34,19 +27,6 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
     resolvePromise(result);
   };
 
-  const showModal = (props: ModalProps): Promise<boolean> => {
-    setModal(props);
-    return new Promise((resolve) => {
-      setResolvePromise(() => (value: boolean) => resolve(value));
-    });
-  };
-
-  const showConfirmation = (
-    props: Omit<ModalProps, "formComponent">
-  ): Promise<boolean> => {
-    return showModal({ ...props, cancelText: props.cancelText || "Cancel" });
-  };
-
   const showFormModal = (props: ModalProps): Promise<any> => {
     setModal(props);
     return new Promise((resolve) => {
@@ -55,16 +35,20 @@ export function ModalProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <ModalContext.Provider
-      value={{ showModal, showConfirmation, showFormModal }}
-    >
+    <ModalContext.Provider value={{ showFormModal }}>
       {children}
       {modal && (
         <ModalDialog
-          {...modal}
-          onClose={handleClose}
-          onConfirm={() => handleClose(true)}
-        />
+          title={modal.title}
+          size={modal.size}
+          showCloseButton={modal.showCloseButton}
+          onClose={() => handleClose()}
+        >
+          {/* Render the component with handleClose */}
+          {/* <modal.content handleClose={handleClose} /> */}
+          {/* Alternative if using JSX element: */}
+          {React.cloneElement(modal.content, { handleClose })}
+        </ModalDialog>
       )}
     </ModalContext.Provider>
   );

@@ -35,8 +35,8 @@ export const useGetSimilarProducts = ({
   type,
   brand,
 }: {
-  type: string;
-  brand: string;
+  type?: string | null;
+  brand?: string | null;
 }) => {
   return useQuery({
     queryFn: () => getProducts({ type, brand }),

@@ -68,15 +68,12 @@ export async function getMatchingProductTypes(
 
 export async function createProduct({
   payload,
-  isForSureNewProd,
 }: {
   payload: any;
-  isForSureNewProd?: boolean;
 }): Promise<void> {
   try {
     const response = await axios.post(`/api/product`, {
       payload,
-      isForSureNewProd,
     });
 
     if (response.status !== 201) {

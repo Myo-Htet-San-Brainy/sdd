@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { SubmitButton } from "@/components/SubmitButton";
+import { forwardRef, useImperativeHandle } from "react";
 
 interface ManageProductFormProps {
   productMeta: {
@@ -11,7 +12,8 @@ interface ManageProductFormProps {
     locations: string[][] | null;
     sources: string[] | null;
   };
-  isPendingAction: boolean;
+  isPending: boolean;
+  // submitBtnText: string;
   existingProduct?: {
     type: {
       value: string;
@@ -28,14 +30,16 @@ interface ManageProductFormProps {
   onSubmit: (data: any) => void;
 }
 
+export type ManageProductFormRef = {
+  resetForm: (values?: any) => void;
+};
+
 const colorEmoji = ["🔴", "🟢", "🔵", "🟣", "🟡", "🟤", "⚫", "⚪"];
 
-const ManageProductForm: React.FC<ManageProductFormProps> = ({
-  productMeta,
-  isPendingAction,
-  existingProduct,
-  onSubmit,
-}) => {
+const ManageProductForm = forwardRef<
+  ManageProductFormRef,
+  ManageProductFormProps
+>(({ productMeta, isPending, existingProduct, onSubmit }, ref) => {
   const [suggestionPrompt, setSuggestionPrompt] = useState<{
     value: string;
     index: number;
@@ -87,6 +91,24 @@ const ManageProductForm: React.FC<ManageProductFormProps> = ({
   });
 
   const { fields, append, remove } = useFieldArray({ name: "type", control });
+
+  useImperativeHandle(ref, () => ({
+    resetForm: (values) => {
+      reset(
+        values || {
+          type: [{ value: "" }],
+          brand: "",
+          source: "",
+          location: "",
+          noOfItemsInStock: 0,
+          buyingPrice: 0,
+          sellingPrice: 0,
+          description: "",
+          lowStockThreshold: 0,
+        }
+      );
+    },
+  }));
 
   const handleSuggestionClick = (suggestionArray: string[]) => {
     const modifiedSugs = suggestionArray.map((sug) => {
@@ -346,10 +368,10 @@ const ManageProductForm: React.FC<ManageProductFormProps> = ({
 
       {/* 🔹 Submit */}
       <div className="pt-4">
-        <SubmitButton isLoading={isPendingAction}>Submit Product</SubmitButton>
+        <SubmitButton isLoading={isPending}>{"Submit"}</SubmitButton>
       </div>
     </form>
   );
-};
+});
 
 export default ManageProductForm;
