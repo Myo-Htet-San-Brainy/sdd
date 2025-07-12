@@ -5,6 +5,13 @@ import { useEffect, useRef, useState } from "react";
 import { useFieldArray, useForm } from "react-hook-form";
 import { SubmitButton } from "@/components/SubmitButton";
 import { forwardRef, useImperativeHandle } from "react";
+import { Product } from "@/Interfaces/Product";
+
+interface ExistingProduct extends Omit<Product, "type"> {
+  type: {
+    value: string;
+  }[];
+}
 
 interface ManageProductFormProps {
   productMeta: {
@@ -14,19 +21,7 @@ interface ManageProductFormProps {
   };
   isPending: boolean;
   // submitBtnText: string;
-  existingProduct?: {
-    type: {
-      value: string;
-    }[];
-    brand: string;
-    source: string;
-    location: string;
-    noOfItemsInStock: number;
-    buyingPrice: number;
-    sellingPrice: number;
-    description: string;
-    lowStockThreshold: number;
-  };
+  existingProduct?: ExistingProduct;
   onSubmit: (data: any) => void;
 }
 
