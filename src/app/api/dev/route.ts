@@ -12,23 +12,20 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const userCol = await getCollection("user");
     const productCollection = await getCollection("product");
-    const saleCollection = await getCollection("sale");
-    const roleCollection = await getCollection("role");
 
-    await userCol.deleteMany({
-      _id: { $ne: new ObjectId("683c2298de25e07b9ade7a14") },
-    });
-    await productCollection.deleteMany({});
-    await saleCollection.deleteMany({});
-    await roleCollection.deleteMany({});
+    const result = await productCollection.deleteMany({ description: "test" });
 
-    return NextResponse.json({ message: "All data wiped ✨" }, { status: 200 });
-  } catch (error) {
-    console.error("[CLEAR_DB_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to clear collections" },
+      {
+        message: `Deleted ${result.deletedCount} products with description 'test' ✨`,
+      },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("[DELETE_TEST_PRODUCTS_ERROR]", error);
+    return NextResponse.json(
+      { error: "Failed to delete test products" },
       { status: 500 }
     );
   }

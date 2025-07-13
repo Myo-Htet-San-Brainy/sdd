@@ -116,3 +116,55 @@ export const MODULES_AND_PERMISSIONS = {
     },
   },
 };
+
+export const navInfo = {
+  ROLE: {
+    displayName: "Manage Roles",
+    link: "/main/role",
+    requiredPermissions: ["ROLE:READ"],
+    children: {},
+  },
+  USER: {
+    displayName: "Manage Users",
+    link: "/main/user",
+    requiredPermissions: ["USER:READ"],
+    children: {},
+  },
+  PRODUCT: {
+    displayName: "Manage Products",
+    link: "/main/product",
+    requiredPermissions: ["PRODUCT:READ"],
+    children: {},
+  },
+  SALE: {
+    displayName: "Manage Sales",
+    link: "/main/sale",
+    requiredPermissions: ["SALE:READ"],
+    children: {},
+  },
+  REPORT: {
+    displayName: "Reports & Analytics",
+    link: "/main/report",
+    requiredPermissions: ["REPORT:LOW_STOCK_ALERT", "REPORT:COMMISSION"],
+    children: {
+      LOW_STOCK: {
+        displayName: "Low Stock Alerts",
+        link: "/main/report/low-stock",
+        requiredPermissions: ["REPORT:LOW_STOCK_ALERT"],
+        children: {},
+      },
+      COMMISSION: {
+        displayName: "Monthly Commission Reports",
+        link: "/main/report/commission",
+        requiredPermissions: ["REPORT:COMMISSION"],
+        children: {},
+      },
+    },
+  },
+  MESSAGE: {
+    displayName: "Messages",
+    link: "/main/message",
+    requiredPermissions: ["MESSAGE:READ"],
+    children: {},
+  },
+};
