@@ -1,15 +1,12 @@
 export const MODULES_AND_PERMISSIONS = {
   ROLE: {
-    displayName: "Manage Roles",
     PERMISSION_READ: {
       name: "ROLE:READ",
       displayName: "View Roles",
-      link: "/main/role",
     },
     PERMISSION_CREATE: {
       name: "ROLE:CREATE",
       displayName: "Create Roles",
-      link: "/main/role/create",
     },
     PERMISSION_UPDATE: {
       name: "ROLE:UPDATE",
@@ -21,21 +18,17 @@ export const MODULES_AND_PERMISSIONS = {
     },
   },
   USER: {
-    displayName: "Manage Users",
     PERMISSION_READ: {
       name: "USER:READ",
       displayName: "View Users",
-      link: "/main/user",
     },
     PERMISSION_READ_ONLY_NAMES: {
       name: "USER:READ_ONLY_NAMES",
       displayName: "View Only User Names",
-      link: "",
     },
     PERMISSION_CREATE: {
       name: "USER:CREATE",
       displayName: "Create Users",
-      link: "/main/user/create",
     },
     PERMISSION_UPDATE: {
       name: "USER:UPDATE",
@@ -47,16 +40,13 @@ export const MODULES_AND_PERMISSIONS = {
     },
   },
   PRODUCT: {
-    displayName: "Manage Products",
     PERMISSION_READ: {
       name: "PRODUCT:READ",
       displayName: "View Products",
-      link: "/main/product",
     },
     PERMISSION_CREATE: {
       name: "PRODUCT:CREATE",
       displayName: "Create Products",
-      link: "/main/product/create",
     },
     PERMISSION_UPDATE: {
       name: "PRODUCT:UPDATE",
@@ -68,16 +58,13 @@ export const MODULES_AND_PERMISSIONS = {
     },
   },
   SALE: {
-    displayName: "Manage Sales",
     PERMISSION_READ: {
       name: "SALE:READ",
       displayName: "View Sales",
-      link: "/main/sale",
     },
     PERMISSION_CREATE: {
       name: "SALE:CREATE",
       displayName: "Create Sales",
-      link: "/main/sale/create",
     },
     PERMISSION_UPDATE: {
       name: "SALE:UPDATE",
@@ -89,82 +76,65 @@ export const MODULES_AND_PERMISSIONS = {
     },
   },
   REPORT: {
-    displayName: "Reports & Analytics",
-    link: "/main/report",
     PERMISSION_LOW_STOCK_ALERT: {
       name: "REPORT:LOW_STOCK_ALERT",
       displayName: "View Low Stock Alerts",
-      link: "/main/report/low-stock",
     },
     PERMISSION_COMMISSION: {
       name: "REPORT:COMMISSION",
       displayName: "View Monthly Commission Reports",
-      link: "/main/report/commission",
     },
   },
   MESSAGE: {
-    displayName: "",
     PERMISSION_UPDATE: {
       name: "MESSAGE:UPDATE",
       displayName: "Update Message",
-      link: "",
     },
     PERMISSION_READ: {
       name: "MESSAGE:READ",
       displayName: "View Message",
-      link: "/main/message/",
     },
   },
 };
 
-export const navInfo = {
-  ROLE: {
+export const globalNavbarData = [
+  {
+    id: "role",
     displayName: "Manage Roles",
     link: "/main/role",
-    requiredPermissions: ["ROLE:READ"],
-    children: {},
+    requiredPermissions: [MODULES_AND_PERMISSIONS.ROLE.PERMISSION_READ.name],
   },
-  USER: {
+  {
+    id: "user",
     displayName: "Manage Users",
     link: "/main/user",
-    requiredPermissions: ["USER:READ"],
-    children: {},
+    requiredPermissions: [MODULES_AND_PERMISSIONS.USER.PERMISSION_READ.name],
   },
-  PRODUCT: {
+  {
+    id: "product",
     displayName: "Manage Products",
     link: "/main/product",
-    requiredPermissions: ["PRODUCT:READ"],
-    children: {},
+    requiredPermissions: [MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name],
   },
-  SALE: {
+  {
+    id: "sale",
     displayName: "Manage Sales",
     link: "/main/sale",
-    requiredPermissions: ["SALE:READ"],
-    children: {},
+    requiredPermissions: [MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name],
   },
-  REPORT: {
+  {
+    id: "report",
     displayName: "Reports & Analytics",
     link: "/main/report",
-    requiredPermissions: ["REPORT:LOW_STOCK_ALERT", "REPORT:COMMISSION"],
-    children: {
-      LOW_STOCK: {
-        displayName: "Low Stock Alerts",
-        link: "/main/report/low-stock",
-        requiredPermissions: ["REPORT:LOW_STOCK_ALERT"],
-        children: {},
-      },
-      COMMISSION: {
-        displayName: "Monthly Commission Reports",
-        link: "/main/report/commission",
-        requiredPermissions: ["REPORT:COMMISSION"],
-        children: {},
-      },
-    },
+    requiredPermissions: [
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_LOW_STOCK_ALERT.name,
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_COMMISSION.name,
+    ],
   },
-  MESSAGE: {
+  {
+    id: "message",
     displayName: "Messages",
     link: "/main/message",
-    requiredPermissions: ["MESSAGE:READ"],
-    children: {},
+    requiredPermissions: [MODULES_AND_PERMISSIONS.MESSAGE.PERMISSION_READ.name],
   },
-};
+];

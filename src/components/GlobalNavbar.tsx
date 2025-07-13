@@ -2,7 +2,7 @@
 
 import { useGetMyAccount, useGetMyPermissions } from "@/query/miscellaneous";
 import Link from "next/link";
-import { navInfo } from "@/lib/constants";
+import { globalNavbarData } from "@/lib/constants";
 import React from "react";
 import { useSession } from "next-auth/react";
 import { ProfileDropdown } from "./ProfileDropdown";
@@ -42,11 +42,11 @@ const GlobalNavbar = () => {
           <GlobalNavbarSkeleton />
         ) : (
           <div className="flex gap-6 items-center text-sm font-medium text-gray-700">
-            {Object.entries(navInfo).map(([key, navItem]) => {
+            {globalNavbarData.map((navItem) => {
               if (hasAnyRequiredPermission(navItem.requiredPermissions)) {
                 return (
                   <Link
-                    key={key}
+                    key={navItem.id}
                     href={navItem.link}
                     className="hover:text-red-600 transition-colors"
                   >
