@@ -1,8 +1,7 @@
 "use client";
 
 import { MyPermissionsContext } from "@/context";
-import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { hasPermission } from "@/lib/utils";
+import { navInfo } from "@/lib/constants";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 
 const Layout = ({
@@ -21,21 +20,21 @@ const Layout = ({
     );
   }
 
-  const permissionEntries = Object.entries(
-    MODULES_AND_PERMISSIONS.REPORT
-  ).filter(
-    ([key, value]) =>
-      key.startsWith("PERMISSION_") &&
-      typeof value === "object" &&
-      "name" in value &&
-      typeof value.name === "string"
-  ) as [string, { name: string }][];
+  // Helper function to check if user has any of the required permissions
+  const hasAnyRequiredPermission = (requiredPermissions: string[]) => {
+    if (!myPermissions) return false;
+    return requiredPermissions.some((permission) =>
+      myPermissions.includes(permission)
+    );
+  };
 
-  const hasAnyPermission = permissionEntries.some(([_, perm]) =>
-    hasPermission(myPermissions!, perm.name)
+  // Get report navigation items and filter by permissions
+  const reportChildren = navInfo.REPORT.children;
+  const allowedReportItems = Object.entries(reportChildren).filter(
+    ([key, navItem]) => hasAnyRequiredPermission(navItem.requiredPermissions)
   );
 
-  if (!hasAnyPermission) {
+  if (allowedReportItems.length === 0) {
     return (
       <p className="mt-6 text-center text-red-700">
         You are not allowed to view reports.
@@ -47,27 +46,15 @@ const Layout = ({
     <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8">
       {/* 🔥 Red Themed Tabs */}
       <nav className="mb-6 flex flex-wrap gap-4">
-        {Object.values(MODULES_AND_PERMISSIONS.REPORT)
-          .filter(
-            (
-              perm
-            ): perm is { name: string; displayName: string; link: string } =>
-              typeof perm === "object" &&
-              "name" in perm &&
-              "link" in perm &&
-              "displayName" in perm
-          )
-          .map((perm) =>
-            hasPermission(myPermissions!, perm.name) ? (
-              <a
-                key={perm.name}
-                href={perm.link}
-                className="text-sm font-medium px-4 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
-              >
-                {perm.displayName}
-              </a>
-            ) : null
-          )}
+        {allowedReportItems.map(([key, navItem]) => (
+          <a
+            key={key}
+            href={navItem.link}
+            className="text-sm font-medium px-4 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+          >
+            {navItem.displayName}
+          </a>
+        ))}
       </nav>
 
       <MyPermissionsContext
