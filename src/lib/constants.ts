@@ -138,3 +138,22 @@ export const globalNavbarData = [
     requiredPermissions: [MODULES_AND_PERMISSIONS.MESSAGE.PERMISSION_READ.name],
   },
 ];
+
+export const reportNavbarData = [
+  {
+    id: "low-stock",
+    displayName: "Low Stock Alerts",
+    link: "/main/report/low-stock",
+    requiredPermissions: [
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_LOW_STOCK_ALERT.name,
+    ],
+  },
+  {
+    id: "commission",
+    displayName: "Monthly Commission Reports",
+    link: "/main/report/commission",
+    requiredPermissions: [
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_COMMISSION.name,
+    ],
+  },
+];

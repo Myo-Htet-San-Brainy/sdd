@@ -1,7 +1,7 @@
 "use client";
 
 import { MyPermissionsContext } from "@/context";
-import { navInfo } from "@/lib/constants";
+import { reportNavbarData } from "@/lib/constants";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 
 const Layout = ({
@@ -28,10 +28,9 @@ const Layout = ({
     );
   };
 
-  // Get report navigation items and filter by permissions
-  const reportChildren = navInfo.REPORT.children;
-  const allowedReportItems = Object.entries(reportChildren).filter(
-    ([key, navItem]) => hasAnyRequiredPermission(navItem.requiredPermissions)
+  // Filter report navigation items by permissions
+  const allowedReportItems = reportNavbarData.filter((navItem) =>
+    hasAnyRequiredPermission(navItem.requiredPermissions)
   );
 
   if (allowedReportItems.length === 0) {
@@ -46,9 +45,9 @@ const Layout = ({
     <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8">
       {/* 🔥 Red Themed Tabs */}
       <nav className="mb-6 flex flex-wrap gap-4">
-        {allowedReportItems.map(([key, navItem]) => (
+        {allowedReportItems.map((navItem) => (
           <a
-            key={key}
+            key={navItem.id}
             href={navItem.link}
             className="text-sm font-medium px-4 py-1.5 rounded-md bg-red-600 text-white hover:bg-red-700 transition"
           >
