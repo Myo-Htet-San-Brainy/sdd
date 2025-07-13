@@ -5,7 +5,7 @@ import BookmarkedProductsPopUp from "@/components/BookmarkedProductsPopUp";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import React, { useEffect, useRef, useState } from "react";
-import { MODULES_AND_PERMISSIONS, navInfo } from "@/lib/constants";
+import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
