@@ -89,10 +89,10 @@ const Page = () => {
       ) && (
         <div className="mb-6">
           <Link
-            href={MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.link}
+            href={"/main/role/create"}
             className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition"
           >
-            {MODULES_AND_PERMISSIONS.ROLE.PERMISSION_CREATE.displayName}
+            Create Role
           </Link>
         </div>
       )}

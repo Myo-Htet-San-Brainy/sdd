@@ -5,7 +5,7 @@ import BookmarkedProductsPopUp from "@/components/BookmarkedProductsPopUp";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import React, { useEffect, useRef, useState } from "react";
-import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { MODULES_AND_PERMISSIONS, navInfo } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
@@ -177,10 +177,10 @@ const Page = () => {
           MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
         ) && (
           <Link
-            href={MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.link}
+            href={"/main/product/create"}
             className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-md transition"
           >
-            {MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.displayName}
+            Create Product
           </Link>
         )}
 
