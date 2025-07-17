@@ -72,21 +72,21 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    // 1️⃣ Find products where ANY type array item has '+'
-    const productsWithPlus = await productCollection
-      .find({ type: { $elemMatch: { $regex: /\+/ } } })
+    // 1️⃣ Find products where 'type' array contains 'ရှေ့တာယာ'
+    const productsToUpdate = await productCollection
+      .find({ type: "နောက်တာယာ" })
       .toArray();
 
-    if (!productsWithPlus.length) {
+    if (!productsToUpdate.length) {
       return NextResponse.json({
-        message: "No products with '+' in type array found.",
+        message: "No products found with 'ရှေ့တာယာ' in type array.",
       });
     }
 
-    // 2️⃣ Loop & replace '+' in EACH type array item
-    const bulkOps = productsWithPlus.map((prod) => {
+    // 2️⃣ Build bulk update ops
+    const bulkOps = productsToUpdate.map((prod) => {
       const updatedTypeArray = prod.type.map((t: string) =>
-        typeof t === "string" ? t.replace(/\+/g, "N") : t
+        t === "နောက်တာယာ" ? "တာယာ" : t
       );
 
       return {
@@ -97,19 +97,48 @@ export async function PATCH(req: NextRequest) {
       };
     });
 
-    // 3️⃣ Bulk update
+    // 3️⃣ Run bulk update
     const result = await productCollection.bulkWrite(bulkOps);
 
     return NextResponse.json(
       {
-        message: `Updated ${result.modifiedCount} products' type arrays successfully ✨`,
+        message: `Updated ${result.modifiedCount} products successfully ✨`,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("[MANUAL_ARRAY_UPDATE_ERROR]", error);
+    console.error("[PATCH_UPDATE_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to update products with array types." },
+      { error: "Failed to update products." },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  const secret = req.nextUrl.searchParams.get("secret");
+
+  if (process.env.NODE_ENV !== "development" || secret !== DEV_SECRET) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const productCollection = await getCollection("product");
+    // Find all products with 'တာယာ' in their 'type' array
+    const products = await productCollection.find({ type: "တာယာ" }).toArray();
+    // Sum up 'noOfItemsInStock' for all fetched products
+    const totalInStock = products.reduce(
+      (sum, prod) => sum + (prod.noOfItemsInStock || 0),
+      0
+    );
+    return NextResponse.json(
+      { totalInStock, count: products.length },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("[GET_TAYA_PRODUCTS_ERROR]", error);
+    return NextResponse.json(
+      { error: "Failed to fetch products." },
       { status: 500 }
     );
   }

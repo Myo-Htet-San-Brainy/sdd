@@ -35,27 +35,29 @@ export function ConflictModalContent({
       {/* Similar Products */}
       <div className="space-y-2">
         <h3 className="font-medium text-white">Similar Products:</h3>
-        {similarProducts.map((prod) => (
-          <div
-            key={prod._id}
-            className="border border-white/30 bg-white/20 backdrop-blur-md p-3 rounded-md flex items-start justify-between"
-          >
-            <div className="text-sm text-white">
-              <strong>Brand:</strong> {prod.brand || "N/A"} <br />
-              <strong>Type:</strong> {prod.type.join(", ")} <br />
-              <strong>Description:</strong> {prod.description}
-            </div>
-            <Link
-              href={`/main/product/${prod._id}/update`}
-              className="ml-4 text-white underline hover:text-red-700 text-sm"
-              onClick={() => {
-                handleClose && handleClose("update");
-              }}
+        <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
+          {similarProducts.map((prod) => (
+            <div
+              key={prod._id}
+              className="border border-white/30 bg-white/20 backdrop-blur-md p-3 rounded-md flex items-start justify-between"
             >
-              Update This Product
-            </Link>
-          </div>
-        ))}
+              <div className="text-sm text-white">
+                <strong>Brand:</strong> {prod.brand || "N/A"} <br />
+                <strong>Type:</strong> {prod.type.join(", ")} <br />
+                <strong>Description:</strong> {prod.description}
+              </div>
+              <Link
+                href={`/main/product/${prod._id}/update`}
+                className="ml-4 text-white underline hover:text-red-700 text-sm"
+                onClick={() => {
+                  handleClose && handleClose("update");
+                }}
+              >
+                Update This Product
+              </Link>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Confirm */}
