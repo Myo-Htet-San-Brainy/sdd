@@ -124,21 +124,26 @@ export async function GET(req: NextRequest) {
 
   try {
     const productCollection = await getCollection("product");
-    // Find all products with 'တာယာ' in their 'type' array
-    const products = await productCollection.find({ type: "တာယာ" }).toArray();
-    // Sum up 'noOfItemsInStock' for all fetched products
-    const totalInStock = products.reduce(
-      (sum, prod) => sum + (prod.noOfItemsInStock || 0),
-      0
-    );
+    // Find the latest entered product document (by _id descending)
+    const latestProduct = await productCollection
+      .find()
+      .sort({ _id: -1 })
+      .limit(1)
+      .toArray();
+    if (!latestProduct.length) {
+      return NextResponse.json(
+        { message: "No products found." },
+        { status: 404 }
+      );
+    }
     return NextResponse.json(
-      { totalInStock, count: products.length },
+      { latestProduct: latestProduct[0] },
       { status: 200 }
     );
   } catch (error) {
-    console.error("[GET_TAYA_PRODUCTS_ERROR]", error);
+    console.error("[GET_LATEST_PRODUCT_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to fetch products." },
+      { error: "Failed to fetch latest product." },
       { status: 500 }
     );
   }

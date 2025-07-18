@@ -47,7 +47,7 @@ const Page = () => {
       if (similarProductsData.products.length > 0) {
         const result = await showFormModal({
           title: "Some title",
-          showCloseButton: false,
+          showCloseButton: true,
           content: (
             <ConflictModalContent
               currentProduct={{
