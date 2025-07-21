@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb"; // ✅ Make sure to import this
+import { deleteDuplicateProducts } from "@/lib/serverUtils";
 
 const DEV_SECRET = process.env.DEV_SECRET;
 
@@ -12,20 +13,19 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    const productCollection = await getCollection("product");
-
-    const result = await productCollection.deleteMany({ description: "test" });
+    const result = await deleteDuplicateProducts();
 
     return NextResponse.json(
       {
-        message: `Deleted ${result.deletedCount} products with description 'test' ✨`,
+        message: `Deleted ${result.totalDeleted} duplicate products ✨`,
+        details: result,
       },
       { status: 200 }
     );
   } catch (error) {
-    console.error("[DELETE_TEST_PRODUCTS_ERROR]", error);
+    console.error("[DELETE_DUPLICATE_PRODUCTS_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to delete test products" },
+      { error: "Failed to delete duplicate products" },
       { status: 500 }
     );
   }

@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextAuthOptions";
 import { getRoleByName } from "@/db/role";
 import { hasPermission } from "@/lib/utils";
+import { getCollection } from "./mongodb";
 
 export async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
@@ -135,4 +136,77 @@ export async function verifyPermissions(
   }
 
   return { ok: true, matchedPermission, userRole };
+}
+
+export interface DuplicateDeletionResult {
+  totalDeleted: number;
+  duplicateGroupsFound: number;
+  deletedGroups: Array<{
+    type: string[];
+    brand: string;
+    description: string;
+    count: number;
+    deleted: number;
+  }>;
+}
+
+export async function deleteDuplicateProducts(): Promise<DuplicateDeletionResult> {
+  try {
+    const productCollection = await getCollection("product");
+
+    // Find all products and group them by type, brand, and description
+    const allProducts = await productCollection.find({}).toArray();
+
+    // Group products by their type, brand, and description combination
+    const groupedProducts = new Map();
+
+    allProducts.forEach((product: any) => {
+      const key = JSON.stringify({
+        type: product.type,
+        brand: product.brand,
+        description: product.description,
+      });
+
+      if (!groupedProducts.has(key)) {
+        groupedProducts.set(key, []);
+      }
+      groupedProducts.get(key).push(product);
+    });
+
+    // Find groups with more than one product (duplicates)
+    const duplicateGroups = Array.from(groupedProducts.values()).filter(
+      (group: any[]) => group.length > 1
+    );
+
+    let totalDeleted = 0;
+    const deletedGroups = [];
+
+    // For each duplicate group, keep the first product and delete the rest
+    for (const group of duplicateGroups) {
+      const productsToDelete = group.slice(1); // Keep first, delete the rest
+      const productIds = productsToDelete.map((p: any) => p._id);
+
+      const deleteResult = await productCollection.deleteMany({
+        _id: { $in: productIds },
+      });
+
+      totalDeleted += deleteResult.deletedCount;
+      deletedGroups.push({
+        type: group[0].type,
+        brand: group[0].brand,
+        description: group[0].description,
+        count: group.length,
+        deleted: deleteResult.deletedCount,
+      });
+    }
+
+    return {
+      totalDeleted,
+      duplicateGroupsFound: duplicateGroups.length,
+      deletedGroups,
+    };
+  } catch (error) {
+    console.error("[DELETE_DUPLICATE_PRODUCTS_ERROR]", error);
+    throw new Error("Failed to delete duplicate products");
+  }
 }

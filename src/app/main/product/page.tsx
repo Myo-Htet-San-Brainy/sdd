@@ -38,11 +38,11 @@ const Page = () => {
 
   const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
 
-  const formRef = useRef<HTMLFormElement | null>(null);
+  const typeRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
+      if (typeRef.current && !typeRef.current.contains(event.target as Node)) {
         setSuggestionPrompt("");
       }
     };
@@ -88,8 +88,6 @@ const Page = () => {
     // Reset filters when a new search is performed
     setFilter({ brand: "all brands", description: "all descriptions" });
   }
-
-  console.log("products", products);
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -195,12 +193,8 @@ const Page = () => {
       </div>
 
       {/* 🔍 Centered Search Form */}
-      <form
-        ref={formRef}
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSearch();
-        }}
+      <div
+        ref={typeRef}
         className="max-w-xl mx-auto flex gap-2 items-stretch relative"
       >
         <input
@@ -245,14 +239,14 @@ const Page = () => {
           </div>
         )}
 
-        <button
+        {/* <button
           disabled={isFetchingProducts}
           type="submit"
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition w-full sm:w-fit self-end"
         >
           Search
-        </button>
-      </form>
+        </button> */}
+      </div>
 
       {/* ⚙️ Filters Section */}
       {searchInput &&
