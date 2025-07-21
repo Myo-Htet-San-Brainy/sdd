@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
     const brand = searchParams.get("brand");
     const type = searchParams.get("type");
     const location = searchParams.get("location");
+    const source = searchParams.get("source");
 
     const filterObj: any = {};
     if (type) {
@@ -33,6 +34,9 @@ export async function GET(req: NextRequest) {
     }
     if (brand) {
       filterObj.brand = brand;
+    }
+    if (source) {
+      filterObj.source = source;
     }
     // console.log(filterObj);
 

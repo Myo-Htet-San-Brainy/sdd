@@ -57,14 +57,16 @@ const Product = ({
       </div>
 
       {/* Cart Controls */}
-      {hasPermission(
-        myPermissions!,
-        MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
-      ) ||
-      hasPermission(
-        myPermissions!,
-        MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
-      ) ? (
+      {(myPermissions &&
+        hasPermission(
+          myPermissions,
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+        )) ||
+      (myPermissions &&
+        hasPermission(
+          myPermissions,
+          MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
+        )) ? (
         <div className="flex items-center justify-between border-t pt-3">
           {isInCart ? (
             <>
