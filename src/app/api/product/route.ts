@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     const type = searchParams.get("type");
     const location = searchParams.get("location");
     const source = searchParams.get("source");
+    const noOfItemsInStockRaw = searchParams.get("noOfItemsInStock");
 
     const filterObj: any = {};
     if (type) {
@@ -38,7 +39,27 @@ export async function GET(req: NextRequest) {
     if (source) {
       filterObj.source = source;
     }
-    // console.log(filterObj);
+    if (noOfItemsInStockRaw) {
+      try {
+        const stockFilter = JSON.parse(noOfItemsInStockRaw);
+        if (
+          typeof stockFilter === "object" &&
+          typeof stockFilter.val === "number" &&
+          ["exact", "greater", "less"].includes(stockFilter.condition)
+        ) {
+          if (stockFilter.condition === "exact") {
+            filterObj.noOfItemsInStock = stockFilter.val;
+          } else if (stockFilter.condition === "greater") {
+            filterObj.noOfItemsInStock = { $gt: stockFilter.val };
+          } else if (stockFilter.condition === "less") {
+            filterObj.noOfItemsInStock = { $lt: stockFilter.val };
+          }
+        }
+      } catch (e) {
+        // ignore invalid JSON
+      }
+    }
+    console.log(filterObj);
 
     const products = await getProducts(filterObj);
 

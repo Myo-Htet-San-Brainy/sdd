@@ -25,6 +25,11 @@ const Page = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const typeRef = useRef<HTMLDivElement | null>(null);
+  const [stockFilterEnabled, setStockFilterEnabled] = useState(false);
+  const [stockCondition, setStockCondition] = useState<
+    "exact" | "greater" | "less"
+  >("exact");
+  const [stockValue, setStockValue] = useState<number>(0);
 
   const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
   const {
@@ -73,11 +78,18 @@ const Page = () => {
     setError("");
     setProducts(undefined);
     try {
-      const filterObj: Record<string, string> = {};
+      const filterObj: Record<string, any> = {};
       if (type.trim() !== "") filterObj["type"] = type.trim();
       if (brand.trim() !== "") filterObj["brand"] = brand.trim();
       if (source.trim() !== "") filterObj["source"] = source.trim();
       if (location.trim() !== "") filterObj["location"] = location.trim();
+      if (stockFilterEnabled) {
+        filterObj["noOfItemsInStock"] = JSON.stringify({
+          val: stockValue,
+          condition: stockCondition,
+        });
+      }
+      // console.log("filterObj", filterObj);
       const res = await getProducts(filterObj);
       setProducts(res.products);
     } catch (err) {
@@ -259,10 +271,51 @@ const Page = () => {
               )}
             </select>
           </div>
+          {/* Stock Filter */}
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
+              <input
+                type="checkbox"
+                checked={stockFilterEnabled}
+                onChange={(e) => setStockFilterEnabled(e.target.checked)}
+                className="mr-2"
+              />
+              Filter by Stock
+            </label>
+            {stockFilterEnabled && (
+              <div className="flex gap-2 mt-1">
+                <select
+                  value={stockCondition}
+                  onChange={(e) =>
+                    setStockCondition(
+                      e.target.value as "exact" | "greater" | "less"
+                    )
+                  }
+                  className="p-2 border border-zinc-300 rounded-md text-black"
+                >
+                  <option value="exact">Exact</option>
+                  <option value="greater">Greater than</option>
+                  <option value="less">Less than</option>
+                </select>
+                <input
+                  type="number"
+                  value={stockValue}
+                  onChange={(e) => setStockValue(Number(e.target.value))}
+                  className="p-2 border border-zinc-300 rounded-md w-20 text-black"
+                  min={0}
+                />
+              </div>
+            )}
+          </div>
         </div>
       )}
 
       {/* Products Content */}
+      {Array.isArray(products) && (
+        <div className="mb-4 text-red-500 font-medium text-right">
+          Showing {products.length} product{products.length !== 1 ? "s" : ""}
+        </div>
+      )}
       <div className="mt-10">{content}</div>
     </div>
   );

@@ -318,6 +318,11 @@ const Page = () => {
         )}
 
       {/* 📦 Products Content */}
+      {Array.isArray(products) && (
+        <div className="mb-4 text-red-500 font-medium text-right">
+          Showing {products.length} product{products.length !== 1 ? "s" : ""}
+        </div>
+      )}
       <div className="mt-10">{content}</div>
     </div>
   );
