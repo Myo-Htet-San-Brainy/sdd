@@ -117,7 +117,8 @@ export async function getUniqueTypeArraysOfMatchedProducts(inputType: string) {
 
 export async function createProduct(product: any) {
   const productCollection = await getCollection("product");
-  return await productCollection.insertOne(product);
+  const productWithLastUpdated = { ...product, lastUpdated: new Date() };
+  return await productCollection.insertOne(productWithLastUpdated);
 }
 
 // db/product.ts

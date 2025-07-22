@@ -117,6 +117,17 @@ const Page = () => {
               value={product.lowStockThreshold}
             />
           )}
+          {product.lastUpdated && (
+            <Detail
+              label="Last Updated"
+              value={
+                typeof product.lastUpdated === "string" ||
+                typeof product.lastUpdated === "number"
+                  ? new Date(product.lastUpdated).toLocaleString()
+                  : ""
+              }
+            />
+          )}
         </div>
 
         {hasPermission(

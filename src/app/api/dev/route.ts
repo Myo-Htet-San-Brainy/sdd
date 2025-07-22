@@ -72,37 +72,33 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    // 1️⃣ Find products where 'type' array contains 'ရှေ့တာယာ'
-    const productsToUpdate = await productCollection
-      .find({ type: "နောက်တာယာ" })
-      .toArray();
+    // 1️⃣ Get all products
+    const allProducts = await productCollection.find({}).toArray();
 
-    if (!productsToUpdate.length) {
-      return NextResponse.json({
-        message: "No products found with 'ရှေ့တာယာ' in type array.",
+    // 2️⃣ Build bulk update ops for products missing 'lastUpdated'
+    const bulkOps = allProducts
+      .filter((prod) => !("lastUpdated" in prod))
+      .map((prod) => {
+        // Get creation time from ObjectId
+        const createdAt = prod._id.getTimestamp();
+        return {
+          updateOne: {
+            filter: { _id: prod._id },
+            update: { $set: { lastUpdated: createdAt } },
+          },
+        };
       });
+
+    let result = { modifiedCount: 0 };
+    if (bulkOps.length > 0) {
+      result = await productCollection.bulkWrite(bulkOps);
     }
-
-    // 2️⃣ Build bulk update ops
-    const bulkOps = productsToUpdate.map((prod) => {
-      const updatedTypeArray = prod.type.map((t: string) =>
-        t === "နောက်တာယာ" ? "တာယာ" : t
-      );
-
-      return {
-        updateOne: {
-          filter: { _id: prod._id },
-          update: { $set: { type: updatedTypeArray } },
-        },
-      };
-    });
-
-    // 3️⃣ Run bulk update
-    const result = await productCollection.bulkWrite(bulkOps);
 
     return NextResponse.json(
       {
-        message: `Updated ${result.modifiedCount} products successfully ✨`,
+        message: `Updated ${result.modifiedCount} products with lastUpdated.`,
+        updatedCount: result.modifiedCount,
+        totalProducts: allProducts.length,
       },
       { status: 200 }
     );
