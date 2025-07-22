@@ -22,6 +22,7 @@ const Page = () => {
   const [source, setSource] = useState("");
   const [location, setLocation] = useState("");
   const [products, setProducts] = useState<ProductI[] | undefined>(undefined);
+  const [orderBy, setOrderBy] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const typeRef = useRef<HTMLDivElement | null>(null);
@@ -50,6 +51,50 @@ const Page = () => {
     isPending: isMetaPending,
     isError: isMetaError,
   } = useGetProductMeta({ brand: true, source: true, location: true });
+
+  // Derived sorted products
+  const [sortedProducts, setSortedProducts] = useState<ProductI[] | undefined>(
+    undefined
+  );
+
+  useEffect(() => {
+    if (!products) {
+      setSortedProducts(undefined);
+      return;
+    }
+    if (!orderBy) {
+      setSortedProducts(products);
+      return;
+    }
+    // Helper to get creation time from MongoDB ObjectId
+    function getCreatedTime(prod: ProductI) {
+      if (prod._id && typeof prod._id === "string" && prod._id.length === 24) {
+        // ObjectId: first 8 chars = 4 bytes = seconds since epoch (hex)
+        const timestampHex = prod._id.substring(0, 8);
+        return parseInt(timestampHex, 16) * 1000;
+      }
+      return 0;
+    }
+    // Helper to get lastUpdated time
+    function getLastUpdated(prod: ProductI) {
+      if (prod.lastUpdated) {
+        // lastUpdated may be a string (ISO) or Date
+        return new Date(prod.lastUpdated).getTime();
+      }
+      return 0;
+    }
+    let sorted = [...products];
+    if (orderBy === "createdTime-recent") {
+      sorted.sort((a, b) => getCreatedTime(b) - getCreatedTime(a));
+    } else if (orderBy === "createdTime-old") {
+      sorted.sort((a, b) => getCreatedTime(a) - getCreatedTime(b));
+    } else if (orderBy === "lastUpdated-recent") {
+      sorted.sort((a, b) => getLastUpdated(b) - getLastUpdated(a));
+    } else if (orderBy === "lastUpdated-old") {
+      sorted.sort((a, b) => getLastUpdated(a) - getLastUpdated(b));
+    }
+    setSortedProducts(sorted);
+  }, [products, orderBy]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -407,12 +452,45 @@ const Page = () => {
       )}
 
       {/* Products Content */}
-      {Array.isArray(products) && (
+      <div className="flex justify-end mb-2">
+        <label className="text-sm text-zinc-700 mr-2">Order by:</label>
+        <select
+          value={orderBy}
+          onChange={(e) => setOrderBy(e.target.value)}
+          className="p-2 border border-zinc-300 rounded-md text-black"
+          style={{ minWidth: 180 }}
+        >
+          <option value="">Nothing (default)</option>
+          <option value="createdTime-recent">
+            Created Time: Recent to Old
+          </option>
+          <option value="createdTime-old">Created Time: Old to Recent</option>
+          <option value="lastUpdated-recent">
+            Last Updated: Recent to Old
+          </option>
+          <option value="lastUpdated-old">Last Updated: Old to Recent</option>
+        </select>
+      </div>
+      {Array.isArray(sortedProducts) && (
         <div className="mb-4 text-red-500 font-medium text-right">
-          Showing {products.length} product{products.length !== 1 ? "s" : ""}
+          Showing {sortedProducts.length} product
+          {sortedProducts.length !== 1 ? "s" : ""}
         </div>
       )}
-      <div className="mt-10">{content}</div>
+      <div className="mt-10">
+        {isLoading ||
+        error ||
+        products === undefined ||
+        (Array.isArray(products) && products.length === 0) ? (
+          content
+        ) : Array.isArray(sortedProducts) ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+            {sortedProducts.map((product: ProductI) => (
+              <Product key={product._id} product={product} />
+            ))}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 };
