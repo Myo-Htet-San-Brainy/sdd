@@ -30,6 +30,18 @@ const Page = () => {
     "exact" | "greater" | "less"
   >("exact");
   const [stockValue, setStockValue] = useState<number>(0);
+  const [buyingPriceFilterEnabled, setBuyingPriceFilterEnabled] =
+    useState(false);
+  const [buyingPriceCondition, setBuyingPriceCondition] = useState<
+    "exact" | "greater" | "less"
+  >("exact");
+  const [buyingPriceValue, setBuyingPriceValue] = useState<number>(0);
+  const [sellingPriceFilterEnabled, setSellingPriceFilterEnabled] =
+    useState(false);
+  const [sellingPriceCondition, setSellingPriceCondition] = useState<
+    "exact" | "greater" | "less"
+  >("exact");
+  const [sellingPriceValue, setSellingPriceValue] = useState<number>(0);
 
   const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
   const {
@@ -87,6 +99,18 @@ const Page = () => {
         filterObj["noOfItemsInStock"] = JSON.stringify({
           val: stockValue,
           condition: stockCondition,
+        });
+      }
+      if (buyingPriceFilterEnabled) {
+        filterObj["buyingPrice"] = JSON.stringify({
+          val: buyingPriceValue,
+          condition: buyingPriceCondition,
+        });
+      }
+      if (sellingPriceFilterEnabled) {
+        filterObj["sellingPrice"] = JSON.stringify({
+          val: sellingPriceValue,
+          condition: sellingPriceCondition,
         });
       }
       // console.log("filterObj", filterObj);
@@ -301,6 +325,78 @@ const Page = () => {
                   type="number"
                   value={stockValue}
                   onChange={(e) => setStockValue(Number(e.target.value))}
+                  className="p-2 border border-zinc-300 rounded-md w-20 text-black"
+                  min={0}
+                />
+              </div>
+            )}
+          </div>
+          {/* Buying Price Filter */}
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
+              <input
+                type="checkbox"
+                checked={buyingPriceFilterEnabled}
+                onChange={(e) => setBuyingPriceFilterEnabled(e.target.checked)}
+                className="mr-2"
+              />
+              Filter by Buying Price
+            </label>
+            {buyingPriceFilterEnabled && (
+              <div className="flex gap-2 mt-1">
+                <select
+                  value={buyingPriceCondition}
+                  onChange={(e) =>
+                    setBuyingPriceCondition(
+                      e.target.value as "exact" | "greater" | "less"
+                    )
+                  }
+                  className="p-2 border border-zinc-300 rounded-md text-black"
+                >
+                  <option value="exact">Exact</option>
+                  <option value="greater">Greater than</option>
+                  <option value="less">Less than</option>
+                </select>
+                <input
+                  type="number"
+                  value={buyingPriceValue}
+                  onChange={(e) => setBuyingPriceValue(Number(e.target.value))}
+                  className="p-2 border border-zinc-300 rounded-md w-20 text-black"
+                  min={0}
+                />
+              </div>
+            )}
+          </div>
+          {/* Selling Price Filter */}
+          <div className="flex-1 min-w-[200px]">
+            <label className="block text-sm font-medium text-zinc-700 mb-1">
+              <input
+                type="checkbox"
+                checked={sellingPriceFilterEnabled}
+                onChange={(e) => setSellingPriceFilterEnabled(e.target.checked)}
+                className="mr-2"
+              />
+              Filter by Selling Price
+            </label>
+            {sellingPriceFilterEnabled && (
+              <div className="flex gap-2 mt-1">
+                <select
+                  value={sellingPriceCondition}
+                  onChange={(e) =>
+                    setSellingPriceCondition(
+                      e.target.value as "exact" | "greater" | "less"
+                    )
+                  }
+                  className="p-2 border border-zinc-300 rounded-md text-black"
+                >
+                  <option value="exact">Exact</option>
+                  <option value="greater">Greater than</option>
+                  <option value="less">Less than</option>
+                </select>
+                <input
+                  type="number"
+                  value={sellingPriceValue}
+                  onChange={(e) => setSellingPriceValue(Number(e.target.value))}
                   className="p-2 border border-zinc-300 rounded-md w-20 text-black"
                   min={0}
                 />

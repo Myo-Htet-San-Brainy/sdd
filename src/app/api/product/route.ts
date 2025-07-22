@@ -25,6 +25,8 @@ export async function GET(req: NextRequest) {
     const location = searchParams.get("location");
     const source = searchParams.get("source");
     const noOfItemsInStockRaw = searchParams.get("noOfItemsInStock");
+    const buyingPriceRaw = searchParams.get("buyingPrice");
+    const sellingPriceRaw = searchParams.get("sellingPrice");
 
     const filterObj: any = {};
     if (type) {
@@ -53,6 +55,46 @@ export async function GET(req: NextRequest) {
             filterObj.noOfItemsInStock = { $gt: stockFilter.val };
           } else if (stockFilter.condition === "less") {
             filterObj.noOfItemsInStock = { $lt: stockFilter.val };
+          }
+        }
+      } catch (e) {
+        // ignore invalid JSON
+      }
+    }
+    if (buyingPriceRaw) {
+      try {
+        const buyingPriceFilter = JSON.parse(buyingPriceRaw);
+        if (
+          typeof buyingPriceFilter === "object" &&
+          typeof buyingPriceFilter.val === "number" &&
+          ["exact", "greater", "less"].includes(buyingPriceFilter.condition)
+        ) {
+          if (buyingPriceFilter.condition === "exact") {
+            filterObj.buyingPrice = buyingPriceFilter.val;
+          } else if (buyingPriceFilter.condition === "greater") {
+            filterObj.buyingPrice = { $gt: buyingPriceFilter.val };
+          } else if (buyingPriceFilter.condition === "less") {
+            filterObj.buyingPrice = { $lt: buyingPriceFilter.val };
+          }
+        }
+      } catch (e) {
+        // ignore invalid JSON
+      }
+    }
+    if (sellingPriceRaw) {
+      try {
+        const sellingPriceFilter = JSON.parse(sellingPriceRaw);
+        if (
+          typeof sellingPriceFilter === "object" &&
+          typeof sellingPriceFilter.val === "number" &&
+          ["exact", "greater", "less"].includes(sellingPriceFilter.condition)
+        ) {
+          if (sellingPriceFilter.condition === "exact") {
+            filterObj.sellingPrice = sellingPriceFilter.val;
+          } else if (sellingPriceFilter.condition === "greater") {
+            filterObj.sellingPrice = { $gt: sellingPriceFilter.val };
+          } else if (sellingPriceFilter.condition === "less") {
+            filterObj.sellingPrice = { $lt: sellingPriceFilter.val };
           }
         }
       } catch (e) {
