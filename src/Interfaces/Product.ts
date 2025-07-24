@@ -9,5 +9,5 @@ export interface Product {
   buyingPrice?: number;
   source?: string;
   lowStockThreshold?: number;
-  lastUpdated: Date;
+  lastUpdated: string;
 }

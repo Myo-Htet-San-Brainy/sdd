@@ -27,6 +27,9 @@ export async function getProducts(filterObj: Object): Promise<{
   products: Product[];
   distinctBrands: string[];
   distinctDescriptions: string[];
+  page?: number;
+  totalPages?: number;
+  total?: number;
 }> {
   try {
     const response = await axios.get(`/api/product`, {
@@ -37,8 +40,22 @@ export async function getProducts(filterObj: Object): Promise<{
       throw new Error("Error fetching products!");
     }
 
-    const { products, distinctBrands, distinctDescriptions } = response.data;
-    return { products, distinctBrands, distinctDescriptions };
+    const {
+      products,
+      distinctBrands,
+      distinctDescriptions,
+      page,
+      totalPages,
+      total,
+    } = response.data;
+    return {
+      products,
+      distinctBrands,
+      distinctDescriptions,
+      page,
+      totalPages,
+      total,
+    };
   } catch (error: any) {
     console.log("error fetching products:", error);
     throw new CustomError("Internal Sever Error!", 500);

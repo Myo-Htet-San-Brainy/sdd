@@ -8,6 +8,7 @@ import { Product as ProductI } from "@/Interfaces/Product";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import Pagination from "@/components/Pagination";
 
 const Page = () => {
   const {
@@ -15,14 +16,12 @@ const Page = () => {
     isFetching: isFetchingMyPermissions,
     isPending: isPendingMyPermissions,
   } = useGetMyPermissions();
-
   const [type, setType] = useState("");
   const [suggestionPrompt, setSuggestionPrompt] = useState("");
   const [brand, setBrand] = useState("");
   const [source, setSource] = useState("");
   const [location, setLocation] = useState("");
   const [products, setProducts] = useState<ProductI[] | undefined>(undefined);
-  const [orderBy, setOrderBy] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const typeRef = useRef<HTMLDivElement | null>(null);
@@ -43,6 +42,10 @@ const Page = () => {
     "exact" | "greater" | "less"
   >("exact");
   const [sellingPriceValue, setSellingPriceValue] = useState<number>(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const { data: suggestions } = useGetSuggestions({ type: suggestionPrompt });
   const {
@@ -52,50 +55,38 @@ const Page = () => {
     isError: isMetaError,
   } = useGetProductMeta({ brand: true, source: true, location: true });
 
-  // Derived sorted products
-  const [sortedProducts, setSortedProducts] = useState<ProductI[] | undefined>(
-    undefined
-  );
+  // ✅ the handle for sorting
+  const handleSort = (value: string) => {
+    if (!products || products.length <= 0) return;
 
-  useEffect(() => {
-    if (!products) {
-      setSortedProducts(undefined);
-      return;
-    }
-    if (!orderBy) {
-      setSortedProducts(products);
-      return;
-    }
-    // Helper to get creation time from MongoDB ObjectId
     function getCreatedTime(prod: ProductI) {
       if (prod._id && typeof prod._id === "string" && prod._id.length === 24) {
-        // ObjectId: first 8 chars = 4 bytes = seconds since epoch (hex)
         const timestampHex = prod._id.substring(0, 8);
         return parseInt(timestampHex, 16) * 1000;
       }
       return 0;
     }
-    // Helper to get lastUpdated time
     function getLastUpdated(prod: ProductI) {
       if (prod.lastUpdated) {
-        // lastUpdated may be a string (ISO) or Date
         return new Date(prod.lastUpdated).getTime();
       }
       return 0;
     }
+
     let sorted = [...products];
-    if (orderBy === "createdTime-recent") {
+    if (value === "createdTime-recent") {
       sorted.sort((a, b) => getCreatedTime(b) - getCreatedTime(a));
-    } else if (orderBy === "createdTime-old") {
+    } else if (value === "createdTime-old") {
       sorted.sort((a, b) => getCreatedTime(a) - getCreatedTime(b));
-    } else if (orderBy === "lastUpdated-recent") {
+    } else if (value === "lastUpdated-recent") {
       sorted.sort((a, b) => getLastUpdated(b) - getLastUpdated(a));
-    } else if (orderBy === "lastUpdated-old") {
+    } else if (value === "lastUpdated-old") {
       sorted.sort((a, b) => getLastUpdated(a) - getLastUpdated(b));
     }
-    setSortedProducts(sorted);
-  }, [products, orderBy]);
+    setProducts(sorted);
+  };
 
+  //adding listeners
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (typeRef.current && !typeRef.current.contains(event.target as Node)) {
@@ -107,6 +98,30 @@ const Page = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  // When filters change, reset to page 1
+  useEffect(() => {
+    setPage(1);
+  }, [
+    type,
+    brand,
+    source,
+    location,
+    stockFilterEnabled,
+    stockCondition,
+    stockValue,
+    buyingPriceFilterEnabled,
+    buyingPriceCondition,
+    buyingPriceValue,
+    sellingPriceFilterEnabled,
+    sellingPriceCondition,
+    sellingPriceValue,
+  ]);
+  // Fetch products when page or limit changes
+  useEffect(() => {
+    handleSearch();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit]);
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -130,7 +145,27 @@ const Page = () => {
     );
   }
 
-  const handleSearch = async () => {
+  if (isMetaFetching || isMetaPending) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-zinc-600 animate-pulse text-center">
+          Preparing product filters...
+        </p>
+      </div>
+    );
+  }
+
+  if (isMetaError) {
+    return (
+      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
+        <p className="text-red-600 text-center text-lg font-medium">
+          Failed to load product metadata.
+        </p>
+      </div>
+    );
+  }
+
+  const handleSearch = async (pageOverride?: number) => {
     setIsLoading(true);
     setError("");
     setProducts(undefined);
@@ -158,9 +193,16 @@ const Page = () => {
           condition: sellingPriceCondition,
         });
       }
+      // Add pagination params
+      const pageToFetch = pageOverride || 1;
+      filterObj["page"] = pageToFetch;
+      filterObj["limit"] = limit;
       // console.log("filterObj", filterObj);
       const res = await getProducts(filterObj);
       setProducts(res.products);
+      setPage(res.page || 1);
+      setTotalPages(res.totalPages || 1);
+      setTotal(res.total || 0);
     } catch (err) {
       setError("Error fetching products. Please try again.");
     } finally {
@@ -193,36 +235,27 @@ const Page = () => {
     );
   } else if (Array.isArray(products)) {
     content = (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-        {products.map((product: ProductI) => (
-          <Product key={product._id} product={product} />
-        ))}
-      </div>
-    );
-  }
-
-  if (isMetaFetching || isMetaPending) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
-        <p className="text-zinc-600 animate-pulse text-center">
-          Preparing product filters...
-        </p>
-      </div>
-    );
-  }
-
-  if (isMetaError) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
-        <p className="text-red-600 text-center text-lg font-medium">
-          Failed to load product metadata.
-        </p>
-      </div>
+      <>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+          {products.map((product: ProductI) => (
+            <Product key={product._id} product={product} />
+          ))}
+        </div>
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          onPageChange={(newPage) => {
+            setPage(newPage);
+            handleSearch(newPage);
+          }}
+        />
+      </>
     );
   }
 
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8">
+      {/* Type */}
       <div
         ref={typeRef}
         className="max-w-xl mx-auto flex gap-2 items-stretch relative"
@@ -240,7 +273,7 @@ const Page = () => {
           onFocus={(e) => setSuggestionPrompt(e.target.value)}
         />
         <button
-          onClick={handleSearch}
+          onClick={() => handleSearch()}
           disabled={isLoading}
           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition w-full sm:w-fit self-end"
         >
@@ -451,12 +484,13 @@ const Page = () => {
         </div>
       )}
 
-      {/* Products Content */}
+      {/* Sorting */}
+      {/* Sorting — uncontrolled select, disabled if products undefined or empty */}
       <div className="flex justify-end mb-2">
         <label className="text-sm text-zinc-700 mr-2">Order by:</label>
         <select
-          value={orderBy}
-          onChange={(e) => setOrderBy(e.target.value)}
+          onChange={(e) => handleSort(e.target.value)}
+          disabled={!products || products.length === 0}
           className="p-2 border border-zinc-300 rounded-md text-black"
           style={{ minWidth: 180 }}
         >
@@ -471,26 +505,15 @@ const Page = () => {
           <option value="lastUpdated-old">Last Updated: Old to Recent</option>
         </select>
       </div>
-      {Array.isArray(sortedProducts) && (
+
+      {/* Total data */}
+      {Array.isArray(products) && (
         <div className="mb-4 text-red-500 font-medium text-right">
-          Showing {sortedProducts.length} product
-          {sortedProducts.length !== 1 ? "s" : ""}
+          Showing {products.length} product
+          {products.length !== 1 ? "s" : ""}
         </div>
       )}
-      <div className="mt-10">
-        {isLoading ||
-        error ||
-        products === undefined ||
-        (Array.isArray(products) && products.length === 0) ? (
-          content
-        ) : Array.isArray(sortedProducts) ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-            {sortedProducts.map((product: ProductI) => (
-              <Product key={product._id} product={product} />
-            ))}
-          </div>
-        ) : null}
-      </div>
+      <div className="mt-10">{content}</div>
     </div>
   );
 };

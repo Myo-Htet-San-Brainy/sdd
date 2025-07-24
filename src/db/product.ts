@@ -21,6 +21,7 @@ export async function getProducts(
     noOfItemsInStock: 1,
     sellingPrice: 1,
     location: 1,
+    lastUpdated: 1,
   }
 ) {
   const productCollection = await getCollection("product");

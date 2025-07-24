@@ -27,6 +27,10 @@ export async function GET(req: NextRequest) {
     const noOfItemsInStockRaw = searchParams.get("noOfItemsInStock");
     const buyingPriceRaw = searchParams.get("buyingPrice");
     const sellingPriceRaw = searchParams.get("sellingPrice");
+    // Pagination params
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const limit = parseInt(searchParams.get("limit") || "20", 10);
+    const skip = (page - 1) * limit;
 
     const filterObj: any = {};
     if (type) {
@@ -103,12 +107,17 @@ export async function GET(req: NextRequest) {
     }
     console.log(filterObj);
 
-    const products = await getProducts(filterObj);
+    // Pagination logic
+    // getProducts should be updated to accept skip and limit, but for now, let's assume it returns all and we slice here
+    const allProducts = await getProducts(filterObj);
+    const total = allProducts.length;
+    const products = allProducts.slice(skip, skip + limit);
+    const totalPages = Math.ceil(total / limit);
 
     const brands = new Set<string>();
     const descriptions = new Set<string>();
 
-    for (const product of products || []) {
+    for (const product of allProducts || []) {
       brands.add(product.brand);
       descriptions.add(product.description);
     }
@@ -116,6 +125,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(
       {
         products: products || [],
+        total,
+        page,
+        limit,
+        totalPages,
         distinctBrands: [...brands],
         distinctDescriptions: [...descriptions],
       },
