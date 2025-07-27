@@ -52,7 +52,22 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const rawSales = await getAllSales();
+    const { searchParams } = new URL(req.url);
+    const createdDateStr = searchParams.get("createdDate");
+
+    let createdDate: Date | undefined = undefined;
+
+    if (createdDateStr) {
+      createdDate = new Date(createdDateStr);
+      if (isNaN(createdDate.getTime())) {
+        return NextResponse.json(
+          { error: "Invalid createdDate format" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const rawSales = await getAllSales(createdDate); // 💥 pass it into DB function
 
     const formattedSales = await Promise.all(
       rawSales.map(async (sale) => {
@@ -70,7 +85,7 @@ export async function GET(req: NextRequest) {
 
         return {
           ...sale,
-          buyer: buyer,
+          buyer,
           soldProducts: enrichedSoldProducts,
         };
       })

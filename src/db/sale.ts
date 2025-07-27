@@ -43,12 +43,25 @@ export async function updateStockAfterTransaction(
   return result;
 }
 
-export async function getAllSales() {
+export async function getAllSales(createdDate?: Date) {
   const saleCollection = await getCollection("sale");
-  return await saleCollection
-    .find()
-    .sort({ createdAt: -1 }) // ← newest first
-    .toArray();
+
+  const query: any = {};
+
+  if (createdDate) {
+    const startOfDay = new Date(createdDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(createdDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    query.createdAt = {
+      $gte: startOfDay,
+      $lte: endOfDay,
+    };
+  }
+
+  return await saleCollection.find(query).sort({ createdAt: -1 }).toArray();
 }
 
 export async function updateSale(id: string, salePayload: any) {

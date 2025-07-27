@@ -21,19 +21,22 @@ export async function createSale({
   }
 }
 
-export async function getAllSales(): Promise<Sale[]> {
+export async function getAllSales(createdDate: Date): Promise<Sale[]> {
   try {
-    const response = await axios.get(`/api/sale`);
+    const dateString = createdDate.toISOString().split("T")[0]; // Format: yyyy-mm-dd
+    const response = await axios.get(`/api/sale`, {
+      params: { createdDate: dateString },
+    });
 
     if (response.status !== 200) {
-      throw new Error("");
+      throw new Error("Failed to fetch sales");
     }
 
     const { sales } = response.data;
     return sales;
   } catch (error: any) {
-    console.log("error fetching sales:", error);
-    throw new CustomError("Internal Sever Error!", 500);
+    console.error("error fetching sales:", error);
+    throw new CustomError("Internal Server Error!", 500);
   }
 }
 

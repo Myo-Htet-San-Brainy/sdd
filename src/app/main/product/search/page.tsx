@@ -9,6 +9,7 @@ import { useGetMyPermissions } from "@/query/miscellaneous";
 import { hasPermission } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import Pagination from "@/components/Pagination";
+import { ProductCount } from "@/components/ProdCount";
 
 const Page = () => {
   const {
@@ -508,11 +509,7 @@ const Page = () => {
 
       {/* Total data */}
       {Array.isArray(products) && (
-        <div className="mb-4 text-red-500 font-medium text-right">
-          Showing {products.length} product
-          {products.length !== 1 ? "s" : ""} out of {total} product
-          {total !== 1 ? "s" : ""}
-        </div>
+        <ProductCount showing={products.length} total={total} />
       )}
       <div className="mt-10">{content}</div>
     </div>

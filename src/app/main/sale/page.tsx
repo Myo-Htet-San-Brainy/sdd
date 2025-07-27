@@ -1,5 +1,6 @@
 "use client";
 
+import { ProductCount } from "@/components/ProdCount";
 import { Sale } from "@/Interfaces/Sale";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
@@ -17,12 +18,14 @@ const Page = () => {
     isFetching: isFetchingMyPermissions,
     isPending: isPendingMyPermissions,
   } = useGetMyPermissions();
+  const [createdDate, setCreatedDate] = useState(new Date());
   const {
     data: sales,
     isPending: isPendingSales,
     isFetching: isFetchingSales,
     isError: isErrorSales,
-  } = useGetSales();
+  } = useGetSales({ createdDate });
+
   const { mutate: restockMutate } = useRestockSaleMutation();
 
   const router = useRouter();
@@ -130,110 +133,109 @@ const Page = () => {
     );
   }
 
+  let content;
   if (isPendingSales || isFetchingSales) {
-    return (
+    content = (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
         <p className="text-zinc-600 animate-pulse text-center">
           Loading sales...
         </p>
       </div>
     );
-  }
-
-  if (isErrorSales) {
-    return (
+  } else if (isErrorSales) {
+    content = (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
         <p className="text-red-600 text-center font-medium">
           Error while loading sales...
         </p>
       </div>
     );
-  }
+  } else if (sales.length <= 0) {
+    content = (
+      <p className="text-center text-zinc-500 mt-8">No sales recorded yet.</p>
+    );
+  } else {
+    content = (
+      <>
+        <ProductCount showing={sales.length} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sales.map((sale) => (
+            <div
+              key={sale._id}
+              ref={(el) => {
+                saleCardRefs.current[sale._id] = el;
+              }}
+              className={`bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm
+              ${
+                highlightedSaleId === sale._id
+                  ? "animate-highlight-pulse border-red-500 ring-4 ring-red-300"
+                  : "hover:shadow-md transition"
+              }
+              flex flex-col justify-between`}
+            >
+              <div className="space-y-2">
+                <div className="text-sm text-zinc-500">
+                  🗓️ {format(new Date(sale.createdAt), "dd MMM, HH:mm")}
+                </div>
+                <div className="text-sm text-zinc-600">
+                  👤 Buyer: {sale.buyer?.username || "N/A"}
+                </div>
+                <div className="text-sm font-medium text-green-600">
+                  💰 Total:{" "}
+                  {sale.soldProducts.reduce(
+                    (sum, sp) => sum + sp.itemsToSell * sp.sellingPrice,
+                    0
+                  )}{" "}
+                  MMK
+                </div>
 
-  if (sales.length <= 0) {
-    return (
-      <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
-        <p className="text-zinc-500 text-center">No sales recorded yet.</p>
-      </div>
+                <div className="border-t pt-2 max-h-56 overflow-y-auto pr-1 space-y-2">
+                  {sale.soldProducts.map((sp, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-zinc-50 p-2 rounded-md border border-zinc-200 text-sm flex justify-between items-center"
+                    >
+                      <div className="space-y-1">
+                        <div className="font-semibold text-red-600">
+                          {sp.product.type.join(", ")}
+                        </div>
+                        <div className="text-zinc-500 text-xs">
+                          {sp.product.brand}
+                        </div>
+                        <div className="text-zinc-700 text-xs">
+                          {sp.product.description}
+                        </div>
+                      </div>
+                      <div className="text-red-600 font-medium ml-2">
+                        {sp.itemsToSell} × {sp.sellingPrice} MMK
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </>
     );
   }
 
   return (
     <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sales.map((sale) => (
-          <div
-            key={sale._id}
-            // 🎯 Assign ref to the card's div
-            ref={(el) => {
-              saleCardRefs.current[sale._id] = el;
-            }}
-            // 🎯 Conditionally apply highlight class based on state
-            className={`
-              bg-white rounded-2xl border border-zinc-200 p-4 shadow-sm
-              ${
-                highlightedSaleId === sale._id
-                  ? "animate-highlight-pulse border-red-500 ring-4 ring-red-300" // Highlight styles
-                  : "hover:shadow-md transition" // Default styles, transition added for smooth hover
-              }
-              flex flex-col justify-between
-            `}
-          >
-            <div className="space-y-2">
-              <div className="text-sm text-zinc-500">
-                🗓️ {format(new Date(sale.createdAt), "dd MMM, HH:mm")}
-              </div>
-              <div className="text-sm text-zinc-600">
-                👤 Buyer: {sale.buyer?.username || "N/A"}
-              </div>
-              <div className="text-sm font-medium text-green-600">
-                💰 Total:{" "}
-                {sale.soldProducts.reduce(
-                  (sum, sp) => sum + sp.itemsToSell * sp.sellingPrice,
-                  0
-                )}{" "}
-                MMK
-              </div>
-
-              <div className="border-t pt-2 max-h-56 overflow-y-auto pr-1 space-y-2">
-                {sale.soldProducts.map((sp, idx) => (
-                  <div
-                    key={idx}
-                    className="bg-zinc-50 p-2 rounded-md border border-zinc-200 text-sm flex justify-between items-center"
-                  >
-                    <div className="space-y-1">
-                      <div className="font-semibold text-red-600">
-                        {sp.product.type.join(", ")}
-                      </div>
-                      <div className="text-zinc-500 text-xs">
-                        {sp.product.brand}
-                      </div>
-                      <div className="text-zinc-700 text-xs">
-                        {sp.product.description}
-                      </div>
-                    </div>
-                    <div className="text-red-600 font-medium ml-2">
-                      {sp.itemsToSell} × {sp.sellingPrice} MMK
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {hasPermission(
-              myPermissions!,
-              MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
-            ) && (
-              <button
-                onClick={() => handleUpdateClick(sale)}
-                className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
-              >
-                Update Sale
-              </button>
-            )}
-          </div>
-        ))}
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <h2 className="text-xl font-semibold text-zinc-800">Sales</h2>
+        <label className="flex items-center gap-2 text-sm text-zinc-600">
+          <span>📅 Pick Date:</span>
+          <input
+            type="date"
+            value={format(createdDate, "yyyy-MM-dd")}
+            onChange={(e) => setCreatedDate(new Date(e.target.value))}
+            className="border rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
+          />
+        </label>
       </div>
+
+      {content}
     </section>
   );
 };

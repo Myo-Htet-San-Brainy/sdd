@@ -54,10 +54,10 @@ export const useCreateSaleMutation = () => {
   });
 };
 
-export const useGetSales = () => {
+export const useGetSales = ({ createdDate }: { createdDate: Date }) => {
   return useQuery({
-    queryFn: getAllSales,
-    queryKey: ["sales"],
+    queryFn: () => getAllSales(createdDate),
+    queryKey: ["sales", createdDate],
   });
 };
 
