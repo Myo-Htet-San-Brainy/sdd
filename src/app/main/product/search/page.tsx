@@ -99,29 +99,29 @@ const Page = () => {
     };
   }, []);
 
-  // When filters change, reset to page 1
-  useEffect(() => {
-    setPage(1);
-  }, [
-    type,
-    brand,
-    source,
-    location,
-    stockFilterEnabled,
-    stockCondition,
-    stockValue,
-    buyingPriceFilterEnabled,
-    buyingPriceCondition,
-    buyingPriceValue,
-    sellingPriceFilterEnabled,
-    sellingPriceCondition,
-    sellingPriceValue,
-  ]);
-  // Fetch products when page or limit changes
-  useEffect(() => {
-    handleSearch();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, limit]);
+  // // When filters change, reset to page 1
+  // useEffect(() => {
+  //   setPage(1);
+  // }, [
+  //   type,
+  //   brand,
+  //   source,
+  //   location,
+  //   stockFilterEnabled,
+  //   stockCondition,
+  //   stockValue,
+  //   buyingPriceFilterEnabled,
+  //   buyingPriceCondition,
+  //   buyingPriceValue,
+  //   sellingPriceFilterEnabled,
+  //   sellingPriceCondition,
+  //   sellingPriceValue,
+  // ]);
+  // // Fetch products when page or limit changes
+  // useEffect(() => {
+  //   handleSearch();
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [page, limit]);
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -510,7 +510,8 @@ const Page = () => {
       {Array.isArray(products) && (
         <div className="mb-4 text-red-500 font-medium text-right">
           Showing {products.length} product
-          {products.length !== 1 ? "s" : ""}
+          {products.length !== 1 ? "s" : ""} out of {total} product
+          {total !== 1 ? "s" : ""}
         </div>
       )}
       <div className="mt-10">{content}</div>
