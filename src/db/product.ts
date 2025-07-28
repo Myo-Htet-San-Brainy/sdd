@@ -132,10 +132,8 @@ export async function getAllProductsFieldValues(
     .find({}, { projection: { [field]: 1 } })
     .toArray();
 
-  // extract, filter falsy, dedupe
-  const uniqueValues = Array.from(
-    new Set(values.map((item) => item[field]).filter(Boolean))
-  );
+  // extract, dedupe
+  const uniqueValues = Array.from(new Set(values.map((item) => item[field])));
 
   return uniqueValues;
 }

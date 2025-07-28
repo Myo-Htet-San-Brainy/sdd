@@ -6,7 +6,7 @@ import Link from "next/link";
 import toast from "react-hot-toast";
 import React, { useEffect, useRef, useState } from "react";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
-import { hasPermission } from "@/lib/utils";
+import { hasPermission, sortEnglishFirst } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
 import { Product as ProductI } from "@/Interfaces/Product";
@@ -279,7 +279,7 @@ const Page = () => {
                 >
                   <option value="all brands">All Brands</option>{" "}
                   {/* "nothing selected" option */}
-                  {data.distinctBrands.map((brand) => (
+                  {sortEnglishFirst(data.distinctBrands).map((brand) => (
                     <option key={brand} value={brand}>
                       {brand === "" ? "no brand" : brand}
                     </option>

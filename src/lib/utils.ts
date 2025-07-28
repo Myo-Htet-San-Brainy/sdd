@@ -36,3 +36,16 @@ export function isItemInList<T extends { _id: ObjectId | string }>(
 
   return list.some((listItem) => listItem._id.toString() === itemId);
 }
+
+export function sortEnglishFirst(arr: string[]): string[] {
+  const isEnglish = (str: string) => /^[A-Za-z\s]+$/.test(str.trim());
+
+  const englishWords = arr
+    .filter((word) => isEnglish(word))
+    .sort((a, b) => a.localeCompare(b));
+  const otherWords = arr
+    .filter((word) => !isEnglish(word))
+    .sort((a, b) => a.localeCompare(b));
+
+  return [...englishWords, ...otherWords];
+}

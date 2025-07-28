@@ -72,22 +72,25 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    // 1️⃣ Get all products
-    const allProducts = await productCollection.find({}).toArray();
-
-    // 2️⃣ Build bulk update ops for products missing 'lastUpdated'
-    const bulkOps = allProducts
-      .filter((prod) => !("lastUpdated" in prod))
-      .map((prod) => {
-        // Get creation time from ObjectId
-        const createdAt = prod._id.getTimestamp();
-        return {
-          updateOne: {
-            filter: { _id: prod._id },
-            update: { $set: { lastUpdated: createdAt } },
+    // 🔍 1️⃣ Find all products whose type array includes 'ဘော' (with or without spaces)
+    const productsWithBaw = await productCollection
+      .find({
+        type: {
+          $elemMatch: {
+            $regex: /^\s*ဘော\s*$/,
+            $options: "u", // "u" = Unicode support
           },
-        };
-      });
+        },
+      })
+      .toArray();
+
+    // ✏️ 2️⃣ Prepare bulk ops to replace their type array with ['ဘော']
+    const bulkOps = productsWithBaw.map((prod) => ({
+      updateOne: {
+        filter: { _id: prod._id },
+        update: { $set: { type: ["ဘော"] } },
+      },
+    }));
 
     let result = { modifiedCount: 0 };
     if (bulkOps.length > 0) {
@@ -96,9 +99,9 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: `Updated ${result.modifiedCount} products with lastUpdated.`,
+        message: `Updated ${result.modifiedCount} products' type to ['ဘော'].`,
         updatedCount: result.modifiedCount,
-        totalProducts: allProducts.length,
+        matchedCount: productsWithBaw.length,
       },
       { status: 200 }
     );

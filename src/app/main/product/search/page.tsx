@@ -6,7 +6,7 @@ import { getProducts } from "@/services/product";
 import Product from "@/components/Product";
 import { Product as ProductI } from "@/Interfaces/Product";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { hasPermission } from "@/lib/utils";
+import { hasPermission, sortEnglishFirst } from "@/lib/utils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import Pagination from "@/components/Pagination";
 import { ProductCount } from "@/components/ProdCount";
@@ -19,9 +19,9 @@ const Page = () => {
   } = useGetMyPermissions();
   const [type, setType] = useState("");
   const [suggestionPrompt, setSuggestionPrompt] = useState("");
-  const [brand, setBrand] = useState("");
-  const [source, setSource] = useState("");
-  const [location, setLocation] = useState("");
+  const [brand, setBrand] = useState("all brands");
+  const [source, setSource] = useState("all sources");
+  const [location, setLocation] = useState("all locations");
   const [products, setProducts] = useState<ProductI[] | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -173,9 +173,10 @@ const Page = () => {
     try {
       const filterObj: Record<string, any> = {};
       if (type.trim() !== "") filterObj["type"] = type.trim();
-      if (brand.trim() !== "") filterObj["brand"] = brand.trim();
-      if (source.trim() !== "") filterObj["source"] = source.trim();
-      if (location.trim() !== "") filterObj["location"] = location.trim();
+      if (brand.trim() !== "all brands") filterObj["brand"] = brand.trim();
+      if (source.trim() !== "all sources") filterObj["source"] = source.trim();
+      if (location.trim() !== "all locations")
+        filterObj["location"] = location.trim();
       if (stockFilterEnabled) {
         filterObj["noOfItemsInStock"] = JSON.stringify({
           val: stockValue,
@@ -313,12 +314,14 @@ const Page = () => {
               onChange={(e) => setBrand(e.target.value)}
               className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
             >
-              <option value="">All Brands</option>
-              {productMeta.brands?.map((opt: string) => (
-                <option key={opt} value={opt} className="">
-                  {opt}
-                </option>
-              ))}
+              <option value="all brands">All Brands</option>
+              {sortEnglishFirst(productMeta.brands as string[]).map(
+                (opt: string) => (
+                  <option key={opt} value={opt} className="">
+                    {opt === "" ? "no brand" : opt}
+                  </option>
+                )
+              )}
             </select>
           </div>
 
@@ -332,12 +335,14 @@ const Page = () => {
               onChange={(e) => setSource(e.target.value)}
               className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
             >
-              <option value="">All Sources</option>
-              {productMeta.sources?.map((opt: string) => (
-                <option key={opt} value={opt} className="">
-                  {opt}
-                </option>
-              ))}
+              <option value="all sources">All Sources</option>
+              {sortEnglishFirst(productMeta.sources as string[]).map(
+                (opt: string) => (
+                  <option key={opt} value={opt} className="">
+                    {opt}
+                  </option>
+                )
+              )}
             </select>
           </div>
 
@@ -351,7 +356,7 @@ const Page = () => {
               onChange={(e) => setLocation(e.target.value)}
               className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
             >
-              <option value="">All Locations</option>
+              <option value="all locations">All Locations</option>
               {productMeta.locations?.flatMap(
                 (optArr: string[], groupIndex: number) => {
                   const colorEmoji = [

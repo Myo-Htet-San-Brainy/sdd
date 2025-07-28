@@ -6,6 +6,7 @@ import { useFieldArray, useForm } from "react-hook-form";
 import { SubmitButton } from "@/components/SubmitButton";
 import { forwardRef, useImperativeHandle } from "react";
 import { Product } from "@/Interfaces/Product";
+import { sortEnglishFirst } from "@/lib/utils";
 
 interface ExistingProduct extends Omit<Product, "type"> {
   type: {
@@ -215,11 +216,17 @@ const ManageProductForm = forwardRef<
             <option value="" className="">
               No Brand
             </option>
-            {productMeta.brands?.map((opt: string) => (
-              <option key={opt} value={opt} className="">
-                {opt}
-              </option>
-            ))}
+            {sortEnglishFirst(productMeta.brands as string[]).map(
+              (opt: string) => {
+                return (
+                  opt !== "" && (
+                    <option key={opt} value={opt} className="">
+                      {opt}
+                    </option>
+                  )
+                );
+              }
+            )}
           </select>
         )}
         <button
@@ -253,7 +260,7 @@ const ManageProductForm = forwardRef<
               Select a source
             </option>
             {productMeta.sources &&
-              productMeta.sources.map((opt) => (
+              sortEnglishFirst(productMeta.sources).map((opt) => (
                 <option key={opt} value={opt}>
                   {opt}
                 </option>

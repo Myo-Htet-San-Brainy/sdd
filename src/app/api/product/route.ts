@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
     if (location) {
       filterObj.location = location;
     }
-    if (brand) {
+    if (brand || brand === "") {
       filterObj.brand = brand;
     }
     if (source) {
