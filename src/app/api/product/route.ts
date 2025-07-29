@@ -27,10 +27,13 @@ export async function GET(req: NextRequest) {
     const noOfItemsInStockRaw = searchParams.get("noOfItemsInStock");
     const buyingPriceRaw = searchParams.get("buyingPrice");
     const sellingPriceRaw = searchParams.get("sellingPrice");
-    // Pagination params
-    const page = parseInt(searchParams.get("page") || "1", 10);
-    const limit = parseInt(searchParams.get("limit") || "20", 10);
-    const skip = (page - 1) * limit;
+    // ⭐️ Pagination params
+    const limitParam = searchParams.get("limit");
+    const pageParam = searchParams.get("page");
+
+    const limit = limitParam ? parseInt(limitParam, 10) : null; // null if not provided
+    const page = pageParam ? parseInt(pageParam, 10) : 1;
+    const skip = limit ? (page - 1) * limit : 0;
 
     const filterObj: any = {};
     if (type) {
@@ -107,12 +110,15 @@ export async function GET(req: NextRequest) {
     }
     console.log(filterObj);
 
-    // Pagination logic
-    // getProducts should be updated to accept skip and limit, but for now, let's assume it returns all and we slice here
+    // Fetch products matching filters
     const allProducts = await getProducts(filterObj);
     const total = allProducts.length;
-    const products = allProducts.slice(skip, skip + limit);
-    const totalPages = Math.ceil(total / limit);
+
+    // ⭐️ If `limit` is null (not sent), return all
+    const products = limit
+      ? allProducts.slice(skip, skip + limit)
+      : allProducts;
+    const totalPages = limit ? Math.ceil(total / limit) : 1;
 
     const brands = new Set<string>();
     const descriptions = new Set<string>();
