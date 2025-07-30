@@ -72,25 +72,34 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    // 🔍 1️⃣ Find all products whose type array includes 'ဘော' (with or without spaces)
-    const productsWithBaw = await productCollection
+    // 🔍 Find all products with source like 'Empire' or 'Yin Mai' (trimmed)
+    const productsToFix = await productCollection
       .find({
-        type: {
-          $elemMatch: {
-            $regex: /^\s*ဘော\s*$/,
-            $options: "u", // "u" = Unicode support
-          },
-        },
+        $or: [
+          { source: { $regex: /^\s*Empire\s*$/, $options: "u" } },
+          { source: { $regex: /^\s*Yin Mai\s*$/, $options: "u" } },
+        ],
       })
       .toArray();
 
-    // ✏️ 2️⃣ Prepare bulk ops to replace their type array with ['ဘော']
-    const bulkOps = productsWithBaw.map((prod) => ({
-      updateOne: {
-        filter: { _id: prod._id },
-        update: { $set: { type: ["ဘော"] } },
-      },
-    }));
+    // ✏️ Prepare bulk updates
+    const bulkOps = productsToFix.map((prod) => {
+      const trimmedSource = prod.source?.trim();
+      let newSource = trimmedSource;
+
+      if (/^Empire$/i.test(trimmedSource)) {
+        newSource = "Empire";
+      } else if (/^Yin Mai$/i.test(trimmedSource)) {
+        newSource = "Yin Mai";
+      }
+
+      return {
+        updateOne: {
+          filter: { _id: prod._id },
+          update: { $set: { source: newSource } },
+        },
+      };
+    });
 
     let result = { modifiedCount: 0 };
     if (bulkOps.length > 0) {
@@ -99,16 +108,16 @@ export async function PATCH(req: NextRequest) {
 
     return NextResponse.json(
       {
-        message: `Updated ${result.modifiedCount} products' type to ['ဘော'].`,
+        message: `Updated ${result.modifiedCount} product sources.`,
         updatedCount: result.modifiedCount,
-        matchedCount: productsWithBaw.length,
+        matchedCount: productsToFix.length,
       },
       { status: 200 }
     );
   } catch (error) {
     console.error("[PATCH_UPDATE_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to update products." },
+      { error: "Failed to update product sources." },
       { status: 500 }
     );
   }
