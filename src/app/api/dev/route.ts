@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb"; // ✅ Make sure to import this
 import { deleteDuplicateProducts } from "@/lib/serverUtils";
+import { Product } from "@/Interfaces/Product";
 
 const DEV_SECRET = process.env.DEV_SECRET;
 
@@ -72,52 +73,67 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    // 🔍 Find all products with source like 'Empire' or 'Yin Mai' (trimmed)
-    const productsToFix = await productCollection
-      .find({
-        $or: [
-          { source: { $regex: /^\s*Empire\s*$/, $options: "u" } },
-          { source: { $regex: /^\s*Yin Mai\s*$/, $options: "u" } },
-        ],
-      })
-      .toArray();
+    const allProducts = await productCollection.find({}).toArray();
 
-    // ✏️ Prepare bulk updates
-    const bulkOps = productsToFix.map((prod) => {
-      const trimmedSource = prod.source?.trim();
-      let newSource = trimmedSource;
+    // 🧠 Group products by common type terms
+    const visited = new Set<string>();
+    const groups: Array<typeof allProducts> = [];
 
-      if (/^Empire$/i.test(trimmedSource)) {
-        newSource = "Empire";
-      } else if (/^Yin Mai$/i.test(trimmedSource)) {
-        newSource = "Yin Mai";
+    for (const product of allProducts) {
+      if (visited.has(product._id.toString())) continue;
+
+      const group: typeof allProducts = [product];
+      visited.add(product._id.toString());
+
+      for (const other of allProducts) {
+        if (product._id.toString() === other._id.toString()) continue;
+        if (visited.has(other._id.toString())) continue;
+
+        const hasCommonType = product.type.some((t: any) =>
+          other.type.includes(t)
+        );
+        if (hasCommonType) {
+          group.push(other);
+          visited.add(other._id.toString());
+        }
       }
 
-      return {
-        updateOne: {
-          filter: { _id: prod._id },
-          update: { $set: { source: newSource } },
-        },
-      };
-    });
+      groups.push(group);
+    }
 
-    let result = { modifiedCount: 0 };
-    if (bulkOps.length > 0) {
-      result = await productCollection.bulkWrite(bulkOps);
+    let updatedCount = 0;
+
+    // ✨ Replace type arrays in each group with the most comprehensive one
+    for (const group of groups) {
+      const maxTypeProduct = group.reduce((longest, current) =>
+        current.type.length > longest.type.length ? current : longest
+      );
+
+      const uniqueTypeSet = new Set(maxTypeProduct.type);
+
+      for (const product of group) {
+        const needsUpdate =
+          product.type.length !== uniqueTypeSet.size ||
+          product.type.some((t: any) => !uniqueTypeSet.has(t));
+
+        if (needsUpdate) {
+          await productCollection.updateOne(
+            { _id: new ObjectId(product._id) },
+            { $set: { type: Array.from(uniqueTypeSet) } }
+          );
+          updatedCount++;
+        }
+      }
     }
 
     return NextResponse.json(
-      {
-        message: `Updated ${result.modifiedCount} product sources.`,
-        updatedCount: result.modifiedCount,
-        matchedCount: productsToFix.length,
-      },
+      { updatedCount, groupCount: groups.length },
       { status: 200 }
     );
   } catch (error) {
     console.error("[PATCH_UPDATE_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to update product sources." },
+      { error: "Failed to update product types." },
       { status: 500 }
     );
   }
@@ -152,6 +168,102 @@ export async function GET(req: NextRequest) {
     console.error("[GET_LATEST_PRODUCT_ERROR]", error);
     return NextResponse.json(
       { error: "Failed to fetch latest product." },
+      { status: 500 }
+    );
+  }
+}
+
+const prods: Omit<Product, "_id">[] = [
+  {
+    brand: "SMOW",
+    noOfItemsInStock: 10,
+    sellingPrice: 7800,
+    description: "အလယ်‌ဒစ်",
+    source: "Empire",
+    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+    location: "MS-I-7",
+    buyingPrice: 7020, // 7800 * 0.9
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+  },
+  {
+    brand: "OUOK",
+    noOfItemsInStock: 8,
+    sellingPrice: 7800,
+    description: "အလယ်ဒစ်",
+    source: "Empire",
+    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+    location: "MS-I-7",
+    buyingPrice: 7020,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+  },
+  {
+    brand: "PRT",
+    noOfItemsInStock: 3,
+    sellingPrice: 7800,
+    description: "အလယ်ဒစ်",
+    source: "Empire",
+    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+    location: "MS-I-7",
+    buyingPrice: 7020,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+  },
+  {
+    brand: "JRC",
+    noOfItemsInStock: 1,
+    sellingPrice: 7800,
+    description: "အလယ်ဒစ်",
+    source: "Empire",
+    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+    location: "MS-I-7",
+    buyingPrice: 7020,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+  },
+  {
+    brand: "SABR",
+    noOfItemsInStock: 1,
+    sellingPrice: 7800,
+    description: "အလယ်ဒစ်",
+    source: "Empire",
+    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+    location: "MS-I-7",
+    buyingPrice: 7020,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+  },
+];
+
+export async function POST(req: NextRequest) {
+  try {
+    console.log("1");
+    const productCollection = await getCollection("product");
+    console.log("2");
+
+    if (!Array.isArray(prods) || prods.length === 0) {
+      return NextResponse.json(
+        { error: "No products to insert." },
+        { status: 400 }
+      );
+    }
+
+    console.log("before insertion");
+    const insertResult = await productCollection.insertMany(prods);
+    console.log("after insertion");
+
+    return NextResponse.json(
+      {
+        message: `Inserted ${insertResult.insertedCount} products successfully ✨`,
+        insertedIds: insertResult.insertedIds,
+      },
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("[POST_PRODUCT_ERROR]", error);
+    return NextResponse.json(
+      { error: "Failed to insert products." },
       { status: 500 }
     );
   }

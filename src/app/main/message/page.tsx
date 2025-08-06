@@ -4,6 +4,7 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { Message, getMessage, updateMessage } from "@/services/miscellaneous";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 
@@ -38,6 +39,8 @@ const MessageManager = () => {
 
     fetchMessage();
   }, []);
+
+  const t = useTranslations("MessagePage");
 
   const handleUpdate = async () => {
     try {
@@ -99,7 +102,7 @@ const MessageManager = () => {
     <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-4 py-10">
       <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-zinc-200 shadow p-6 space-y-6">
         <h1 className="text-xl font-semibold text-red-600">
-          📢 Public Message
+          {t("page_title")}
         </h1>
 
         {editMode ? (

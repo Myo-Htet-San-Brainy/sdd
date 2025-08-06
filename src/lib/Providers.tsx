@@ -5,8 +5,17 @@ import { useState, ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
 import { SessionProvider } from "next-auth/react";
 import { ModalProvider } from "@/context/modalContext";
+import { NextIntlClientProvider } from "next-intl";
 
-export default function Providers({ children }: { children: ReactNode }) {
+export default function Providers({
+  children,
+  msgs,
+  locale,
+}: {
+  children: ReactNode;
+  msgs: Record<string, any>;
+  locale: string;
+}) {
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -18,7 +27,9 @@ export default function Providers({ children }: { children: ReactNode }) {
     <ModalProvider>
       <SessionProvider>
         <QueryClientProvider client={queryClient}>
-          {children}
+          <NextIntlClientProvider messages={msgs} locale={locale}>
+            {children}
+          </NextIntlClientProvider>
           <Toaster />
         </QueryClientProvider>
       </SessionProvider>
