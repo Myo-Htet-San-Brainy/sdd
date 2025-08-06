@@ -5,5 +5,12 @@
     "cancel": "မပြင်တော့ပါ",
     "success_toast": "စာပြင်လိုက်ပါပြီ",
     "updating_msg": "စာပြင်နေသည်"
+  },
+  "ViewSalesPage": {
+    "sales": "ဘောက်ချာများ",
+    "pickDate": "ရက်ရွေးပါ",
+    "buyer": "ဝယ်သူ",
+    "total": "စုစုပေါင်း",
+    "updateSale": "ဘောက်ချာပြင်မည်"
   }
 }

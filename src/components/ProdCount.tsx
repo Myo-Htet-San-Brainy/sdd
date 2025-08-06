@@ -16,8 +16,8 @@ export const ProductCount: React.FC<ProductCountProps> = ({
 
   return (
     <div className={className}>
-      Showing {productText(showing)}
-      {typeof total === "number" && ` out of ${productText(total)}`}
+      Showing {showing}
+      {typeof total === "number" && ` out of ${total}`}
     </div>
   );
 };

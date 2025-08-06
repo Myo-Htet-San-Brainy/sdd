@@ -8,11 +8,13 @@ import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetSales, useRestockSaleMutation } from "@/query/sale";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react"; // Import useRef and useState
 import toast from "react-hot-toast";
 
 const Page = () => {
+  const t = useTranslations("ViewSalesPage");
   const {
     data: myPermissions,
     isFetching: isFetchingMyPermissions,
@@ -178,10 +180,10 @@ const Page = () => {
                   🗓️ {format(new Date(sale.createdAt), "dd MMM, HH:mm")}
                 </div>
                 <div className="text-sm text-zinc-600">
-                  👤 Buyer: {sale.buyer?.username || "N/A"}
+                  👤 {t("buyer")}: {sale.buyer?.username || "N/A"}
                 </div>
                 <div className="text-sm font-medium text-green-600">
-                  💰 Total:{" "}
+                  💰 {t("total")}:{" "}
                   {sale.soldProducts.reduce(
                     (sum, sp) => sum + sp.itemsToSell * sp.sellingPrice,
                     0
@@ -221,7 +223,7 @@ const Page = () => {
                     onClick={() => handleUpdateClick(sale)}
                     className="mt-4 px-4 py-2 bg-red-600 text-white rounded-xl hover:bg-red-700 transition"
                   >
-                    Update Sale
+                    {t("updateSale")}
                   </button>
                 )}
               </div>
@@ -235,9 +237,9 @@ const Page = () => {
   return (
     <section className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-8">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <h2 className="text-xl font-semibold text-zinc-800">Sales</h2>
+        <h2 className="text-xl font-semibold text-zinc-800">{t("sales")}</h2>
         <label className="flex items-center gap-2 text-sm text-zinc-600">
-          <span>📅 Pick Date:</span>
+          <span>📅 {t("pickDate")}:</span>
           <input
             type="date"
             value={format(createdDate, "yyyy-MM-dd")}

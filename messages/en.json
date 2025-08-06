@@ -5,5 +5,12 @@
     "cancel": "Cancel",
     "success_toast": "Message updated!",
     "updating_msg": "Updating message..."
+  },
+  "ViewSalesPage": {
+    "sales": "Sales",
+    "pickDate": "Pick Date",
+    "buyer": "Buyer",
+    "total": "Total",
+    "updateSale": "Update Sale"
   }
 }
