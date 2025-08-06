@@ -1,5 +1,9 @@
 {
   "MessagePage": {
-    "page_title": "📢 Public Message"
+    "page_title": "📢 Public Message",
+    "update_msg": "Update Message",
+    "cancel": "Cancel",
+    "success_toast": "Message updated!",
+    "updating_msg": "Updating message..."
   }
 }

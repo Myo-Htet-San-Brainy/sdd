@@ -30,7 +30,7 @@ export default function Providers({
           <NextIntlClientProvider messages={msgs} locale={locale}>
             {children}
           </NextIntlClientProvider>
-          <Toaster />
+          <Toaster toastOptions={{ duration: 3000 }} />
         </QueryClientProvider>
       </SessionProvider>
     </ModalProvider>

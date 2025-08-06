@@ -48,7 +48,7 @@ const MessageManager = () => {
       await updateMessage(draftContent);
       setMessage({ content: draftContent });
       setEditMode(false);
-      toast.success("Message updated!");
+      toast.success(t("success_toast"));
     } catch (err) {
       console.error("Error updating message:", err);
       toast.error("Failed to update message. Please try again.");
@@ -88,7 +88,7 @@ const MessageManager = () => {
     return (
       <div className="w-full min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-50">
         <p className="text-zinc-600 animate-pulse text-center">
-          {loading ? "Loading message..." : "Updating message..."}
+          {loading ? "Loading message..." : t("updating_msg")}
         </p>
       </div>
     );
@@ -119,7 +119,7 @@ const MessageManager = () => {
                 disabled={updating}
                 className="bg-red-600 hover:bg-red-700 text-white font-medium px-5 py-2.5 rounded-xl transition disabled:opacity-60"
               >
-                Update Message
+                {t("update_msg")}
               </button>
               <button
                 onClick={() => {
@@ -128,7 +128,7 @@ const MessageManager = () => {
                 }}
                 className="bg-zinc-200 hover:bg-zinc-300 text-zinc-700 font-medium px-5 py-2.5 rounded-xl transition"
               >
-                Cancel
+                {t("cancel")}
               </button>
             </div>
           </div>
@@ -141,7 +141,7 @@ const MessageManager = () => {
               onClick={() => setEditMode(true)}
               className="bg-red-600 hover:bg-red-700 text-white font-medium px-6 py-2.5 rounded-xl transition"
             >
-              Edit Message
+              {t("update_msg")}
             </button>
           </div>
         )}
