@@ -49,20 +49,21 @@
     "lastUpdated": "Last Updated",
     "updateProd": "Update Product"
   },
+
   "createSalePage": {
     "sale": "Sale",
     "noItemsInCart": "No items in cart yet",
-    "noItemsLeftForThisSale": "",
-    "removeSale": "",
-    "cartClearToastMsg": "",
-    "saleUpdatedToastMsg": "",
-    "saleCreatedToastMsg": "",
+    "noItemsLeftForThisSale": "No items left for this sale",
+    "removeSale": "Remove Sale",
+    "cartClearToastMsg": "Cart Cleared!",
+    "saleUpdatedToastMsg": "Sale updated successfully!",
+    "saleCreatedToastMsg": "Sale created successfully!",
     "priceForThisElement": "Price",
-    "totalPrice": "",
-    "selectBuyer": "",
-    "noBuyerSelected": "",
-    "clearCart": "",
-    "sell": "",
-    "update": ""
+    "totalPrice": "Total Price",
+    "selectBuyer": "Select Buyer",
+    "noBuyerSelected": "No buyer selected",
+    "clearCart": "Clear Cart",
+    "sell": "Sell",
+    "update": "Update"
   }
 }

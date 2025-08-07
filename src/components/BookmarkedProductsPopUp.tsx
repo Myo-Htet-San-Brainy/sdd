@@ -25,6 +25,7 @@ const BookmarkedProductsPopUp = ({
   const { bookmarkedProducts } = useBookmarkedProductsStore();
   const { isOpenBookmarkedProductsPopUp, setIsOpenBookmarkedProductsPopUp } =
     usePopUpsStore();
+  const totalItems = bookmarkedProducts.length;
 
   return (
     <>
@@ -70,7 +71,7 @@ const BookmarkedProductsPopUp = ({
         onClick={() => setIsOpenBookmarkedProductsPopUp(true)}
         className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md transition"
       >
-        {t("bookmarks")}
+        {t("bookmarks")}: <span>{totalItems}</span>
       </button>
     </>
   );

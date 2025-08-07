@@ -119,7 +119,7 @@ const Page = () => {
     // Check for undefined to differentiate initial state
     content = (
       <div className="min-h-[300px] flex justify-center items-center">
-        <p className="text-zinc-500 animate-pulse">🔄 Fetching products...</p>
+        <p className="text-zinc-500 animate-pulse">🔄 {t("searching")}...</p>
       </div>
     );
   } else if (isPendingProducts) {

@@ -14,8 +14,10 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast, { ToastIcon } from "react-hot-toast";
 import { SubmitButton } from "@/components/SubmitButton";
+import { useTranslations } from "next-intl";
 
 const Page = () => {
+  const t = useTranslations("createSalePage");
   const {
     data: myPermissions,
     isFetching: isFetchingMyPermissions,
@@ -88,13 +90,13 @@ const Page = () => {
     return (
       <div className="min-h-[calc(100vh-72px)] flex flex-col items-center justify-center bg-zinc-100">
         <p className="text-zinc-600 text-lg mb-4">
-          No items left for this sale.
+          {t("noItemsLeftForThisSale")}
         </p>
         <button
           onClick={handleDeleteSale}
           className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl transition-colors"
         >
-          Remove Sale
+          {t("removeSale")}
         </button>
       </div>
     );
@@ -103,7 +105,7 @@ const Page = () => {
   if (cart.length <= 0) {
     return (
       <div className="min-h-[calc(100vh-72px)] flex items-center justify-center bg-zinc-100">
-        <p className="text-zinc-600 text-lg">No items in cart yet!</p>
+        <p className="text-zinc-600 text-lg">{t("noItemsInCart")}!</p>
       </div>
     );
   }
@@ -138,7 +140,11 @@ const Page = () => {
 
     const commonOptions = {
       onSuccess: () => {
-        toast.success(updatedSaleId ? "Updated sale!" : "Created sale!");
+        toast.success(
+          updatedSaleId
+            ? `${t("saleUpdatedToastMsg")}!`
+            : `${t("saleCreatedToastMsg")}!`
+        );
         router.push("/main/product");
         clearCart();
         setBuyer("");
@@ -164,14 +170,14 @@ const Page = () => {
 
   function handleClearCart() {
     clearCart();
-    toast.success("Cart cleared successfully!");
+    toast.success(t("cartClearToastMsg"));
   }
 
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
       <div className="max-w-3xl mx-auto bg-white border border-zinc-200 shadow-md rounded-2xl p-6 space-y-6">
         <h1 className="text-xl font-semibold text-red-600 border-b pb-2">
-          Confirm Sale
+          {t("sale")}
         </h1>
 
         <div className="space-y-4">
@@ -197,8 +203,8 @@ const Page = () => {
               )}
               <div className="text-sm text-zinc-500">{val.product.brand}</div>
               <div className="text-sm text-zinc-700">
-                Price: {val.product.sellingPrice} × {val.itemsToSell} ={" "}
-                {val.product.sellingPrice * val.itemsToSell}
+                {t("priceForThisElement")}: {val.product.sellingPrice} ×{" "}
+                {val.itemsToSell} = {val.product.sellingPrice * val.itemsToSell}
               </div>
 
               {/* Added Cart Controls */}
@@ -228,18 +234,20 @@ const Page = () => {
           ))}
 
           <p className="text-right text-lg font-semibold text-zinc-800">
-            Total: {total}
+            {t("totalPrice")}: {total}
           </p>
         </div>
 
         <div>
-          <label className="block font-medium text-zinc-700 mb-1">Buyer</label>
+          <label className="block font-medium text-zinc-700 mb-1">
+            {t("selectBuyer")}
+          </label>
           <select
             value={buyer}
             onChange={(e) => setBuyer(e.currentTarget.value)}
             className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
           >
-            <option value="">No buyer selected</option>
+            <option value="">{t("noBuyerSelected")}</option>
             {buyers?.map((val) => (
               <option key={val._id} value={val._id}>
                 {val.username}
@@ -253,13 +261,13 @@ const Page = () => {
             onClick={handleClearCart}
             className="px-6 py-2 bg-zinc-100 hover:bg-zinc-200 text-zinc-700 rounded-xl transition-colors"
           >
-            Clear Cart
+            {t("clearCart")}
           </button>
           <SubmitButton
             isLoading={isCreating || isUpdating}
             onClick={handleCreateOrUpdateSale}
           >
-            {updatedSaleId ? "Update" : "Sell"}
+            {updatedSaleId ? t("update") : t("sell")}
           </SubmitButton>
         </div>
       </div>
