@@ -65,5 +65,29 @@
     "clearCart": "Clear Cart",
     "sell": "Sell",
     "update": "Update"
+  },
+
+  "createProdPage": {
+    "title": "Create New Product",
+    "type": "Type(s)",
+    "addType": "Add Type",
+    "remove": "Remove",
+    "brand": "Brand",
+    "addNew": "Add New",
+    "selectFromExisting": "Select from Existing",
+    "source": "Source",
+    "location": "Location",
+    "noOfItemsInStock": "Items in Stock",
+    "buyingPrice": "Buying Price",
+    "sellingPrice": "Selling Price",
+    "lowStockThreshold": "Low Stock Threshold",
+    "description": "Description",
+    "submit": "Create New",
+    "prodCreateSuccessToastMsg": "Created Product Successfully",
+    "conflictModalTitle": "Similar Products Exist!",
+    "prodYouCreating": "Product You are Creating",
+    "similarProds": "Similar Products",
+    "updateThisInstead": "Update This Instead",
+    "confirmCreateNew": "Confirm Create New"
   }
 }

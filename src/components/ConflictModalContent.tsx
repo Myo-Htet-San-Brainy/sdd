@@ -13,28 +13,42 @@ type ConflictModalContentProps = {
     description: string;
   }>;
   handleClose?: (result?: any) => void;
+  prodYouCreating: string;
+  similarProds: string;
+  updateThisInstead: string;
+  confirmCreateNew: string;
+  brand: string;
+  type: string;
+  description: string;
 };
 
 export function ConflictModalContent({
   currentProduct,
   similarProducts,
   handleClose,
+  prodYouCreating,
+  similarProds,
+  updateThisInstead,
+  confirmCreateNew,
+  brand,
+  type,
+  description,
 }: ConflictModalContentProps) {
   return (
     <>
       {/* Current Product */}
       <div className="space-y-2">
-        <h3 className="font-medium text-white">Product You Tried to Create:</h3>
+        <h3 className="font-medium text-white">{prodYouCreating}:</h3>
         <p className="text-sm text-white">
-          <strong>Brand:</strong> {currentProduct.brand || "N/A"} <br />
-          <strong>Type:</strong> {currentProduct.type.join(", ")} <br />
-          <strong>Description:</strong> {currentProduct.description}
+          <strong>{brand}:</strong> {currentProduct.brand || "N/A"} <br />
+          <strong>{type}:</strong> {currentProduct.type.join(", ")} <br />
+          <strong>{description}:</strong> {currentProduct.description}
         </p>
       </div>
 
       {/* Similar Products */}
       <div className="space-y-2">
-        <h3 className="font-medium text-white">Similar Products:</h3>
+        <h3 className="font-medium text-white">{similarProds}:</h3>
         <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
           {similarProducts.map((prod) => (
             <div
@@ -42,9 +56,9 @@ export function ConflictModalContent({
               className="border border-white/30 bg-white/20 backdrop-blur-md p-3 rounded-md flex items-start justify-between"
             >
               <div className="text-sm text-white">
-                <strong>Brand:</strong> {prod.brand || "N/A"} <br />
-                <strong>Type:</strong> {prod.type.join(", ")} <br />
-                <strong>Description:</strong> {prod.description}
+                <strong>{brand}:</strong> {prod.brand || "N/A"} <br />
+                <strong>{type}:</strong> {prod.type.join(", ")} <br />
+                <strong>{description}:</strong> {prod.description}
               </div>
               <Link
                 href={`/main/product/${prod._id}/update`}
@@ -53,7 +67,7 @@ export function ConflictModalContent({
                   handleClose && handleClose("update");
                 }}
               >
-                Update This Product
+                {updateThisInstead}
               </Link>
             </div>
           ))}
@@ -68,7 +82,7 @@ export function ConflictModalContent({
           }}
           className="px-4 py-2 bg-red-700 hover:bg-red-800 text-white rounded-md"
         >
-          Confirm Create New
+          {confirmCreateNew}
         </button>
       </div>
     </>

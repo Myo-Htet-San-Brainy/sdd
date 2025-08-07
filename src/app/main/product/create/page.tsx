@@ -24,8 +24,10 @@ import ManageProductForm, {
 import { useModal } from "@/context/modalContext";
 import { ConflictModalContent } from "@/components/ConflictModalContent";
 import { getProducts } from "@/services/product";
+import { useTranslations } from "next-intl";
 
 const Page = () => {
+  const t = useTranslations("createProdPage");
   const { data: myPermissions, isFetching, isPending } = useGetMyPermissions();
   const {
     data: productMeta,
@@ -46,7 +48,7 @@ const Page = () => {
       });
       if (similarProductsData.products.length > 0) {
         const result = await showFormModal({
-          title: "Some title",
+          title: t("conflictModalTitle"),
           showCloseButton: true,
           content: (
             <ConflictModalContent
@@ -56,6 +58,13 @@ const Page = () => {
                 description: prod.description,
               }}
               similarProducts={similarProductsData.products}
+              prodYouCreating={t("prodYouCreating")}
+              similarProds={t("similarProds")}
+              updateThisInstead={t("updateThisInstead")}
+              confirmCreateNew={t("confirmCreateNew")}
+              brand={t("brand")}
+              type={t("type")}
+              description={t("description")}
             />
           ),
         });
@@ -68,7 +77,7 @@ const Page = () => {
         { payload: prod },
         {
           onSuccess: () => {
-            toast.success("Product Created!");
+            toast.success(t("prodCreateSuccessToastMsg"));
             manageProductFormRef.current?.resetForm();
           },
           onError(error, variables, context) {
@@ -135,6 +144,8 @@ const Page = () => {
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
       <ManageProductForm
+        titleText={t("title")}
+        submitText={t("submit")}
         productMeta={productMeta}
         isPending={false}
         onSubmit={onSubmit}

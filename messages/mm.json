@@ -64,5 +64,28 @@
     "clearCart": "ခြင်းရှင်းမည်",
     "sell": "ဘောက်ချာပြုလုပ်မည်",
     "update": "ဘောက်ချာပြင်မည်"
+  },
+  "createProdPage": {
+    "title": "ပစ္စည်းအသစ်",
+    "type": "အမျိုးအစား(များ)",
+    "addType": "အမျိုးအစားနောက်တခုထည့်မည်",
+    "remove": "ဖျက်မည်",
+    "brand": "အမှတ်တံဆိပ်",
+    "addNew": "အသစ်ထည့်မည်",
+    "selectFromExisting": "ရှိပြီးသားထဲကရွေးမည်",
+    "source": "ကုန်သယ်",
+    "location": "နေရာ",
+    "noOfItemsInStock": "ပစ္စည်းကျန်",
+    "buyingPrice": "ဝယ်စျေး",
+    "sellingPrice": "ရောင်းစျေး",
+    "lowStockThreshold": "အနဲဆုံးရှိသင့်သည့် ပစ္စည်းကျန်ပမာဏ",
+    "description": "အသေးစိတ်",
+    "submit": "ပစ္စည်းသစ်ထည့်မည်",
+    "prodCreateSuccessToastMsg": "ပစ္စည်းသစ်ထည့်ပြီးပါပြီ",
+    "conflictModalTitle": "ယခုထည့်သောပစ္စည်းနှင့် ဆင်တူသောပစ္စည်းများရှိနေသည်",
+    "prodYouCreating": "ယခုထည့်သောပစ္စည်း",
+    "similarProds": "ဆင်တူသောပစ္စည်းများ",
+    "updateThisInstead": "ဒါကိုပဲပြင်တော့မည်",
+    "confirmCreateNew": "အသစ်ပဲထည့်မည်"
   }
 }
