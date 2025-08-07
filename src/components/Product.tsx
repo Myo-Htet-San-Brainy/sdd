@@ -1,7 +1,10 @@
+"use client";
+
 import { Product as ProductI } from "@/Interfaces/Product";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission, isItemInList } from "@/lib/utils";
 import { CartProduct, useBookmarkedProductsStore, useCartStore } from "@/store";
+import { useTranslations } from "next-intl";
 import Link from "next/link";
 import React from "react";
 
@@ -12,6 +15,8 @@ const Product = ({
   product: ProductI;
   myPermissions?: string[];
 }) => {
+  const t = useTranslations("ProdCard");
+
   const { addToBookmark, removeFromBookmark, bookmarkedProducts } =
     useBookmarkedProductsStore();
   const isBookmarked = isItemInList(product, bookmarkedProducts);
@@ -45,14 +50,16 @@ const Product = ({
       {/* Product Info */}
       <div className="text-sm text-zinc-600 space-y-1 mt-2">
         <p>
-          <span className="font-medium">Stock:</span> {product.noOfItemsInStock}
+          <span className="font-medium">{t("stock")}:</span>{" "}
+          {product.noOfItemsInStock}
         </p>
         <p>
-          <span className="font-medium">Price:</span>{" "}
+          <span className="font-medium">{t("price")}:</span>{" "}
           {product.sellingPrice.toLocaleString()} MMK
         </p>
         <p>
-          <span className="font-medium">Location:</span> {product.location}
+          <span className="font-medium">{t("location")}:</span>{" "}
+          {product.location}
         </p>
       </div>
 
@@ -131,7 +138,7 @@ const Product = ({
           }}
           className="inline-block text-sm text-red-600 hover:underline"
         >
-          View Details →
+          {t("viewDetails")} →
         </Link>
         {/* Bookmark */}
         <button
@@ -146,7 +153,7 @@ const Product = ({
               : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"
           }`}
         >
-          {isBookmarked ? "💖 Bookmarked" : "🤍 Bookmark"}
+          {isBookmarked ? t("unbookmark") : t("bookmark")}
         </button>
       </div>
     </div>

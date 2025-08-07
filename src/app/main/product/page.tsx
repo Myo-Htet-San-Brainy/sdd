@@ -11,8 +11,10 @@ import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useGetProductsByType, useGetSuggestions } from "@/query/product";
 import { Product as ProductI } from "@/Interfaces/Product";
 import Product from "@/components/Product";
+import { useTranslations } from "next-intl";
 
 const Page = () => {
+  const t = useTranslations("BrowsePage");
   const [type, setType] = useState("");
   const [searchInput, setSearchInput] = useState("");
   const [suggestionPrompt, setSuggestionPrompt] = useState("");
@@ -77,17 +79,17 @@ const Page = () => {
     }
   }, [data, filter]); // Re-run effect when data or filter changes
 
-  function handleSearch() {
-    const trimmedType = type.trim();
-    if (!trimmedType) {
-      toast.error("Please enter a product type");
-      return;
-    }
-    setSuggestionPrompt("");
-    setSearchInput(trimmedType);
-    // Reset filters when a new search is performed
-    setFilter({ brand: "all brands", description: "all descriptions" });
-  }
+  // function handleSearch() {
+  //   const trimmedType = type.trim();
+  //   if (!trimmedType) {
+  //     toast.error("Please enter a product type");
+  //     return;
+  //   }
+  //   setSuggestionPrompt("");
+  //   setSearchInput(trimmedType);
+  //   // Reset filters when a new search is performed
+  //   setFilter({ brand: "all brands", description: "all descriptions" });
+  // }
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
     return (
@@ -124,7 +126,7 @@ const Page = () => {
     // This state indicates query is not yet started or has no data
     content = (
       <div className="min-h-[300px] flex justify-center items-center">
-        <p className="text-zinc-500">🚀 Ready To Fetch...</p>
+        <p className="text-zinc-500">🚀 {t("readyToSearch")}...</p>
       </div>
     );
   } else if (isErrorProducts) {
@@ -138,7 +140,7 @@ const Page = () => {
   } else if (!products) {
     content = (
       <div className="min-h-[300px] flex justify-center items-center">
-        <p className="text-zinc-500 animate-pulse">🔄 Fetching products...</p>
+        <p className="text-zinc-500 animate-pulse">🔄 {t("searching")}...</p>
       </div>
     );
   } else if (products.length <= 0) {
@@ -174,7 +176,7 @@ const Page = () => {
           href={"/main/product/search"}
           className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-md transition"
         >
-          Search
+          {t("search")}
         </Link>
 
         {hasPermission(
@@ -185,7 +187,7 @@ const Page = () => {
             href={"/main/product/create"}
             className="bg-red-600 hover:bg-red-700 text-white font-medium px-4 py-2 rounded-md transition"
           >
-            Create Product
+            {t("createProd")}
           </Link>
         )}
 
@@ -212,7 +214,7 @@ const Page = () => {
             setType(value);
             setSuggestionPrompt(value);
           }}
-          placeholder="🔍 Search product type..."
+          placeholder={`🔍 ${t("enterProdAType")}...`}
           className="border border-zinc-300 text-zinc-500 placeholder-zinc-500 px-4 py-2 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-red-600"
           onFocus={(e) => setSuggestionPrompt(e.target.value)}
         />
@@ -260,60 +262,63 @@ const Page = () => {
         data &&
         (data.distinctBrands.length > 0 ||
           data.distinctDescriptions.length > 0) && (
-          <div className="max-w-xl mx-auto flex flex-wrap gap-4 mt-6 p-4 border border-zinc-200 rounded-lg bg-white shadow-sm">
-            {data.distinctBrands.length > 0 && (
-              <div className="flex-1 min-w-[150px]">
-                <label
-                  htmlFor="brand-filter"
-                  className="block text-sm font-medium text-zinc-700 mb-1"
-                >
-                  Brand:
-                </label>
-                <select
-                  id="brand-filter"
-                  value={filter.brand}
-                  onChange={(e) =>
-                    setFilter({ ...filter, brand: e.target.value })
-                  }
-                  className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
-                >
-                  <option value="all brands">All Brands</option>{" "}
-                  {/* "nothing selected" option */}
-                  {sortEnglishFirst(data.distinctBrands).map((brand) => (
-                    <option key={brand} value={brand}>
-                      {brand === "" ? "no brand" : brand}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+          <div className="max-w-xl mx-auto  mt-6 p-4 border border-zinc-200 rounded-lg bg-white shadow-sm">
+            <h1 className="text-zinc-700 mb-2 text-base">{t("filter")}</h1>
+            <div className="flex flex-wrap gap-4">
+              {data.distinctBrands.length > 0 && (
+                <div className="flex-1 min-w-[150px]">
+                  <label
+                    htmlFor="brand-filter"
+                    className="block text-sm font-medium text-zinc-700 mb-1"
+                  >
+                    {t("brand")}:
+                  </label>
+                  <select
+                    id="brand-filter"
+                    value={filter.brand}
+                    onChange={(e) =>
+                      setFilter({ ...filter, brand: e.target.value })
+                    }
+                    className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  >
+                    <option value="all brands">All Brands</option>{" "}
+                    {/* "nothing selected" option */}
+                    {sortEnglishFirst(data.distinctBrands).map((brand) => (
+                      <option key={brand} value={brand}>
+                        {brand === "" ? "no brand" : brand}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
-            {data.distinctDescriptions.length > 0 && (
-              <div className="flex-1 min-w-[150px]">
-                <label
-                  htmlFor="description-filter"
-                  className="block text-sm font-medium text-zinc-700 mb-1"
-                >
-                  Description:
-                </label>
-                <select
-                  id="description-filter"
-                  value={filter.description}
-                  onChange={(e) =>
-                    setFilter({ ...filter, description: e.target.value })
-                  }
-                  className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
-                >
-                  <option value="all descriptions">All Descriptions</option>{" "}
-                  {/* "nothing selected" option */}
-                  {data.distinctDescriptions.map((description) => (
-                    <option key={description} value={description}>
-                      {description === "" ? "no description" : description}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
+              {data.distinctDescriptions.length > 0 && (
+                <div className="flex-1 min-w-[150px]">
+                  <label
+                    htmlFor="description-filter"
+                    className="block text-sm font-medium text-zinc-700 mb-1"
+                  >
+                    {t("description")}:
+                  </label>
+                  <select
+                    id="description-filter"
+                    value={filter.description}
+                    onChange={(e) =>
+                      setFilter({ ...filter, description: e.target.value })
+                    }
+                    className="w-full p-2 border border-zinc-300 rounded-md bg-white text-zinc-800 focus:outline-none focus:ring-2 focus:ring-red-600"
+                  >
+                    <option value="all descriptions">All Descriptions</option>{" "}
+                    {/* "nothing selected" option */}
+                    {data.distinctDescriptions.map((description) => (
+                      <option key={description} value={description}>
+                        {description === "" ? "no description" : description}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
           </div>
         )}
 

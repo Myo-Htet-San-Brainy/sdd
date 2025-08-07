@@ -12,5 +12,57 @@
     "buyer": "ဝယ်သူ",
     "total": "စုစုပေါင်း",
     "updateSale": "ဘောက်ချာပြင်မည်"
+  },
+  "BrowsePage": {
+    "bookmarks": "ခနသိမ်းထားသောပစ္စည်းများ",
+    "search": "ရှာမည်",
+    "createProd": "ပစ္စည်းသစ်ထည့်မည်",
+    "cart": "စျေးခြင်း",
+    "enterProdAType": "အမျိုးအစားတခုခုထည့်ပါ",
+    "readyToSearch": "ရှာရန်အသင့်",
+    "searching": "ရှာနေသည်",
+    "filter": "စစ်ထုတ်မည်",
+    "brand": "အမှတ်တံဆိပ်ဖြင့်",
+    "description": "အသေးစိတ်ဖြင့်",
+    "noBookmarkedProds": "ခနသိမ်းထားသောပစ္စည်းများမရှိသေးပါ",
+    "close": "ပိတ်မည်"
+  },
+  "ProdCard": {
+    "stock": "ပစ္စည်းကျန်",
+    "price": "ရောင်းစျေး",
+    "location": "နေရာ",
+    "viewDetails": "အချက်အလက်အပြည့်အစုံကြည့်မည်",
+    "bookmark": "ခနသိမ်းမည်",
+    "unbookmark": "မသိမ်းတော့ပါ"
+  },
+  "prodDetailsPage": {
+    "title": "အစ္စည်းအချက်အလက်အပြည့်အစုံ",
+    "type": "အမျိုးအစား",
+    "brand": "အမှတ်တံဆိပ်",
+    "location": "နေရာ",
+    "description": "အသေးစိတ်",
+    "itemsInStock": "ပစ္စည်းကျန်",
+    "sellingPrice": "ရောင်းစျေး",
+    "buyingPrice": "ဝယ်စျေး",
+    "source": "ကုန်သယ်",
+    "lowStockThreshold": "အနဲဆုံးရှိသင့်သည့် ပစ္စည်းကျန်ပမာဏ",
+    "lastUpdated": "ဤပစ္စည်းအချက်အလက်များအားနောက်ဆုံးကြိမ်ပြင်ထားသည့်ရက်စွဲ",
+    "updateProd": "အချက်အလက်ပြင်မည်"
+  },
+  "createSalePage": {
+    "sale": "ဘောက်ချာ",
+    "noItemsInCart": "ခြင်းထဲပစ္စည်းမရှိသေးပါ",
+    "noItemsLeftForThisSale": "ပြင်နေသောဘောက်ချာတွင် ပစ္စည်းမကျန်တော့ပါ",
+    "removeSale": "ပြင်နေသောဘောက်ချာကို ဖျက်မည်",
+    "cartClearToastMsg": "ခြင်းရှင်းလိုက်ပါပြီ",
+    "saleUpdatedToastMsg": "ဘောက်ချာပြင်လိုက်ပါပြီ",
+    "saleCreatedToastMsg": "ဘောက်ချာပြုလုပ်ပြီးပါပြီ",
+    "priceForThisElement": "ဤပစ္စည်းအတွက် သင့်ငွေ",
+    "totalPrice": "စုစုပေါင်း သင့်ငွေ",
+    "selectBuyer": "စျေးဝယ်သူရွေးရန်",
+    "noBuyerSelected": "ဘယ်စျေးဝယ်သူမှ ‌မရွေးတော့ပါ",
+    "clearCart": "ခြင်းရှင်းမည်",
+    "sell": "ဘောက်ချာပြုလုပ်မည်",
+    "update": "ဘောက်ချာပြင်မည်"
   }
 }

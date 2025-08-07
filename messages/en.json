@@ -12,5 +12,57 @@
     "buyer": "Buyer",
     "total": "Total",
     "updateSale": "Update Sale"
+  },
+  "BrowsePage": {
+    "bookmarks": "Bookmarks",
+    "search": "Search",
+    "createProd": "Create Product",
+    "cart": "Cart",
+    "enterProdAType": "Enter A Prod Type",
+    "readyToSearch": "Ready",
+    "searching": "Searching",
+    "filter": "Filter",
+    "brand": "Brand",
+    "description": "Description",
+    "noBookmarkedProds": "No Bookmarked Products",
+    "close": "Close"
+  },
+  "ProdCard": {
+    "stock": "Stock",
+    "price": "Price",
+    "location": "Location",
+    "viewDetails": "View Details",
+    "bookmark": "Bookmark",
+    "unbookmark": "Unbookmark"
+  },
+  "prodDetailsPage": {
+    "title": "Title",
+    "type": "Type",
+    "brand": "Brand",
+    "location": "Location",
+    "description": "Description",
+    "itemsInStock": "Items In Stock",
+    "sellingPrice": "Selling Price",
+    "buyingPrice": "Buying Price",
+    "source": "Source",
+    "lowStockThreshold": "Low Stock Threshold",
+    "lastUpdated": "Last Updated",
+    "updateProd": "Update Product"
+  },
+  "createSalePage": {
+    "sale": "Sale",
+    "noItemsInCart": "No items in cart yet",
+    "noItemsLeftForThisSale": "",
+    "removeSale": "",
+    "cartClearToastMsg": "",
+    "saleUpdatedToastMsg": "",
+    "saleCreatedToastMsg": "",
+    "priceForThisElement": "Price",
+    "totalPrice": "",
+    "selectBuyer": "",
+    "noBuyerSelected": "",
+    "clearCart": "",
+    "sell": "",
+    "update": ""
   }
 }
