@@ -87,5 +87,10 @@
     "similarProds": "ဆင်တူသောပစ္စည်းများ",
     "updateThisInstead": "ဒါကိုပဲပြင်တော့မည်",
     "confirmCreateNew": "အသစ်ပဲထည့်မည်"
+  },
+  "updateProdPage": {
+    "title": "ပစ္စည်းပြင်ရန်",
+    "submit": "ပစ္စည်းပြင်မည်",
+    "prodUpdateSuccessToastMsg": "ပစ္စည်းပြင်ပြီးပါပြီ"
   }
 }

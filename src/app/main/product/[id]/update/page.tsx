@@ -23,10 +23,10 @@ import { productSchema } from "@/schema";
 import ManageProductForm from "@/components/ManageProductForm";
 import { Product } from "@/Interfaces/Product";
 import { getProducts } from "@/services/product";
-
-const colorEmoji = ["🔴", "🟢", "🔵", "🟣", "🟡", "🟤", "⚫", "⚪"];
+import { useTranslations } from "next-intl";
 
 const Page = () => {
+  const t = useTranslations("updateProdPage");
   const { data: myPermissions, isFetching, isPending } = useGetMyPermissions();
   const { id }: { id?: string } = useParams();
   const router = useRouter();
@@ -121,7 +121,7 @@ const Page = () => {
       { productId: id!, productPayload: { ...data, type } },
       {
         onSuccess: () => {
-          toast.success("Product Updated!");
+          toast.success(t("prodUpdateSuccessToastMsg"));
           router.push(`/main/product/${id}`);
         },
         onError: () => {
@@ -134,6 +134,8 @@ const Page = () => {
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 py-10 px-4">
       <ManageProductForm
+        titleText={t("title")}
+        submitText={t("submit")}
         productMeta={productMeta}
         existingProduct={{
           ...product,

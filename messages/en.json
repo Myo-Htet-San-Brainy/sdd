@@ -89,5 +89,10 @@
     "similarProds": "Similar Products",
     "updateThisInstead": "Update This Instead",
     "confirmCreateNew": "Confirm Create New"
+  },
+  "updateProdPage": {
+    "title": "Update Product",
+    "submit": "Confirm Update",
+    "prodUpdateSuccessToastMsg": "Updated Product Successfully"
   }
 }
