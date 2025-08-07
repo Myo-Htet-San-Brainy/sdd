@@ -142,6 +142,6 @@ export async function updateProductById(id: string, update: any) {
   const productCollection = await getCollection("product");
   return await productCollection.updateOne(
     { _id: new ObjectId(id) },
-    { $set: update }
+    { $set: { ...update, lastUpdated: new Date() } }
   );
 }
