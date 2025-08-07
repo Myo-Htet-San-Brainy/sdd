@@ -173,98 +173,98 @@ export async function GET(req: NextRequest) {
   }
 }
 
-const prods: Omit<Product, "_id">[] = [
-  {
-    brand: "SMOW",
-    noOfItemsInStock: 10,
-    sellingPrice: 7800,
-    description: "အလယ်‌ဒစ်",
-    source: "Empire",
-    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
-    location: "MS-I-7",
-    buyingPrice: 7020, // 7800 * 0.9
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-  {
-    brand: "OUOK",
-    noOfItemsInStock: 8,
-    sellingPrice: 7800,
-    description: "အလယ်ဒစ်",
-    source: "Empire",
-    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
-    location: "MS-I-7",
-    buyingPrice: 7020,
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-  {
-    brand: "PRT",
-    noOfItemsInStock: 3,
-    sellingPrice: 7800,
-    description: "အလယ်ဒစ်",
-    source: "Empire",
-    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
-    location: "MS-I-7",
-    buyingPrice: 7020,
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-  {
-    brand: "JRC",
-    noOfItemsInStock: 1,
-    sellingPrice: 7800,
-    description: "အလယ်ဒစ်",
-    source: "Empire",
-    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
-    location: "MS-I-7",
-    buyingPrice: 7020,
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-  {
-    brand: "SABR",
-    noOfItemsInStock: 1,
-    sellingPrice: 7800,
-    description: "အလယ်ဒစ်",
-    source: "Empire",
-    type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
-    location: "MS-I-7",
-    buyingPrice: 7020,
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-];
+// const prods: Omit<Product, "_id">[] = [
+//   {
+//     brand: "SMOW",
+//     noOfItemsInStock: 10,
+//     sellingPrice: 7800,
+//     description: "အလယ်‌ဒစ်",
+//     source: "Empire",
+//     type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+//     location: "MS-I-7",
+//     buyingPrice: 7020, // 7800 * 0.9
+//     lowStockThreshold: 0,
+//     lastUpdated: new Date(),
+//   },
+//   {
+//     brand: "OUOK",
+//     noOfItemsInStock: 8,
+//     sellingPrice: 7800,
+//     description: "အလယ်ဒစ်",
+//     source: "Empire",
+//     type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+//     location: "MS-I-7",
+//     buyingPrice: 7020,
+//     lowStockThreshold: 0,
+//     lastUpdated: new Date(),
+//   },
+//   {
+//     brand: "PRT",
+//     noOfItemsInStock: 3,
+//     sellingPrice: 7800,
+//     description: "အလယ်ဒစ်",
+//     source: "Empire",
+//     type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+//     location: "MS-I-7",
+//     buyingPrice: 7020,
+//     lowStockThreshold: 0,
+//     lastUpdated: new Date(),
+//   },
+//   {
+//     brand: "JRC",
+//     noOfItemsInStock: 1,
+//     sellingPrice: 7800,
+//     description: "အလယ်ဒစ်",
+//     source: "Empire",
+//     type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+//     location: "MS-I-7",
+//     buyingPrice: 7020,
+//     lowStockThreshold: 0,
+//     lastUpdated: new Date(),
+//   },
+//   {
+//     brand: "SABR",
+//     noOfItemsInStock: 1,
+//     sellingPrice: 7800,
+//     description: "အလယ်ဒစ်",
+//     source: "Empire",
+//     type: ["ကွန်ထရိုလာဂွ", "controllerဂွ"],
+//     location: "MS-I-7",
+//     buyingPrice: 7020,
+//     lowStockThreshold: 0,
+//     lastUpdated: new Date(),
+//   },
+// ];
 
-export async function POST(req: NextRequest) {
-  try {
-    console.log("1");
-    const productCollection = await getCollection("product");
-    console.log("2");
+// export async function POST(req: NextRequest) {
+//   try {
+//     console.log("1");
+//     const productCollection = await getCollection("product");
+//     console.log("2");
 
-    if (!Array.isArray(prods) || prods.length === 0) {
-      return NextResponse.json(
-        { error: "No products to insert." },
-        { status: 400 }
-      );
-    }
+//     if (!Array.isArray(prods) || prods.length === 0) {
+//       return NextResponse.json(
+//         { error: "No products to insert." },
+//         { status: 400 }
+//       );
+//     }
 
-    console.log("before insertion");
-    const insertResult = await productCollection.insertMany(prods);
-    console.log("after insertion");
+//     console.log("before insertion");
+//     const insertResult = await productCollection.insertMany(prods);
+//     console.log("after insertion");
 
-    return NextResponse.json(
-      {
-        message: `Inserted ${insertResult.insertedCount} products successfully ✨`,
-        insertedIds: insertResult.insertedIds,
-      },
-      { status: 201 }
-    );
-  } catch (error) {
-    console.error("[POST_PRODUCT_ERROR]", error);
-    return NextResponse.json(
-      { error: "Failed to insert products." },
-      { status: 500 }
-    );
-  }
-}
+//     return NextResponse.json(
+//       {
+//         message: `Inserted ${insertResult.insertedCount} products successfully ✨`,
+//         insertedIds: insertResult.insertedIds,
+//       },
+//       { status: 201 }
+//     );
+//   } catch (error) {
+//     console.error("[POST_PRODUCT_ERROR]", error);
+//     return NextResponse.json(
+//       { error: "Failed to insert products." },
+//       { status: 500 }
+//     );
+//   }
+// }
