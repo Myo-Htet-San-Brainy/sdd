@@ -73,67 +73,32 @@ export async function PATCH(req: NextRequest) {
   try {
     const productCollection = await getCollection("product");
 
-    const allProducts = await productCollection.find({}).toArray();
-
-    // 🧠 Group products by common type terms
-    const visited = new Set<string>();
-    const groups: Array<typeof allProducts> = [];
-
-    for (const product of allProducts) {
-      if (visited.has(product._id.toString())) continue;
-
-      const group: typeof allProducts = [product];
-      visited.add(product._id.toString());
-
-      for (const other of allProducts) {
-        if (product._id.toString() === other._id.toString()) continue;
-        if (visited.has(other._id.toString())) continue;
-
-        const hasCommonType = product.type.some((t: any) =>
-          other.type.includes(t)
-        );
-        if (hasCommonType) {
-          group.push(other);
-          visited.add(other._id.toString());
-        }
-      }
-
-      groups.push(group);
-    }
-
-    let updatedCount = 0;
-
-    // ✨ Replace type arrays in each group with the most comprehensive one
-    for (const group of groups) {
-      const maxTypeProduct = group.reduce((longest, current) =>
-        current.type.length > longest.type.length ? current : longest
-      );
-
-      const uniqueTypeSet = new Set(maxTypeProduct.type);
-
-      for (const product of group) {
-        const needsUpdate =
-          product.type.length !== uniqueTypeSet.size ||
-          product.type.some((t: any) => !uniqueTypeSet.has(t));
-
-        if (needsUpdate) {
-          await productCollection.updateOne(
-            { _id: new ObjectId(product._id) },
-            { $set: { type: Array.from(uniqueTypeSet) } }
-          );
-          updatedCount++;
-        }
-      }
-    }
+    // Match products where brand exists and is not already uppercase
+    const result = await productCollection.updateMany(
+      {
+        brand: { $exists: true, $type: "string" },
+        $expr: { $ne: ["$brand", { $toUpper: "$brand" }] },
+      },
+      [
+        {
+          $set: {
+            brand: { $toUpper: "$brand" },
+          },
+        },
+      ]
+    );
 
     return NextResponse.json(
-      { updatedCount, groupCount: groups.length },
+      {
+        matchedCount: result.matchedCount,
+        modifiedCount: result.modifiedCount,
+      },
       { status: 200 }
     );
   } catch (error) {
     console.error("[PATCH_UPDATE_ERROR]", error);
     return NextResponse.json(
-      { error: "Failed to update product types." },
+      { error: "Failed to update product brands." },
       { status: 500 }
     );
   }
@@ -173,90 +138,130 @@ export async function GET(req: NextRequest) {
   }
 }
 
-const prods: Omit<Product, "_id">[] = [
+type ProductWithDateNoId = Omit<Product, "_id" | "lastUpdated"> & {
+  lastUpdated: Date;
+};
+
+const prods: ProductWithDateNoId[] = [
   {
-    brand: "ဘူးညို",
-    noOfItemsInStock: 10,
-    sellingPrice: 2000,
-    description: "45ဆိုက်", // Removed "စတပ်ဘောဆံ"
+    brand: "Rapid",
+    sellingPrice: 12000,
+    description: "CLICK2014_Black",
+    noOfItemsInStock: 4,
     source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
+    location: "MS-B-3",
+    buyingPrice: 10800, // 12000 * 0.9
     lowStockThreshold: 0,
     lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
   },
   {
-    brand: "ဘူးညို",
-    noOfItemsInStock: 7,
-    sellingPrice: 2000,
-    description: "40ဆိုက်", // Removed "စတပ်ဘောဆံ"
+    brand: "Rapid",
+    sellingPrice: 12500,
+    description: "CLICK2017_Black",
+    noOfItemsInStock: 5,
     source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
+    location: "MS-B-3",
+    buyingPrice: 11250, // 12500 * 0.9
     lowStockThreshold: 0,
     lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
   },
   {
-    brand: "ဘူးညို",
-    noOfItemsInStock: 9,
-    sellingPrice: 2000,
-    description: "50ဆိုက်", // Removed "စတပ်ဘောဆံ"
+    brand: "Rapid",
+    sellingPrice: 13500,
+    description: "CLICK2018i_Black",
+    noOfItemsInStock: 5,
     source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
+    location: "MS-B-3",
+    buyingPrice: 12150, // 13500 * 0.9
     lowStockThreshold: 0,
     lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
   },
   {
-    brand: "ဘူးညို",
-    noOfItemsInStock: 8,
-    sellingPrice: 2000,
-    description: "35ဆိုက်", // Removed "စတပ်ဘောဆံ"
-    source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-  {
-    brand: "Powerfui",
-    noOfItemsInStock: 7,
-    sellingPrice: 2000,
-    description: "20ဆိုက်", // Removed "စတပ်ဘောဆံ"
-    source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
-    lowStockThreshold: 0,
-    lastUpdated: new Date(),
-  },
-  {
-    brand: "JX",
+    brand: "Yamaha",
+    sellingPrice: 12000,
+    description: "FZ_Black",
     noOfItemsInStock: 2,
-    sellingPrice: 2000,
-    description: "30ဆိုက်", // Removed "စတပ်ဘောဆံ"
     source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
+    location: "MS-B-3",
+    buyingPrice: 10800,
     lowStockThreshold: 0,
     lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
   },
   {
-    brand: "PINION",
-    noOfItemsInStock: 15,
-    sellingPrice: 2000,
-    description: "25ဆိုက်", // Removed "စတပ်ဘောဆံ"
+    brand: "Rapid",
+    sellingPrice: 11500,
+    description: "FZ16_Black",
+    noOfItemsInStock: 3,
     source: "Empire",
-    type: ["စတပ်ဘောဆံ"],
-    location: "MS-I-6",
-    buyingPrice: 1500,
+    location: "MS-B-3",
+    buyingPrice: 10350, // 11500 * 0.9
     lowStockThreshold: 0,
     lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
+  },
+  {
+    brand: "Honda",
+    sellingPrice: 22000,
+    description: "Scoopyi2017_Black",
+    noOfItemsInStock: 2,
+    source: "Empire",
+    location: "MS-B-3",
+    buyingPrice: 19800, // 22000 * 0.9
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
+  },
+  {
+    brand: "Rapid",
+    sellingPrice: 12000,
+    description: "Scoopy_Black",
+    noOfItemsInStock: 1,
+    source: "Empire",
+    location: "MS-B-3",
+    buyingPrice: 10800,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
+  },
+  {
+    brand: "Rapid",
+    sellingPrice: 12000,
+    description: "Scoopy_Gold",
+    noOfItemsInStock: 1,
+    source: "Empire",
+    location: "MS-B-3",
+    buyingPrice: 10800,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
+  },
+  {
+    brand: "Rapid",
+    sellingPrice: 12000,
+    description: "Scoopy_Green",
+    noOfItemsInStock: 1,
+    source: "Empire",
+    location: "MS-B-3",
+    buyingPrice: 10800,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
+  },
+  {
+    brand: "Rapid",
+    sellingPrice: 12000,
+    description: "Scoopy_Orange",
+    noOfItemsInStock: 1,
+    source: "Empire",
+    location: "MS-B-3",
+    buyingPrice: 10800,
+    lowStockThreshold: 0,
+    lastUpdated: new Date(),
+    type: ["ဘက်မှန်"],
   },
 ];
 
