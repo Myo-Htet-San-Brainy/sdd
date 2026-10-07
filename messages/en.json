@@ -47,7 +47,12 @@
     "source": "Source",
     "lowStockThreshold": "Low Stock Threshold",
     "lastUpdated": "Last Updated",
-    "updateProd": "Update Product"
+    "updateProd": "Update Product",
+    "deleteProd": "Delete Product",
+    "deleteConfirm": "Are you sure you want to delete this product?",
+    "deletingProd": "Deleting product...",
+    "deleteSuccess": "Product deleted successfully!",
+    "deleteFailed": "Failed to delete product!"
   },
 
   "createSalePage": {

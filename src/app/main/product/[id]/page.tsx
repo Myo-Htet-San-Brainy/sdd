@@ -1,16 +1,16 @@
 "use client";
 
-import { Product } from "@/Interfaces/Product";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { CustomError } from "@/lib/CustomError";
 import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
-import { useGetProductById } from "@/query/product";
+import { useDeleteProductMutation, useGetProductById } from "@/query/product";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const Page = () => {
   const t = useTranslations("prodDetailsPage");
@@ -24,6 +24,9 @@ const Page = () => {
     isError: isErrorProduct,
     error: errorProduct,
   } = useGetProductById(id);
+  const { mutate: deleteProductMutate, isPending: isDeleting } =
+    useDeleteProductMutation();
+  const router = useRouter();
 
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -38,6 +41,30 @@ const Page = () => {
       queryClient.invalidateQueries({ queryKey: ["products-meta"] });
     }
   }, [isErrorProduct]);
+
+  function handleDeleteProduct() {
+    if (!product?._id) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
+
+    const toastId = toast.loading(t("deletingProd"));
+    deleteProductMutate(
+      { productId: product._id },
+      {
+        onSuccess() {
+          toast.success(t("deleteSuccess"), { id: toastId });
+          router.push("/main/product");
+        },
+        onError(error) {
+          if (error instanceof CustomError && error.status === 404) {
+            toast.success(t("deleteSuccess"), { id: toastId });
+            router.push("/main/product");
+          } else {
+            toast.error(t("deleteFailed"), { id: toastId });
+          }
+        },
+      }
+    );
+  }
 
   if (isFetchingMyPermissions) {
     return (
@@ -87,6 +114,15 @@ const Page = () => {
     );
   }
 
+  const canUpdate = hasPermission(
+    myPermissions!,
+    MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.name
+  );
+  const canDelete = hasPermission(
+    myPermissions!,
+    MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_DELETE.name
+  );
+
   return (
     <div className="min-h-[calc(100vh-72px)] bg-zinc-50 px-6 py-10">
       <div className="max-w-2xl mx-auto p-6 rounded-2xl shadow-md border border-zinc-200 bg-white space-y-5">
@@ -134,17 +170,26 @@ const Page = () => {
           )}
         </div>
 
-        {hasPermission(
-          myPermissions!,
-          MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_UPDATE.name
-        ) && (
-          <div className="pt-4">
-            <Link
-              href={`/main/product/${product._id}/update`}
-              className="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
-            >
-              {t("updateProd")}
-            </Link>
+        {(canUpdate || canDelete) && (
+          <div className="pt-4 flex flex-wrap gap-3">
+            {canUpdate && (
+              <Link
+                href={`/main/product/${product._id}/update`}
+                className="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+              >
+                {t("updateProd")}
+              </Link>
+            )}
+            {canDelete && (
+              <button
+                type="button"
+                onClick={handleDeleteProduct}
+                disabled={isDeleting}
+                className="inline-block bg-zinc-800 hover:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg transition"
+              >
+                {t("deleteProd")}
+              </button>
+            )}
           </div>
         )}
       </div>

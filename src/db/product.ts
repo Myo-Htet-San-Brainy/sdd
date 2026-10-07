@@ -145,3 +145,8 @@ export async function updateProductById(id: string, update: any) {
     { $set: { ...update, lastUpdated: new Date() } }
   );
 }
+
+export async function deleteProductById(id: string) {
+  const productCollection = await getCollection("product");
+  return await productCollection.deleteOne({ _id: new ObjectId(id) });
+}

@@ -1,26 +1,13 @@
 import { CustomError } from "@/lib/CustomError";
 import {
   createProduct,
+  deleteProduct,
   getMatchingProductTypes,
   getProductById,
   getProductMeta,
   getProducts,
   updateProduct,
 } from "@/services/product";
-import {
-  createRole,
-  deleteRole,
-  getRole,
-  getRoles,
-  updateRole,
-} from "@/services/role";
-import {
-  createUser,
-  deleteUser,
-  getUser,
-  getUsers,
-  updateUser,
-} from "@/services/user";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useGetProductsByType = ({ type }: { type: string }) => {
@@ -117,6 +104,30 @@ export const useUpdateProductMutation = () => {
         productPayload.type.forEach((type: string) => {
           queryClient.invalidateQueries({ queryKey: ["products", type] });
         });
+        queryClient.invalidateQueries({ queryKey: ["product", productId] });
+        queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+        queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
+      }
+    },
+  });
+};
+
+export const useDeleteProductMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deleteProduct,
+    onSuccess(data, variables) {
+      const { productId } = variables;
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      queryClient.invalidateQueries({ queryKey: ["product", productId] });
+      queryClient.invalidateQueries({ queryKey: ["products-meta"] });
+      queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
+    },
+    onError(error, variables) {
+      const { productId } = variables;
+      if (error instanceof CustomError && error.status === 404) {
+        queryClient.invalidateQueries({ queryKey: ["products"] });
         queryClient.invalidateQueries({ queryKey: ["product", productId] });
         queryClient.invalidateQueries({ queryKey: ["products-meta"] });
         queryClient.invalidateQueries({ queryKey: ["low-stock products"] });

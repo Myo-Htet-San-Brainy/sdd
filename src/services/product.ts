@@ -157,3 +157,23 @@ export async function updateProduct({
     throw new CustomError("Internal Sever Error!", 500);
   }
 }
+
+export async function deleteProduct({
+  productId,
+}: {
+  productId: string;
+}): Promise<void> {
+  try {
+    const response = await axios.delete(`/api/product/${productId}`);
+
+    if (response.status !== 200) {
+      throw new Error("Failed to delete product!");
+    }
+  } catch (error: any) {
+    console.log("error deleting product:", error);
+    if (isAxiosError(error) && error.response?.status === 404) {
+      throw new CustomError("Product Not Found!", 404);
+    }
+    throw new CustomError("Internal Sever Error!", 500);
+  }
+}
