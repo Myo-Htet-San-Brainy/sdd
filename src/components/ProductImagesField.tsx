@@ -4,6 +4,9 @@ import { Camera, ImagePlus, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { ImageLightbox } from "@/components/ImageLightbox";
 
+const MAX_IMAGE_DIMENSION = 1600;
+const WEBP_QUALITY = 0.82;
+
 export type ProductImageItem = {
   id: string;
   previewUrl: string;
@@ -28,8 +31,54 @@ export function ProductImagesField({
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const [fullImageUrl, setFullImageUrl] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const compressImage = async (file: File): Promise<File> => {
+    const sourceUrl = URL.createObjectURL(file);
+
+    try {
+      const image = new Image();
+      image.src = sourceUrl;
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
+        image.onerror = () => reject(new Error("Unable to read image."));
+      });
+
+      const scale = Math.min(
+        1,
+        MAX_IMAGE_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight),
+      );
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      canvas.getContext("2d")?.drawImage(
+        image,
+        0,
+        0,
+        canvas.width,
+        canvas.height,
+      );
+
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, "image/webp", WEBP_QUALITY),
+      );
+
+      if (!blob || blob.size >= file.size) {
+        return file;
+      }
+
+      return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
+        type: "image/webp",
+        lastModified: file.lastModified,
+      });
+    } finally {
+      URL.revokeObjectURL(sourceUrl);
+    }
+  };
+
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0];
     event.target.value = "";
 
@@ -38,14 +87,24 @@ export function ProductImagesField({
     }
 
     const previewUrl = URL.createObjectURL(file);
-    onChange([
-      ...images,
-      {
-        id: crypto.randomUUID(),
-        previewUrl,
-        file,
-      },
-    ]);
+    setIsCompressing(true);
+
+    try {
+      const uploadFile = await compressImage(file);
+      onChange([
+        ...images,
+        {
+          id: crypto.randomUUID(),
+          previewUrl,
+          file: uploadFile,
+        },
+      ]);
+    } catch (error) {
+      URL.revokeObjectURL(previewUrl);
+      console.error("Image compression failed:", error);
+    } finally {
+      setIsCompressing(false);
+    }
   };
 
   const handleRemove = (image: ProductImageItem) => {
@@ -91,7 +150,8 @@ export function ProductImagesField({
           <button
             type="button"
             onClick={() => cameraInputRef.current?.click()}
-            className="flex min-h-0 flex-1 items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 px-1 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
+            disabled={isCompressing}
+            className="flex min-h-0 flex-1 items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 px-1 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-wait disabled:opacity-50"
           >
             <Camera className="h-5 w-5 shrink-0" />
             <span className="text-xs leading-tight">{cameraLabel}</span>
@@ -99,7 +159,8 @@ export function ProductImagesField({
           <button
             type="button"
             onClick={() => galleryInputRef.current?.click()}
-            className="flex min-h-0 flex-1 items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 px-1 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
+            disabled={isCompressing}
+            className="flex min-h-0 flex-1 items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 px-1 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-wait disabled:opacity-50"
           >
             <ImagePlus className="h-5 w-5 shrink-0" />
             <span className="text-xs leading-tight">{galleryLabel}</span>
