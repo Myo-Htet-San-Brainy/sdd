@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect } from "react";
 import toast from "react-hot-toast";
+import { ImageLightbox } from "@/components/ImageLightbox";
 
 const Page = () => {
   const t = useTranslations("prodDetailsPage");
@@ -27,6 +28,7 @@ const Page = () => {
   const { mutate: deleteProductMutate, isPending: isDeleting } =
     useDeleteProductMutation();
   const router = useRouter();
+  const [fullImageUrl, setFullImageUrl] = React.useState<string | null>(null);
 
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -134,12 +136,19 @@ const Page = () => {
           {product.images && product.images.length > 0 && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               {product.images.map((imageUrl) => (
-                <img
+                <button
                   key={imageUrl}
-                  src={imageUrl}
-                  alt={product.description || "Product"}
-                  className="h-32 w-full rounded-md border border-zinc-200 object-cover"
-                />
+                  type="button"
+                  onClick={() => setFullImageUrl(imageUrl)}
+                  aria-label="View image full size"
+                  className="h-32 w-full cursor-zoom-in overflow-hidden rounded-md border border-zinc-200"
+                >
+                  <img
+                    src={imageUrl}
+                    alt={product.description || "Product"}
+                    className="h-full w-full object-cover"
+                  />
+                </button>
               ))}
             </div>
           )}
@@ -181,6 +190,11 @@ const Page = () => {
             />
           )}
         </div>
+        <ImageLightbox
+          imageUrl={fullImageUrl}
+          alt={product.description || "Product image full size"}
+          onClose={() => setFullImageUrl(null)}
+        />
 
         {(canUpdate || canDelete) && (
           <div className="pt-4 flex flex-wrap gap-3">

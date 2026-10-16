@@ -1,7 +1,8 @@
 "use client";
 
 import { Camera, X } from "lucide-react";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { ImageLightbox } from "@/components/ImageLightbox";
 
 export type ProductImageItem = {
   id: string;
@@ -23,6 +24,7 @@ export function ProductImagesField({
   onChange,
 }: ProductImagesFieldProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [fullImageUrl, setFullImageUrl] = useState<string | null>(null);
 
   const handleAddClick = () => {
     inputRef.current?.click();
@@ -63,11 +65,18 @@ export function ProductImagesField({
             key={image.id}
             className="relative h-24 w-24 overflow-hidden rounded-md border border-zinc-300 bg-zinc-100"
           >
-            <img
-              src={image.previewUrl}
-              alt=""
-              className="h-full w-full object-cover"
-            />
+            <button
+              type="button"
+              onClick={() => setFullImageUrl(image.previewUrl)}
+              aria-label="View image full size"
+              className="block h-full w-full cursor-zoom-in"
+            >
+              <img
+                src={image.previewUrl}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            </button>
             <button
               type="button"
               onClick={() => handleRemove(image)}
@@ -97,6 +106,11 @@ export function ProductImagesField({
         capture="environment"
         className="hidden"
         onChange={handleFileChange}
+      />
+      <ImageLightbox
+        imageUrl={fullImageUrl}
+        alt="Product image full size"
+        onClose={() => setFullImageUrl(null)}
       />
     </div>
   );
