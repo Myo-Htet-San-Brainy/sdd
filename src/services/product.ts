@@ -109,6 +109,31 @@ export async function createProduct({
   }
 }
 
+export async function uploadProductImages(files: File[]): Promise<string[]> {
+  if (files.length === 0) {
+    return [];
+  }
+
+  const formData = new FormData();
+  files.forEach((file) => formData.append("files", file));
+
+  try {
+    const response = await axios.post("/api/product/images", formData);
+
+    if (response.status !== 201) {
+      throw new Error("Error uploading product images!");
+    }
+
+    return response.data.imageUrls;
+  } catch (error: any) {
+    console.error("Error uploading product images:", error);
+    throw new CustomError(
+      error.response?.data?.error || "Failed to upload product images.",
+      error.response?.status || 500,
+    );
+  }
+}
+
 export async function getProductMeta(params: {
   brand?: boolean;
   location?: boolean;

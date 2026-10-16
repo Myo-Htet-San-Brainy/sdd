@@ -8,6 +8,10 @@ import { forwardRef, useImperativeHandle } from "react";
 import { Product } from "@/Interfaces/Product";
 import { sortEnglishFirst } from "@/lib/utils";
 import { useTranslations } from "next-intl";
+import {
+  ProductImageItem,
+  ProductImagesField,
+} from "@/components/ProductImagesField";
 
 interface ExistingProduct extends Omit<Product, "type"> {
   type: {
@@ -48,7 +52,7 @@ const ManageProductForm = forwardRef<
       existingProduct,
       onSubmit,
     },
-    ref
+    ref,
   ) => {
     const t = useTranslations("createProdPage");
 
@@ -81,6 +85,9 @@ const ManageProductForm = forwardRef<
     const [isNewBrand, setIsNewBrand] = useState(false);
     const [isNewSource, setIsNewSource] = useState(false);
     const [isNewLocation, setIsNewLocation] = useState(false);
+    const [images, setImages] = useState<ProductImageItem[]>([]);
+    const imagesRef = useRef<ProductImageItem[]>([]);
+    imagesRef.current = images;
 
     const {
       register,
@@ -107,8 +114,20 @@ const ManageProductForm = forwardRef<
 
     const { fields, append, remove } = useFieldArray({ name: "type", control });
 
+    const clearCapturedImages = () => {
+      setImages((current) => {
+        current.forEach((image) => {
+          if (image.file) {
+            URL.revokeObjectURL(image.previewUrl);
+          }
+        });
+        return [];
+      });
+    };
+
     useImperativeHandle(ref, () => ({
       resetForm: (values) => {
+        clearCapturedImages();
         reset(
           values || {
             type: [{ value: "" }],
@@ -120,7 +139,7 @@ const ManageProductForm = forwardRef<
             sellingPrice: 0,
             description: "",
             lowStockThreshold: 0,
-          }
+          },
         );
       },
     }));
@@ -137,13 +156,44 @@ const ManageProductForm = forwardRef<
     useEffect(() => {
       if (existingProduct) {
         reset(existingProduct);
+        setImages((current) => {
+          current.forEach((image) => {
+            if (image.file) {
+              URL.revokeObjectURL(image.previewUrl);
+            }
+          });
+          return (existingProduct.images ?? []).map((url) => ({
+            id: url,
+            previewUrl: url,
+          }));
+        });
       }
     }, [existingProduct]);
+
+    useEffect(() => {
+      return () => {
+        imagesRef.current.forEach((image) => {
+          if (image.file) {
+            URL.revokeObjectURL(image.previewUrl);
+          }
+        });
+      };
+    }, []);
+
+    console.log(productMeta);
 
     return (
       <form
         ref={formRef}
-        onSubmit={handleSubmit(onSubmit)}
+        onSubmit={handleSubmit((data) =>
+          onSubmit({
+            ...data,
+            images: images.map((image) => image.file).filter(Boolean),
+            existingImages: images
+              .filter((image) => !image.file)
+              .map((image) => image.previewUrl),
+          }),
+        )}
         className="bg-white border border-zinc-200 shadow-md rounded-2xl max-w-2xl mx-auto p-6 space-y-6"
       >
         <h1 className="text-xl font-semibold text-red-600 border-b pb-2">
@@ -248,7 +298,7 @@ const ManageProductForm = forwardRef<
                       </option>
                     )
                   );
-                }
+                },
               )}
             </select>
           )}
@@ -369,7 +419,7 @@ const ManageProductForm = forwardRef<
                   | "buyingPrice"
                   | "sellingPrice"
                   | "lowStockThreshold",
-                { valueAsNumber: true }
+                { valueAsNumber: true },
               )}
               className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
             />
@@ -393,13 +443,20 @@ const ManageProductForm = forwardRef<
           />
         </div>
 
+        <ProductImagesField
+          label={t("images")}
+          addLabel={t("addImage")}
+          images={images}
+          onChange={setImages}
+        />
+
         {/* 🔹 Submit */}
         <div className="pt-4">
           <SubmitButton isLoading={isPending}>{submitText}</SubmitButton>
         </div>
       </form>
     );
-  }
+  },
 );
 
 export default ManageProductForm;

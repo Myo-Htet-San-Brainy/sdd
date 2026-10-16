@@ -10,4 +10,5 @@ export interface Product {
   source?: string;
   lowStockThreshold?: number;
   lastUpdated: string;
+  images?: string[];
 }

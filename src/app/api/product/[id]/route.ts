@@ -6,6 +6,7 @@ import {
 } from "@/db/product";
 import { verifyPermission } from "@/lib/serverUtils";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { removeProductImages } from "@/lib/supabase";
 
 export async function GET(
   req: NextRequest,
@@ -63,6 +64,11 @@ export async function PATCH(
     }
 
     const body = await req.json();
+    const nextImages = Array.isArray(body.images) ? body.images : [];
+    const previousImages = Array.isArray(product.images) ? product.images : [];
+    const removedImages = previousImages.filter(
+      (image: string) => !nextImages.includes(image),
+    );
 
     const result = await updateProductById(id, body);
 
@@ -72,6 +78,8 @@ export async function PATCH(
         { status: 500 }
       );
     }
+
+    await removeProductImages(removedImages);
 
     return NextResponse.json(
       { message: "Updating product successful!" },
@@ -117,6 +125,10 @@ export async function DELETE(
         { status: 500 }
       );
     }
+
+    await removeProductImages(
+      Array.isArray(product.images) ? product.images : [],
+    );
 
     return NextResponse.json(
       { message: "Product deleted successfully!" },

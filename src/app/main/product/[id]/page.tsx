@@ -131,6 +131,18 @@ const Page = () => {
         </h2>
 
         <div className="grid gap-4">
+          {product.images && product.images.length > 0 && (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {product.images.map((imageUrl) => (
+                <img
+                  key={imageUrl}
+                  src={imageUrl}
+                  alt={product.description || "Product"}
+                  className="h-32 w-full rounded-md border border-zinc-200 object-cover"
+                />
+              ))}
+            </div>
+          )}
           <Detail label={t("type")} value={product.type.join(", ")} />
           {product.description && (
             <Detail label={t("description")} value={product.description} />

@@ -23,7 +23,7 @@ import ManageProductForm, {
 } from "@/components/ManageProductForm";
 import { useModal } from "@/context/modalContext";
 import { ConflictModalContent } from "@/components/ConflictModalContent";
-import { getProducts } from "@/services/product";
+import { getProducts, uploadProductImages } from "@/services/product";
 import { useTranslations } from "next-intl";
 
 const Page = () => {
@@ -40,7 +40,7 @@ const Page = () => {
   const { showFormModal } = useModal();
   const manageProductFormRef = useRef<ManageProductFormRef>(null);
 
-  async function handleCreateProd(prod: any) {
+  async function handleCreateProd(prod: any, imageFiles: File[] = []) {
     try {
       const similarProductsData = await getProducts({
         type: prod.type[0],
@@ -73,8 +73,9 @@ const Page = () => {
           return;
         }
       }
+      const imageUrls = await uploadProductImages(imageFiles);
       createProductMutate(
-        { payload: prod },
+        { payload: { ...prod, images: imageUrls } },
         {
           onSuccess: () => {
             toast.success(t("prodCreateSuccessToastMsg"));
@@ -83,16 +84,30 @@ const Page = () => {
           onError(error, variables, context) {
             toast.error("Creating Product Failed! Try again later...");
           },
-        }
+        },
       );
     } catch (error) {
+      console.error("Creating product failed:", error);
+      if (error instanceof CustomError) {
+        toast.error(error.message);
+        return;
+      }
       toast.error("Creating Product Failed! Try again later...");
     }
   }
 
   const onSubmit = (data: any) => {
-    const type = data.type.map((item: any) => item.value);
-    handleCreateProd({ ...data, type });
+    const imageFiles = data.images.filter(
+      (image: unknown): image is File => image instanceof File,
+    );
+    const {
+      images: _images,
+      existingImages: _existingImages,
+      ...productData
+    } = data;
+    const type = productData.type.map((item: any) => item.value);
+
+    handleCreateProd({ ...productData, type }, imageFiles);
   };
 
   if (isFetching || isPending) {
@@ -108,7 +123,7 @@ const Page = () => {
   if (
     !hasPermission(
       myPermissions!,
-      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name
+      MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_CREATE.name,
     )
   ) {
     return (

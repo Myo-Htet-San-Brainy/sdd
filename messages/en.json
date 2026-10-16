@@ -87,6 +87,8 @@
     "sellingPrice": "Selling Price",
     "lowStockThreshold": "Low Stock Threshold",
     "description": "Description",
+    "images": "Images",
+    "addImage": "Add image",
     "submit": "Create New",
     "prodCreateSuccessToastMsg": "Created Product Successfully",
     "conflictModalTitle": "Similar Products Exist!",

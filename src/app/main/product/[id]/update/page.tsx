@@ -24,6 +24,7 @@ import ManageProductForm from "@/components/ManageProductForm";
 import { Product } from "@/Interfaces/Product";
 import { getProducts } from "@/services/product";
 import { useTranslations } from "next-intl";
+import { uploadProductImages } from "@/services/product";
 
 const Page = () => {
   const t = useTranslations("updateProdPage");
@@ -115,20 +116,43 @@ const Page = () => {
   //   }
   // }
 
-  const onSubmit = (data: any) => {
-    const type = data.type.map((item: any) => item.value);
-    updateProdMutate(
-      { productId: id!, productPayload: { ...data, type } },
-      {
-        onSuccess: () => {
-          toast.success(t("prodUpdateSuccessToastMsg"));
-          router.push(`/main/product/${id}`);
+  const onSubmit = async (data: any) => {
+    try {
+      const imageFiles = data.images.filter(
+        (image: unknown): image is File => image instanceof File,
+      );
+      const existingImages = data.existingImages;
+      const imageUrls = await uploadProductImages(imageFiles);
+      const productImages = [...existingImages, ...imageUrls];
+      const {
+        images: _images,
+        existingImages: _existingImages,
+        ...productData
+      } = data;
+      const type = productData.type.map((item: any) => item.value);
+      updateProdMutate(
+        {
+          productId: id!,
+          productPayload: { ...productData, type, images: productImages },
         },
-        onError: () => {
-          toast.error("Updating Product Failed! Try again later...");
+        {
+          onSuccess: () => {
+            toast.success(t("prodUpdateSuccessToastMsg"));
+            router.push(`/main/product/${id}`);
+          },
+          onError: () => {
+            toast.error("Updating Product Failed! Try again later...");
+          },
         },
+      );
+    } catch (error) {
+      console.error("Updating product images failed:", error);
+      if (error instanceof CustomError) {
+        toast.error(error.message);
+        return;
       }
-    );
+      toast.error("Updating Product Failed! Try again later...");
+    }
   };
 
   return (
