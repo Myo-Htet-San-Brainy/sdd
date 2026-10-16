@@ -445,7 +445,8 @@ const ManageProductForm = forwardRef<
 
         <ProductImagesField
           label={t("images")}
-          addLabel={t("addImage")}
+          cameraLabel={t("takePhoto")}
+          galleryLabel={t("chooseFromGallery")}
           images={images}
           onChange={setImages}
         />

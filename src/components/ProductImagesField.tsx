@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, X } from "lucide-react";
+import { Camera, ImagePlus, X } from "lucide-react";
 import { useRef, useState } from "react";
 import { ImageLightbox } from "@/components/ImageLightbox";
 
@@ -12,23 +12,22 @@ export type ProductImageItem = {
 
 interface ProductImagesFieldProps {
   label: string;
-  addLabel: string;
+  cameraLabel: string;
+  galleryLabel: string;
   images: ProductImageItem[];
   onChange: (images: ProductImageItem[]) => void;
 }
 
 export function ProductImagesField({
   label,
-  addLabel,
+  cameraLabel,
+  galleryLabel,
   images,
   onChange,
 }: ProductImagesFieldProps) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
   const [fullImageUrl, setFullImageUrl] = useState<string | null>(null);
-
-  const handleAddClick = () => {
-    inputRef.current?.click();
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -88,22 +87,37 @@ export function ProductImagesField({
           </div>
         ))}
 
-        <button
-          type="button"
-          onClick={handleAddClick}
-          className="flex h-24 w-24 flex-col items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
-        >
-          <Camera className="h-6 w-6" />
-          <span className="px-1 text-center text-xs leading-tight">
-            {addLabel}
-          </span>
-        </button>
+        <div className="flex h-24 w-24 flex-col gap-1">
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            className="flex min-h-0 flex-1 items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 px-1 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <Camera className="h-5 w-5 shrink-0" />
+            <span className="text-xs leading-tight">{cameraLabel}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            className="flex min-h-0 flex-1 items-center justify-center gap-1 rounded-md border border-dashed border-zinc-400 bg-zinc-50 px-1 text-zinc-600 hover:border-blue-500 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <ImagePlus className="h-5 w-5 shrink-0" />
+            <span className="text-xs leading-tight">{galleryLabel}</span>
+          </button>
+        </div>
       </div>
       <input
-        ref={inputRef}
+        ref={cameraInputRef}
         type="file"
         accept="image/*"
         capture="environment"
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      <input
+        ref={galleryInputRef}
+        type="file"
+        accept="image/*"
         className="hidden"
         onChange={handleFileChange}
       />
