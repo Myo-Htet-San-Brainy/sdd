@@ -9,7 +9,7 @@ import {
 
 export const runtime = "nodejs";
 
-const MAX_FILES = 5;
+const MAX_FILES = 1;
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
 const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 

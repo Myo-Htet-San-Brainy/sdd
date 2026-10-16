@@ -114,17 +114,22 @@ export async function uploadProductImages(files: File[]): Promise<string[]> {
     return [];
   }
 
-  const formData = new FormData();
-  files.forEach((file) => formData.append("files", file));
-
   try {
-    const response = await axios.post("/api/product/images", formData);
+    const imageUrls: string[] = [];
 
-    if (response.status !== 201) {
-      throw new Error("Error uploading product images!");
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append("files", file);
+      const response = await axios.post("/api/product/images", formData);
+
+      if (response.status !== 201) {
+        throw new Error("Error uploading product image!");
+      }
+
+      imageUrls.push(...response.data.imageUrls);
     }
 
-    return response.data.imageUrls;
+    return imageUrls;
   } catch (error: any) {
     console.error("Error uploading product images:", error);
     throw new CustomError(

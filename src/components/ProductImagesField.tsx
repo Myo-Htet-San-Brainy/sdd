@@ -5,7 +5,8 @@ import { useRef, useState } from "react";
 import { ImageLightbox } from "@/components/ImageLightbox";
 
 const MAX_IMAGE_DIMENSION = 1600;
-const WEBP_QUALITY = 0.82;
+const MAX_UPLOAD_SIZE = 1.25 * 1024 * 1024;
+const WEBP_QUALITIES = [0.82, 0.7, 0.58, 0.46];
 
 export type ProductImageItem = {
   id: string;
@@ -44,33 +45,52 @@ export function ProductImagesField({
         image.onerror = () => reject(new Error("Unable to read image."));
       });
 
-      const scale = Math.min(
-        1,
-        MAX_IMAGE_DIMENSION / Math.max(image.naturalWidth, image.naturalHeight),
-      );
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-      canvas.getContext("2d")?.drawImage(
-        image,
-        0,
-        0,
-        canvas.width,
-        canvas.height,
+      let dimension = Math.min(
+        MAX_IMAGE_DIMENSION,
+        Math.max(image.naturalWidth, image.naturalHeight),
       );
 
-      const blob = await new Promise<Blob | null>((resolve) =>
-        canvas.toBlob(resolve, "image/webp", WEBP_QUALITY),
-      );
+      for (let attempt = 0; attempt < 3; attempt += 1) {
+        const scale = Math.min(
+          1,
+          dimension / Math.max(image.naturalWidth, image.naturalHeight),
+        );
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext("2d")?.drawImage(
+          image,
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
 
-      if (!blob || blob.size >= file.size) {
-        return file;
+        for (const quality of WEBP_QUALITIES) {
+          const blob = await new Promise<Blob | null>((resolve) =>
+            canvas.toBlob(resolve, "image/webp", quality),
+          );
+
+          if (blob && blob.size <= MAX_UPLOAD_SIZE) {
+            if (blob.size >= file.size && file.size <= MAX_UPLOAD_SIZE) {
+              return file;
+            }
+
+            return new File(
+              [blob],
+              `${file.name.replace(/\.[^.]+$/, "")}.webp`,
+              {
+                type: "image/webp",
+                lastModified: file.lastModified,
+              },
+            );
+          }
+        }
+
+        dimension = Math.round(dimension * 0.75);
       }
 
-      return new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, {
-        type: "image/webp",
-        lastModified: file.lastModified,
-      });
+      throw new Error("Image could not be compressed below the upload limit.");
     } finally {
       URL.revokeObjectURL(sourceUrl);
     }
