@@ -68,10 +68,13 @@ const ManageProductForm = forwardRef<
     const formRef = useRef<HTMLFormElement | null>(null);
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
-        if (
-          formRef.current &&
-          !formRef.current.contains(event.target as Node)
-        ) {
+        const target = event.target as HTMLElement;
+        const activeField = suggestionPrompt?.index;
+        const clickedActiveField =
+          activeField !== undefined &&
+          target.closest(`[data-suggestion-field="${activeField}"]`);
+
+        if (!clickedActiveField) {
           setSuggestionPrompt(null);
         }
       };
@@ -80,7 +83,7 @@ const ManageProductForm = forwardRef<
       return () => {
         document.removeEventListener("mousedown", handleClickOutside);
       };
-    }, []);
+    }, [suggestionPrompt?.index]);
 
     const [isNewBrand, setIsNewBrand] = useState(false);
     const [isNewSource, setIsNewSource] = useState(false);
@@ -207,7 +210,11 @@ const ManageProductForm = forwardRef<
           </label>
           <div className="space-y-2">
             {fields.map((field, index) => (
-              <div key={field.id} className="flex items-center gap-2 relative">
+              <div
+                key={field.id}
+                data-suggestion-field={index}
+                className="flex items-center gap-2 relative"
+              >
                 <input
                   {...register(`type.${index}.value`)}
                   className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
