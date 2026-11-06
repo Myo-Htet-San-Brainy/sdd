@@ -29,6 +29,16 @@ const Page = () => {
   } = useGetSales({ createdDate });
 
   const { mutate: restockMutate } = useRestockSaleMutation();
+  const dailyTotal =
+    sales?.reduce(
+      (dayTotal, sale) =>
+        dayTotal +
+        sale.soldProducts.reduce(
+          (saleTotal, sp) => saleTotal + sp.itemsToSell * sp.sellingPrice,
+          0
+        ),
+      0
+    ) ?? 0;
 
   const router = useRouter();
   const { setUpdatedSaleId } = useUpdatedSaleIdStore();
@@ -154,12 +164,32 @@ const Page = () => {
     );
   } else if (sales.length <= 0) {
     content = (
-      <p className="text-center text-zinc-500 mt-8">No sales recorded yet.</p>
+      <>
+        <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 p-5 shadow-sm">
+          <div className="text-sm font-medium text-green-700">
+            {t("dailyTotal")}
+          </div>
+          <div className="mt-1 text-2xl font-bold text-green-800">
+            {dailyTotal.toLocaleString()} MMK
+          </div>
+        </div>
+        <p className="text-center text-zinc-500 mt-8">
+          No sales recorded yet.
+        </p>
+      </>
     );
   } else {
     content = (
       <>
         <ProductCount showing={sales.length} />
+        <div className="mb-6 rounded-2xl border border-green-200 bg-green-50 p-5 shadow-sm">
+          <div className="text-sm font-medium text-green-700">
+            {t("dailyTotal")}
+          </div>
+          <div className="mt-1 text-2xl font-bold text-green-800">
+            {dailyTotal.toLocaleString()} MMK
+          </div>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sales.map((sale) => (
             <div

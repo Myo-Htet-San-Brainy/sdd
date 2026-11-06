@@ -11,6 +11,7 @@
     "pickDate": "Pick Date",
     "buyer": "Buyer",
     "total": "Total",
+    "dailyTotal": "Total for the day",
     "updateSale": "Update Sale"
   },
   "BrowsePage": {
