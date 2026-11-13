@@ -12,6 +12,7 @@
     "buyer": "Buyer",
     "total": "Total",
     "dailyTotal": "Total for the day",
+    "dailyProfit": "Profit for the day",
     "updateSale": "Update Sale"
   },
   "BrowsePage": {

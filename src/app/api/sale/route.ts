@@ -76,6 +76,7 @@ export async function GET(req: NextRequest) {
             const product = await getProductById(sp._id);
             return {
               product,
+              buyingPrice: sp.buyingPrice ?? product?.buyingPrice ?? 0,
               sellingPrice: sp.sellingPrice,
               itemsToSell: sp.itemsToSell,
             };

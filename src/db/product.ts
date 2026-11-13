@@ -19,6 +19,7 @@ export async function getProducts(
     description: 1,
     brand: 1,
     noOfItemsInStock: 1,
+    buyingPrice: 1,
     sellingPrice: 1,
     location: 1,
     lastUpdated: 1,

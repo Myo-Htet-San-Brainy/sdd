@@ -39,6 +39,20 @@ const Page = () => {
         ),
       0
     ) ?? 0;
+  const dailyProfit =
+    sales?.reduce(
+      (dayProfit, sale) =>
+        dayProfit +
+        sale.soldProducts.reduce(
+          (saleProfit, sp) =>
+            saleProfit +
+            sp.itemsToSell *
+              (sp.sellingPrice -
+                (sp.buyingPrice ?? sp.product.buyingPrice ?? 0)),
+          0
+        ),
+      0
+    ) ?? 0;
 
   const router = useRouter();
   const { setUpdatedSaleId } = useUpdatedSaleIdStore();
@@ -172,6 +186,12 @@ const Page = () => {
           <div className="mt-1 text-2xl font-bold text-green-800">
             {dailyTotal.toLocaleString()} MMK
           </div>
+          <div className="mt-4 text-sm font-medium text-blue-700">
+            {t("dailyProfit")}
+          </div>
+          <div className="mt-1 text-2xl font-bold text-blue-800">
+            {dailyProfit.toLocaleString()} MMK
+          </div>
         </div>
         <p className="text-center text-zinc-500 mt-8">
           No sales recorded yet.
@@ -188,6 +208,12 @@ const Page = () => {
           </div>
           <div className="mt-1 text-2xl font-bold text-green-800">
             {dailyTotal.toLocaleString()} MMK
+          </div>
+          <div className="mt-4 text-sm font-medium text-blue-700">
+            {t("dailyProfit")}
+          </div>
+          <div className="mt-1 text-2xl font-bold text-blue-800">
+            {dailyProfit.toLocaleString()} MMK
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

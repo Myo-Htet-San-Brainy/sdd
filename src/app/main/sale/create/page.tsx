@@ -131,6 +131,7 @@ const Page = () => {
     const soldProducts = cart.map(({ product, itemsToSell }) => ({
       _id: product._id,
       itemsToSell,
+      buyingPrice: product.buyingPrice ?? 0,
       sellingPrice: product.sellingPrice,
     }));
 

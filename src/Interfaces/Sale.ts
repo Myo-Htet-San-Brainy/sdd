@@ -12,6 +12,7 @@ export interface Sale {
 
 export interface SoldProduct {
   product: Product;
+  buyingPrice: number;
   sellingPrice: number;
   itemsToSell: number;
 }
