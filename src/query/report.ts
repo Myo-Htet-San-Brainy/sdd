@@ -1,5 +1,9 @@
 import { CustomError } from "@/lib/CustomError";
-import { getCommissionReports, getLowStockProducts } from "@/services/report";
+import {
+  getCommissionReports,
+  getLowStockProducts,
+  getUnitsSoldReport,
+} from "@/services/report";
 import {
   createRole,
   deleteRole,
@@ -32,5 +36,16 @@ export const useGetCommissionReports = (params: {
     queryFn: () => getCommissionReports(params),
     queryKey: ["commission reports", params.commissionerId, params.date],
     enabled: Boolean(params.commissionerId),
+  });
+};
+
+export const useGetUnitsSoldReport = (params: {
+  from: string;
+  to: string;
+  sort: "most" | "least";
+}) => {
+  return useQuery({
+    queryFn: () => getUnitsSoldReport(params),
+    queryKey: ["units sold report", params.from, params.to, params.sort],
   });
 };

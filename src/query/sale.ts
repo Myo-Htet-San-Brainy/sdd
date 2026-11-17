@@ -50,6 +50,7 @@ export const useCreateSaleMutation = () => {
 
       queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
       queryClient.invalidateQueries({ queryKey: ["commission reports"] });
+      queryClient.invalidateQueries({ queryKey: ["units sold report"] });
     },
   });
 };
@@ -87,6 +88,7 @@ export const useUpdateSaleMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["sale", saleId] });
       queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
       queryClient.invalidateQueries({ queryKey: ["commission reports"] });
+      queryClient.invalidateQueries({ queryKey: ["units sold report"] });
     },
   });
 };
@@ -116,6 +118,7 @@ export const useDeleteSaleMutation = () => {
       queryClient.invalidateQueries({ queryKey: ["low-stock products"] });
       //improve - could target more granular cache
       queryClient.invalidateQueries({ queryKey: ["commission reports"] });
+      queryClient.invalidateQueries({ queryKey: ["units sold report"] });
     },
   });
 };

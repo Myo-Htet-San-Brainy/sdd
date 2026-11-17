@@ -84,6 +84,10 @@ export const MODULES_AND_PERMISSIONS = {
       name: "REPORT:COMMISSION",
       displayName: "View Monthly Commission Reports",
     },
+    PERMISSION_UNITS_SOLD: {
+      name: "REPORT:UNITS_SOLD",
+      displayName: "View Units Sold Reports",
+    },
   },
   MESSAGE: {
     PERMISSION_UPDATE: {
@@ -129,6 +133,7 @@ export const globalNavbarData = [
     requiredPermissions: [
       MODULES_AND_PERMISSIONS.REPORT.PERMISSION_LOW_STOCK_ALERT.name,
       MODULES_AND_PERMISSIONS.REPORT.PERMISSION_COMMISSION.name,
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_UNITS_SOLD.name,
     ],
   },
   {
@@ -154,6 +159,14 @@ export const reportNavbarData = [
     link: "/main/report/commission",
     requiredPermissions: [
       MODULES_AND_PERMISSIONS.REPORT.PERMISSION_COMMISSION.name,
+    ],
+  },
+  {
+    id: "units-sold",
+    displayName: "Units Sold",
+    link: "/main/report/units-sold",
+    requiredPermissions: [
+      MODULES_AND_PERMISSIONS.REPORT.PERMISSION_UNITS_SOLD.name,
     ],
   },
 ];
