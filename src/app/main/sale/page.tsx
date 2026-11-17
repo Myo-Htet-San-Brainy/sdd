@@ -13,6 +13,10 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react"; // Import useRef and useState
 import toast from "react-hot-toast";
 
+const getProductProfit = (soldProduct: Sale["soldProducts"][number]) =>
+  soldProduct.itemsToSell *
+  (soldProduct.sellingPrice - soldProduct.buyingPrice);
+
 const Page = () => {
   const t = useTranslations("ViewSalesPage");
   const {
@@ -46,7 +50,7 @@ const Page = () => {
         sale.soldProducts.reduce(
           (saleProfit, sp) =>
             saleProfit +
-            sp.itemsToSell * (sp.sellingPrice - sp.buyingPrice),
+            getProductProfit(sp),
           0
         ),
       0
@@ -245,6 +249,14 @@ const Page = () => {
                   MMK
                 </div>
 
+                <div className="text-sm font-medium text-blue-600">
+                  {t("saleProfit")}: {" "}
+                  {sale.soldProducts.reduce(
+                    (sum, sp) => sum + getProductProfit(sp),
+                    0
+                  ).toLocaleString()} {" "}
+                  MMK
+                </div>
                 <div className="border-t pt-2 max-h-56 overflow-y-auto pr-1 space-y-2">
                   {sale.soldProducts.map((sp, idx) => (
                     <div
@@ -264,6 +276,10 @@ const Page = () => {
                       </div>
                       <div className="text-red-600 font-medium ml-2">
                         {sp.itemsToSell} × {sp.sellingPrice} MMK
+                      </div>
+                      <div className="text-blue-600 text-xs font-medium mt-1">
+                        {t("productProfit")}: {" "}
+                        {getProductProfit(sp).toLocaleString()} MMK
                       </div>
                     </div>
                   ))}
