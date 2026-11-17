@@ -46,9 +46,7 @@ const Page = () => {
         sale.soldProducts.reduce(
           (saleProfit, sp) =>
             saleProfit +
-            sp.itemsToSell *
-              (sp.sellingPrice -
-                (sp.buyingPrice ?? sp.product.buyingPrice ?? 0)),
+            sp.itemsToSell * (sp.sellingPrice - sp.buyingPrice),
           0
         ),
       0
