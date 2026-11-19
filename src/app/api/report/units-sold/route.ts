@@ -8,8 +8,20 @@ const dateOnlyPattern = /^\d{4}-\d{2}-\d{2}$/;
 function parseDateBoundary(value: string, endOfDay = false) {
   if (!dateOnlyPattern.test(value)) return null;
 
-  const date = new Date(`${value}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}Z`);
-  return Number.isNaN(date.getTime()) ? null : date;
+  const [year, month, day] = value.split("-").map(Number);
+  const date = new Date(
+    Date.UTC(year, month - 1, day, endOfDay ? 23 : 0, endOfDay ? 59 : 0, endOfDay ? 59 : 0, endOfDay ? 999 : 0)
+  );
+
+  if (
+    date.getUTCFullYear() !== year ||
+    date.getUTCMonth() !== month - 1 ||
+    date.getUTCDate() !== day
+  ) {
+    return null;
+  }
+
+  return date;
 }
 
 export async function GET(req: NextRequest) {

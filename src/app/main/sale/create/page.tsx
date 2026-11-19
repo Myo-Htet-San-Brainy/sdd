@@ -57,7 +57,7 @@ const Page = () => {
         onError(error, variables, context) {
           toast.error("Deleting Sale Failed!", { id: toastId });
         },
-      }
+      },
     );
   }
 
@@ -74,7 +74,7 @@ const Page = () => {
   if (
     !hasPermission(
       myPermissions!,
-      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name,
     )
   ) {
     return (
@@ -128,12 +128,17 @@ const Page = () => {
 
   function handleCreateOrUpdateSale() {
     const b = buyer === "" ? null : buyer;
-    const soldProducts = cart.map(({ product, itemsToSell }) => ({
-      _id: product._id,
-      itemsToSell,
-      buyingPrice: product.buyingPrice ?? 0,
-      sellingPrice: product.sellingPrice,
-    }));
+    const soldProducts = cart.map(({ product, itemsToSell }) => {
+      return {
+        _id: product._id,
+        itemsToSell,
+        buyingPrice: product.buyingPrice,
+        sellingPrice: product.sellingPrice,
+        type: product.type,
+        description: product.description,
+        brand: product.brand,
+      };
+    });
 
     const soldProductsTypes = [
       ...new Set(cart.flatMap(({ product }) => product.type)),
@@ -144,7 +149,7 @@ const Page = () => {
         toast.success(
           updatedSaleId
             ? `${t("saleUpdatedToastMsg")}!`
-            : `${t("saleCreatedToastMsg")}!`
+            : `${t("saleCreatedToastMsg")}!`,
         );
         router.push("/main/product");
         clearCart();
@@ -159,12 +164,12 @@ const Page = () => {
     if (updatedSaleId) {
       updateSaleMutate(
         { saleId: updatedSaleId, salePayload: { soldProducts, buyer: b } },
-        commonOptions
+        commonOptions,
       );
     } else {
       createSaleMutate(
         { payload: { soldProducts, buyer: b }, soldProductsTypes },
-        commonOptions
+        commonOptions,
       );
     }
   }

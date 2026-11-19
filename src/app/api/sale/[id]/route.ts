@@ -4,6 +4,7 @@ import {
   getSaleByFilter,
   updateStockAfterTransaction,
   deleteSale,
+  getSaleProductDetails,
 } from "@/db/sale"; // your new DB functions
 import {
   authenticateSession,
@@ -40,6 +41,11 @@ export async function PATCH(
     const salePayload = await req.json();
 
     // 🛠️ Step 3: Update the sale
+    if (salePayload.soldProducts) {
+      salePayload.soldProducts = await getSaleProductDetails(
+        salePayload.soldProducts
+      );
+    }
     const result = await updateSale(id, salePayload);
     if (!result.acknowledged) {
       return NextResponse.json(

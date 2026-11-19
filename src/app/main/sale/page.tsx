@@ -39,21 +39,19 @@ const Page = () => {
         dayTotal +
         sale.soldProducts.reduce(
           (saleTotal, sp) => saleTotal + sp.itemsToSell * sp.sellingPrice,
-          0
+          0,
         ),
-      0
+      0,
     ) ?? 0;
   const dailyProfit =
     sales?.reduce(
       (dayProfit, sale) =>
         dayProfit +
         sale.soldProducts.reduce(
-          (saleProfit, sp) =>
-            saleProfit +
-            getProductProfit(sp),
-          0
+          (saleProfit, sp) => saleProfit + getProductProfit(sp),
+          0,
         ),
-      0
+      0,
     ) ?? 0;
 
   const router = useRouter();
@@ -64,7 +62,7 @@ const Page = () => {
   const saleCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   // 🎯 New: State to control which sale card is highlighted
   const [highlightedSaleId, setHighlightedSaleId] = useState<string | null>(
-    null
+    null,
   );
 
   const handleUpdateClick = (sale: Sale) => {
@@ -74,7 +72,7 @@ const Page = () => {
     }));
     const typesOfRestockedProds = [
       ...new Set(
-        sale.soldProducts.flatMap((soldProd) => soldProd.product.type)
+        sale.soldProducts.flatMap((soldProd) => soldProd.product.type),
       ),
     ];
     const prepUpdateSaleToast = toast.loading("Preparing update...");
@@ -101,7 +99,7 @@ const Page = () => {
             id: prepUpdateSaleToast,
           });
         },
-      }
+      },
     );
   };
 
@@ -148,7 +146,7 @@ const Page = () => {
   if (
     !hasPermission(
       myPermissions!,
-      MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name,
     )
   ) {
     return (
@@ -195,9 +193,7 @@ const Page = () => {
             {dailyProfit.toLocaleString()} MMK
           </div>
         </div>
-        <p className="text-center text-zinc-500 mt-8">
-          No sales recorded yet.
-        </p>
+        <p className="text-center text-zinc-500 mt-8">No sales recorded yet.</p>
       </>
     );
   } else {
@@ -244,19 +240,19 @@ const Page = () => {
                   💰 {t("total")}:{" "}
                   {sale.soldProducts.reduce(
                     (sum, sp) => sum + sp.itemsToSell * sp.sellingPrice,
-                    0
+                    0,
                   )}{" "}
                   MMK
                 </div>
-
                 <div className="text-sm font-medium text-blue-600">
-                  {t("saleProfit")}: {" "}
+                  📈 {t("saleProfit")}:{" "}
                   {sale.soldProducts.reduce(
                     (sum, sp) => sum + getProductProfit(sp),
-                    0
-                  ).toLocaleString()} {" "}
+                    0,
+                  ).toLocaleString()}{" "}
                   MMK
                 </div>
+
                 <div className="border-t pt-2 max-h-56 overflow-y-auto pr-1 space-y-2">
                   {sale.soldProducts.map((sp, idx) => (
                     <div
@@ -274,12 +270,14 @@ const Page = () => {
                           {sp.product.description}
                         </div>
                       </div>
-                      <div className="text-red-600 font-medium ml-2">
-                        {sp.itemsToSell} × {sp.sellingPrice} MMK
-                      </div>
-                      <div className="text-blue-600 text-xs font-medium mt-1">
-                        {t("productProfit")}: {" "}
-                        {getProductProfit(sp).toLocaleString()} MMK
+                      <div className="text-right ml-2">
+                        <div className="text-red-600 font-medium">
+                          {sp.itemsToSell} × {sp.sellingPrice.toLocaleString()} MMK
+                        </div>
+                        <div className="text-blue-600 text-xs font-medium mt-1">
+                          {t("productProfit")}:{" "}
+                          {getProductProfit(sp).toLocaleString()} MMK
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -287,7 +285,7 @@ const Page = () => {
 
                 {hasPermission(
                   myPermissions!,
-                  MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name
+                  MODULES_AND_PERMISSIONS.SALE.PERMISSION_UPDATE.name,
                 ) && (
                   <button
                     onClick={() => handleUpdateClick(sale)}

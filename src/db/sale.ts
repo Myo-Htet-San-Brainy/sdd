@@ -9,6 +9,101 @@ export async function createSale(salePayload: any) {
   });
 }
 
+export async function getSaleProductDetails(
+  soldProducts: {
+    _id: string;
+    buyingPrice: number;
+    sellingPrice: number;
+    itemsToSell: number;
+  }[]
+) {
+  const productCollection = await getCollection("product");
+  const productIds = soldProducts.map((product) => new ObjectId(product._id));
+  const products = await productCollection
+    .find({ _id: { $in: productIds } })
+    .project({ type: 1, description: 1, brand: 1 })
+    .toArray();
+  const productsById = new Map(
+    products.map((product) => [product._id.toString(), product])
+  );
+
+  return soldProducts.map((soldProduct) => {
+    const product = productsById.get(soldProduct._id);
+    if (!product) {
+      throw new Error(`Product not found: ${soldProduct._id}`);
+    }
+
+    return {
+      ...soldProduct,
+      type: product.type,
+      description: product.description,
+      brand: product.brand,
+    };
+  });
+}
+
+export async function migrateSaleProductDetails() {
+  const saleCollection = await getCollection("sale");
+  const productCollection = await getCollection("product");
+  const sales = await saleCollection.find({}).toArray();
+  const productIds = sales.flatMap((sale) =>
+    sale.soldProducts.map((soldProduct: { _id: string }) => {
+      if (!ObjectId.isValid(soldProduct._id)) {
+        console.warn(`Skipping invalid product id: ${soldProduct._id}`);
+        return null;
+      }
+      return new ObjectId(soldProduct._id);
+    })
+  ).filter((productId): productId is ObjectId => productId !== null);
+  const products = await productCollection
+    .find({ _id: { $in: productIds } })
+    .project({ type: 1, description: 1, brand: 1 })
+    .toArray();
+  const productsById = new Map(
+    products.map((product) => [product._id.toString(), product])
+  );
+  const operations = sales.map((sale) => ({
+    updateOne: {
+      filter: { _id: sale._id },
+      update: {
+        $set: {
+          soldProducts: sale.soldProducts.flatMap(
+            (soldProduct: { _id: string }) => {
+              if (!ObjectId.isValid(soldProduct._id)) {
+                console.warn(
+                  `Removing sold product with invalid id from sale ${sale._id}: ${soldProduct._id}`
+                );
+                return [];
+              }
+
+              const product = productsById.get(soldProduct._id);
+              if (!product) {
+                console.warn(
+                  `Removing deleted product from sale ${sale._id}: ${soldProduct._id}`
+                );
+                return [];
+              }
+
+              return {
+                ...soldProduct,
+                type: product.type,
+                description: product.description,
+                brand: product.brand,
+              };
+            }
+          ),
+        },
+      },
+    },
+  }));
+
+  if (operations.length === 0) {
+    return { matchedCount: 0, modifiedCount: 0 };
+  }
+
+  return saleCollection.bulkWrite(operations);
+}
+
 export async function deleteSale(id: string) {
   const saleCollection = await getCollection("sale");
   return await saleCollection.deleteOne({ _id: new ObjectId(id) });

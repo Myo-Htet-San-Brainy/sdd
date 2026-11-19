@@ -73,50 +73,18 @@ export async function getUnitsSoldReport({
       {
         $group: {
           _id: "$soldProducts._id",
+          type: { $first: "$soldProducts.type" },
+          description: { $first: "$soldProducts.description" },
+          brand: { $first: "$soldProducts.brand" },
           unitsSold: { $sum: "$soldProducts.itemsToSell" },
         },
       },
       {
-        $lookup: {
-          from: "product",
-          let: { productId: "$_id" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $eq: [
-                    "$_id",
-                    {
-                      $convert: {
-                        input: "$$productId",
-                        to: "objectId",
-                        onError: null,
-                        onNull: null,
-                      },
-                    },
-                  ],
-                },
-              },
-            },
-            {
-              $project: {
-                _id: 1,
-                type: 1,
-                description: 1,
-                brand: 1,
-              },
-            },
-          ],
-          as: "product",
-        },
-      },
-      { $unwind: "$product" },
-      {
         $project: {
-          _id: { $toString: "$product._id" },
-          type: "$product.type",
-          description: "$product.description",
-          brand: "$product.brand",
+          _id: { $toString: "$_id" },
+          type: 1,
+          description: 1,
+          brand: 1,
           unitsSold: 1,
         },
       },

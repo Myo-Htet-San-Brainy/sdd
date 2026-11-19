@@ -51,7 +51,7 @@ const Page = () => {
     MODULES_AND_PERMISSIONS.PRODUCT.PERMISSION_READ.name,
   );
   const {
-    data: products,
+    data: products = [],
     isPending,
     isFetching,
     isError,

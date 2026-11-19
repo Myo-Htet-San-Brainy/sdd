@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   createSale,
+  getSaleProductDetails,
   getAllSales,
   updateStockAfterTransaction,
 } from "@/db/sale";
@@ -22,8 +23,9 @@ export async function POST(req: NextRequest) {
       );
     }
     const { soldProducts, buyer } = await req.json();
+    const saleProducts = await getSaleProductDetails(soldProducts);
 
-    await createSale({ soldProducts, buyer });
+    await createSale({ soldProducts: saleProducts, buyer });
     await updateStockAfterTransaction(soldProducts, { mode: "decrease" });
 
     return NextResponse.json(
