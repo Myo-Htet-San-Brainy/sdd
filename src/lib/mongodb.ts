@@ -1,8 +1,17 @@
 // lib/mongodb.ts
+import { loadEnvConfig } from "@next/env";
 import { MongoClient, MongoClientOptions, Db } from "mongodb";
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost:27017";
+// Load .env / .env.local for standalone scripts (e.g. tsx). Next.js already loads these in-app.
+loadEnvConfig(process.cwd());
+
+const mongodbUri = process.env.MONGODB_URI;
 const dbName = "SDD";
+
+if (!mongodbUri) {
+  throw new Error("Missing MONGODB_URI in environment (.env)");
+}
+const MONGODB_URI: string = mongodbUri;
 
 // Connection options
 const options: MongoClientOptions = {
