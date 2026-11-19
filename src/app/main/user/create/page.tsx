@@ -204,6 +204,10 @@ const Page = () => {
           <label className="block font-medium text-zinc-700 mb-1">
             Is Active
           </label>
+          <p className="text-sm text-zinc-500 mb-1">
+            Indicates whether the user is active. This status is displayed to
+            administrators but is not currently used to block login.
+          </p>
           <select
             {...register("isActive")}
             className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
