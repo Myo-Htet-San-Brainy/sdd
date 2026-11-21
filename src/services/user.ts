@@ -28,6 +28,28 @@ export async function getUsers(params: { role?: string }): Promise<User[]> {
   }
 }
 
+export async function getCommissioners(): Promise<User[]> {
+  try {
+    const response = await axios.get(`/api/user/commissioners`);
+
+    if (response.status !== 200) {
+      throw new CustomError("Failed to fetch commissioners.", 500);
+    }
+
+    const { users } = response.data;
+    return users;
+  } catch (error: any) {
+    console.log("error fetching commissioners:", error);
+    if (error.response?.status === 403) {
+      throw new CustomError("Forbidden!", 403);
+    }
+    if (error.response?.status === 500) {
+      throw new CustomError("Internal Sever Error!", 500);
+    }
+    throw error;
+  }
+}
+
 export async function createUser(user: any): Promise<void> {
   try {
     const response = await axios.post("/api/user", user);

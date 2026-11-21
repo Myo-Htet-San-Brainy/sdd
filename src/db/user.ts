@@ -2,35 +2,19 @@
 import { getCollection } from "@/lib/mongodb";
 import { ObjectId } from "mongodb";
 
-export async function getAllUsers(isOnlyNames: boolean = false) {
+export async function getAllUsers() {
   const userCollection = await getCollection("user");
-  let projection: { [key: string]: number } = { password: 0 }; // Always exclude password
-
-  if (isOnlyNames) {
-    projection = { _id: 1, username: 1 }; // Only include _id, name, and id (if you store both)
-    // Adjust these fields based on what your "basic info" truly entails.
-    // If your user model has an `id` field separate from `_id`, include it.
-    // Assuming `name` is the field for username/name.
-  }
-
-  return await userCollection.find({}, { projection }).toArray();
+  return await userCollection
+    .find({}, { projection: { password: 0 } })
+    .toArray();
 }
 
-export async function getUsersByRole(
-  role: string,
-  isOnlyNames: boolean = false
-) {
+export async function getUsersByRole(role: string) {
   const userCollection = await getCollection("user");
-  let projection: { [key: string]: number } = { password: 0 }; // Always exclude password
-
-  if (isOnlyNames) {
-    projection = { _id: 1, username: 1 }; // Only include _id, name, and id (if you store both)
-  }
-
   return await userCollection
     .find(
-      { role }, // Filter by the specified role
-      { projection }
+      { role },
+      { projection: { password: 0 } }
     )
     .toArray();
 }

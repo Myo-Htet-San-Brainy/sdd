@@ -9,6 +9,7 @@ import {
 import {
   createUser,
   deleteUser,
+  getCommissioners,
   getUser,
   getUsers,
   updateUser,
@@ -19,6 +20,13 @@ export const useGetUsers = (params: { role?: string }) => {
   return useQuery({
     queryFn: () => getUsers({ role: params.role }),
     queryKey: ["users", params.role],
+  });
+};
+
+export const useGetCommissioners = () => {
+  return useQuery({
+    queryFn: getCommissioners,
+    queryKey: ["commissioners"],
   });
 };
 
