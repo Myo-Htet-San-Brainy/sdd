@@ -8,3 +8,8 @@ export interface User {
   address: string;
   commissionRate: null | number;
 }
+
+export interface CommissionerOption {
+  _id: string;
+  username: string;
+}

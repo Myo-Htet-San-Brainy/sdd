@@ -5,7 +5,7 @@ import { useMyPermissionsContext } from "@/context";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { hasPermission } from "@/lib/utils";
 import { useGetCommissionReports } from "@/query/report";
-import { useGetUsers } from "@/query/user";
+import { useGetCommissioners } from "@/query/user";
 import { useEffect, useState } from "react";
 import Link from "next/link"; // Import Link component
 import { CommissionReport } from "@/Interfaces/Sale"; // Assuming CommissionReport is defined here or imported
@@ -26,7 +26,7 @@ const Page = () => {
     isFetching: isFetchingCommissioners,
     isError: isErrorCommissioners,
     isPending: isPendingCommissioners,
-  } = useGetUsers({ role: "commissioner" });
+  } = useGetCommissioners();
 
   const [commissionerId, setCommissionerId] = useState<string>("");
   const [date, setDate] = useState<Date>(new Date());

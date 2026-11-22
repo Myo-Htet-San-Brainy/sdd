@@ -159,6 +159,50 @@ export async function getAllSales(createdDate?: Date) {
   return await saleCollection.find(query).sort({ createdAt: -1 }).toArray();
 }
 
+export async function migrateSaleBuyerDetails() {
+  const saleCollection = await getCollection("sale");
+  const userCollection = await getCollection("user");
+  const sales = await saleCollection.find({ buyer: { $type: "string" } }).toArray();
+  const buyerIds = sales
+    .map((sale) => sale.buyer)
+    .filter((buyerId: unknown): buyerId is string =>
+      typeof buyerId === "string" && ObjectId.isValid(buyerId)
+    );
+
+  const buyers = await userCollection
+    .find({ _id: { $in: buyerIds.map((buyerId) => new ObjectId(buyerId)) } })
+    .project({ username: 1, commissionRate: 1 })
+    .toArray();
+  const buyersById = new Map(
+    buyers.map((buyer) => [buyer._id.toString(), buyer])
+  );
+  const operations = sales.map((sale) => {
+    const buyer = buyersById.get(sale.buyer);
+    return {
+      updateOne: {
+        filter: { _id: sale._id },
+        update: buyer
+          ? {
+              $set: {
+                buyer: {
+                  _id: sale.buyer,
+                  username: buyer.username,
+                  commissionRate: buyer.commissionRate ?? null,
+                },
+              },
+            }
+          : { $unset: { buyer: "" } },
+      },
+    };
+  });
+
+  if (operations.length === 0) {
+    return { matchedCount: 0, modifiedCount: 0 };
+  }
+
+  return saleCollection.bulkWrite(operations);
+}
+
 export async function updateSale(id: string, salePayload: any) {
   const saleCollection = await getCollection("sale");
   return await saleCollection.updateOne(

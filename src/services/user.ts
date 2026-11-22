@@ -1,4 +1,4 @@
-import { User } from "@/Interfaces/User";
+import { CommissionerOption, User } from "@/Interfaces/User";
 import { CustomError } from "@/lib/CustomError";
 import axios from "axios";
 
@@ -20,6 +20,28 @@ export async function getUsers(params: { role?: string }): Promise<User[]> {
     console.log("error fetching users:", error);
     if (error.response?.status === 403) {
       throw new CustomError("Internal Sever Error!", 500);
+    }
+    if (error.response?.status === 500) {
+      throw new CustomError("Internal Sever Error!", 500);
+    }
+    throw error;
+  }
+}
+
+export async function getCommissioners(): Promise<CommissionerOption[]> {
+  try {
+    const response = await axios.get(`/api/user/commissioners`);
+
+    if (response.status !== 200) {
+      throw new CustomError("Failed to fetch commissioners.", 500);
+    }
+
+    const { users } = response.data;
+    return users;
+  } catch (error: any) {
+    console.log("error fetching commissioners:", error);
+    if (error.response?.status === 403) {
+      throw new CustomError("Forbidden!", 403);
     }
     if (error.response?.status === 500) {
       throw new CustomError("Internal Sever Error!", 500);

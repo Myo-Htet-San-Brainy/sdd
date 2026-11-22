@@ -8,7 +8,7 @@ import {
   useDeleteSaleMutation,
   useUpdateSaleMutation,
 } from "@/query/sale";
-import { useGetUsers } from "@/query/user";
+import { useGetCommissioners } from "@/query/user";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -33,7 +33,7 @@ const Page = () => {
     isError: isErrorBuyers,
     isFetching: isFetchingBuyers,
     isPending: isPendingBuyers,
-  } = useGetUsers({ role: "commissioner" });
+  } = useGetCommissioners();
   const { mutate: createSaleMutate, isPending: isCreating } =
     useCreateSaleMutation();
   const { mutate: updateSaleMutate, isPending: isUpdating } =
