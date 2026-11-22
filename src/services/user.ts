@@ -1,4 +1,4 @@
-import { User } from "@/Interfaces/User";
+import { CommissionerOption, User } from "@/Interfaces/User";
 import { CustomError } from "@/lib/CustomError";
 import axios from "axios";
 
@@ -28,7 +28,7 @@ export async function getUsers(params: { role?: string }): Promise<User[]> {
   }
 }
 
-export async function getCommissioners(): Promise<User[]> {
+export async function getCommissioners(): Promise<CommissionerOption[]> {
   try {
     const response = await axios.get(`/api/user/commissioners`);
 

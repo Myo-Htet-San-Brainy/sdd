@@ -13,30 +13,38 @@ import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 export async function POST(req: NextRequest) {
   try {
     const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_CREATE.name,
     );
 
     if (!permissionCheck.ok) {
       return NextResponse.json(
         { error: permissionCheck.message },
-        { status: permissionCheck.status }
+        { status: permissionCheck.status },
       );
     }
     const { soldProducts, buyer } = await req.json();
     const saleProducts = await getSaleProductDetails(soldProducts);
+    const buyerUser = buyer ? await getUserById(buyer) : null;
+    const buyerSnapshot = buyerUser
+      ? {
+          _id: buyerUser._id.toString(),
+          username: buyerUser.username,
+          commissionRate: buyerUser.commissionRate ?? null,
+        }
+      : null;
 
-    await createSale({ soldProducts: saleProducts, buyer });
+    await createSale({ soldProducts: saleProducts, buyer: buyerSnapshot });
     await updateStockAfterTransaction(soldProducts, { mode: "decrease" });
 
     return NextResponse.json(
       { message: "Creating sale successful" },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (error) {
     console.error("Create sale error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -44,13 +52,13 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const permissionCheck = await verifyPermission(
-      MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name
+      MODULES_AND_PERMISSIONS.SALE.PERMISSION_READ.name,
     );
 
     if (!permissionCheck.ok) {
       return NextResponse.json(
         { error: permissionCheck.message },
-        { status: permissionCheck.status }
+        { status: permissionCheck.status },
       );
     }
 
@@ -64,12 +72,12 @@ export async function GET(req: NextRequest) {
       if (isNaN(createdDate.getTime())) {
         return NextResponse.json(
           { error: "Invalid createdDate format" },
-          { status: 400 }
+          { status: 400 },
         );
       }
     }
 
-    const rawSales = await getAllSales(createdDate); // 💥 pass it into DB function
+    const rawSales = await getAllSales(createdDate);
 
     const formattedSales = await Promise.all(
       rawSales.map(async (sale) => {
@@ -82,16 +90,13 @@ export async function GET(req: NextRequest) {
               sellingPrice: sp.sellingPrice,
               itemsToSell: sp.itemsToSell,
             };
-          })
+          }),
         );
-        const buyer = sale.buyer && (await getUserById(sale.buyer));
-
         return {
           ...sale,
-          buyer,
           soldProducts: enrichedSoldProducts,
         };
-      })
+      }),
     );
 
     return NextResponse.json({ sales: formattedSales }, { status: 200 });
@@ -99,7 +104,7 @@ export async function GET(req: NextRequest) {
     console.error("Get sales error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

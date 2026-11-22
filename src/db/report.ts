@@ -20,7 +20,7 @@ export async function getSalesByBuyerAndMonth(
   const saleCollection = await getCollection("sale");
 
   const match: any = {
-    buyer: buyerId,
+    "buyer._id": buyerId,
   };
 
   if (date !== "all") {

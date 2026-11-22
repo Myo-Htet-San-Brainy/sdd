@@ -1,12 +1,18 @@
-import { migrateSaleProductDetails } from "@/db/sale";
+import {
+  migrateSaleBuyerDetails,
+  migrateSaleProductDetails,
+} from "@/db/sale";
 
-migrateSaleProductDetails()
-  .then((result) => {
+Promise.all([migrateSaleProductDetails(), migrateSaleBuyerDetails()])
+  .then(([productResult, buyerResult]) => {
     console.log(
-      `Updated ${result.modifiedCount} of ${result.matchedCount} sale documents.`
+      `Updated product details: ${productResult.modifiedCount} of ${productResult.matchedCount} sale documents.`
+    );
+    console.log(
+      `Updated buyer details: ${buyerResult.modifiedCount} of ${buyerResult.matchedCount} sale documents.`
     );
   })
   .catch((error) => {
-    console.error("Sale product details migration failed:", error);
+    console.error("Sale migration failed:", error);
     process.exitCode = 1;
   });

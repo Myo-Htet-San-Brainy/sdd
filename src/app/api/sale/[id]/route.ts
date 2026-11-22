@@ -11,7 +11,24 @@ import {
   verifyPermission,
   verifyPermissions,
 } from "@/lib/serverUtils";
+import { getUserById } from "@/db/user";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
+import { ObjectId } from "mongodb";
+
+function formatSaleBuyer(sale: any) {
+  if (!sale?.buyer) {
+    return { ...sale, buyer: null };
+  }
+
+  return {
+    ...sale,
+    buyer: {
+      _id: sale.buyer._id?.toString(),
+      username: sale.buyer.username,
+      commissionRate: sale.buyer.commissionRate ?? null,
+    },
+  };
+}
 
 export async function PATCH(
   req: NextRequest,
@@ -46,6 +63,35 @@ export async function PATCH(
         salePayload.soldProducts
       );
     }
+    if (salePayload.buyer !== undefined) {
+      if (salePayload.buyer === null) {
+        salePayload.buyer = null;
+      } else if (typeof salePayload.buyer === "string") {
+        if (!ObjectId.isValid(salePayload.buyer)) {
+          return NextResponse.json(
+            { error: "Invalid buyer ID" },
+            { status: 400 }
+          );
+        }
+        const buyer = await getUserById(salePayload.buyer);
+        if (!buyer) {
+          return NextResponse.json(
+            { error: "Buyer not found" },
+            { status: 404 }
+          );
+        }
+        salePayload.buyer = {
+          _id: buyer._id.toString(),
+          username: buyer.username,
+          commissionRate: buyer.commissionRate ?? null,
+        };
+      } else {
+        return NextResponse.json(
+          { error: "Buyer must be null or a user ID" },
+          { status: 400 }
+        );
+      }
+    }
     const result = await updateSale(id, salePayload);
     if (!result.acknowledged) {
       return NextResponse.json(
@@ -53,10 +99,12 @@ export async function PATCH(
         { status: 500 }
       );
     }
-    // Decrease Stock
-    await updateStockAfterTransaction(salePayload.soldProducts, {
-      mode: "decrease",
-    });
+    // Decrease stock only when sold products changed.
+    if (salePayload.soldProducts) {
+      await updateStockAfterTransaction(salePayload.soldProducts, {
+        mode: "decrease",
+      });
+    }
 
     return NextResponse.json(
       { message: "Sale updated successfully!" },
@@ -96,14 +144,17 @@ export async function GET(
 
       const sale = await getSaleByFilter({
         _id: id,
-        buyer: userId,
+        "buyer._id": userId,
       });
 
       if (!sale) {
         return NextResponse.json({ error: "Sale not found" }, { status: 404 });
       }
 
-      return NextResponse.json({ sale }, { status: 200 });
+      return NextResponse.json(
+        { sale: formatSaleBuyer(sale) },
+        { status: 200 }
+      );
     }
 
     // ✅ Permission check for admin/staff
@@ -129,7 +180,10 @@ export async function GET(
       return NextResponse.json({ error: "Sale not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ sale }, { status: 200 });
+    return NextResponse.json(
+      { sale: formatSaleBuyer(sale) },
+      { status: 200 }
+    );
   } catch (error) {
     console.error("Get sale error:", error);
     return NextResponse.json(

@@ -19,6 +19,16 @@ export async function getUsersByRole(role: string) {
     .toArray();
 }
 
+export async function getCommissionerOptions() {
+  const userCollection = await getCollection("user");
+  return await userCollection
+    .find(
+      { role: "commissioner" },
+      { projection: { _id: 1, username: 1 } }
+    )
+    .toArray();
+}
+
 // And ensure your getUserById (for individual user fetch) does NOT use isOnlyNames
 // as it should always return full details if authorized.
 // export async function getUserById(id: string) {

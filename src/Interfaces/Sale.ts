@@ -6,6 +6,7 @@ export interface Sale {
   buyer: {
     _id: string;
     username: string;
+    commissionRate: number | null;
   } | null;
   soldProducts: SoldProduct[];
 }

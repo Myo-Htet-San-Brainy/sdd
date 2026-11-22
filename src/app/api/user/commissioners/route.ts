@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getUsersByRole } from "@/db/user";
+import { getCommissionerOptions } from "@/db/user";
 import { MODULES_AND_PERMISSIONS } from "@/lib/constants";
 import { verifyPermission } from "@/lib/serverUtils";
 
@@ -16,7 +16,7 @@ export async function GET() {
       );
     }
 
-    const users = await getUsersByRole("commissioner");
+    const users = await getCommissionerOptions();
     return NextResponse.json({ users: users || [] }, { status: 200 });
   } catch (error) {
     console.error("Get commissioners error:", error);
