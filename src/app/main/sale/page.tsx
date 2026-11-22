@@ -9,6 +9,7 @@ import { useGetSales, useRestockSaleMutation } from "@/query/sale";
 import { useCartStore, useUpdatedSaleIdStore } from "@/store";
 import { format } from "date-fns";
 import { useTranslations } from "next-intl";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react"; // Import useRef and useState
 import toast from "react-hot-toast";
@@ -255,8 +256,9 @@ const Page = () => {
 
                 <div className="border-t pt-2 max-h-56 overflow-y-auto pr-1 space-y-2">
                   {sale.soldProducts.map((sp, idx) => (
-                    <div
+                    <Link
                       key={idx}
+                      href={`/main/product/${sp.product._id}`}
                       className="bg-zinc-50 p-2 rounded-md border border-zinc-200 text-sm flex justify-between items-center"
                     >
                       <div className="space-y-1">
@@ -279,7 +281,7 @@ const Page = () => {
                           {getProductProfit(sp).toLocaleString()} MMK
                         </div>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
 
