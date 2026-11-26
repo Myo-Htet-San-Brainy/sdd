@@ -7,7 +7,7 @@ import { useGetRoles } from "@/query/role";
 import { useGetUser, useUpdateUserMutation } from "@/query/user";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { CustomError } from "@/lib/CustomError";
 import { useQueryClient } from "@tanstack/react-query";
@@ -18,6 +18,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { userSchema } from "@/schema";
 
 const Page = () => {
+  const [hasCommissionRate, setHasCommissionRate] = useState(false);
+
   const {
     data: myPermissions,
     isFetching: isFetchingMyPermissions,
@@ -64,6 +66,7 @@ const Page = () => {
         isActive: user.isActive ? "true" : "false",
         commissionRate: user.commissionRate ?? 0,
       });
+      setHasCommissionRate(typeof user.commissionRate === "number");
     }
   }, [user]);
 
@@ -136,7 +139,13 @@ const Page = () => {
 
   const onSubmit = (data: any) => {
     mutate(
-      { userId: id, userPayload: data },
+      {
+        userId: id,
+        userPayload: {
+          ...data,
+          commissionRate: hasCommissionRate ? data.commissionRate : null,
+        },
+      },
       {
         onSuccess: () => {
           toast.success("User Updated!");
@@ -196,27 +205,36 @@ const Page = () => {
           </div>
         ))}
 
-        {/* 🔹 Number Inputs */}
-        {[{ label: "Commission Rate", name: "commissionRate" }].map(
-          ({ label, name }) => (
-            <div key={name}>
-              <label className="block font-medium text-zinc-700 mb-1">
-                {label}:
-              </label>
+        <div>
+          <label className="block font-medium text-zinc-700 mb-1">
+            Commission Rate:
+          </label>
+          <select
+            value={hasCommissionRate ? "set" : "none"}
+            onChange={(event) =>
+              setHasCommissionRate(event.target.value === "set")
+            }
+            className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+          >
+            <option value="none">Don&apos;t set commission rate</option>
+            <option value="set">Set commission rate</option>
+          </select>
+          {hasCommissionRate && (
+            <>
               <input
                 type="number"
                 step="0.01"
-                {...register(name as "commissionRate", { valueAsNumber: true })}
-                className="border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
+                {...register("commissionRate", { valueAsNumber: true })}
+                className="mt-2 border border-zinc-300 px-3 py-2 rounded-md w-full text-zinc-500"
               />
-              {errors[name as keyof typeof errors] && (
+              {errors.commissionRate && (
                 <p className="text-sm text-red-500 mt-1">
-                  {errors[name as keyof typeof errors]?.message as string}
+                  {errors.commissionRate.message}
                 </p>
               )}
-            </div>
-          )
-        )}
+            </>
+          )}
+        </div>
 
         <div>
           <label className="block font-medium text-zinc-700 mb-1">Role:</label>

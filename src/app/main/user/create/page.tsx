@@ -5,6 +5,7 @@ import { hasPermission } from "@/lib/utils";
 import { useGetMyPermissions } from "@/query/miscellaneous";
 import { useCreateUserMutation } from "@/query/user";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGetRoles } from "@/query/role";
@@ -14,6 +15,8 @@ import { SubmitButton } from "@/components/SubmitButton";
 import { userSchema } from "@/schema";
 
 const Page = () => {
+  const [hasCommissionRate, setHasCommissionRate] = useState(false);
+
   const {
     data: myPermissions,
     isFetching: isFetchingMyPermissions,
@@ -44,15 +47,22 @@ const Page = () => {
   });
 
   const onSubmit = (data: any) => {
-    mutate(data, {
-      onSuccess: () => {
-        toast.success("User created!");
-        reset();
+    mutate(
+      {
+        ...data,
+        commissionRate: hasCommissionRate ? data.commissionRate : null,
       },
-      onError: () => {
-        toast.error("User creation failed!");
-      },
-    });
+      {
+        onSuccess: () => {
+          toast.success("User created!");
+          reset();
+          setHasCommissionRate(false);
+        },
+        onError: () => {
+          toast.error("User creation failed!");
+        },
+      }
+    );
   };
 
   if (isFetchingMyPermissions || isPendingMyPermissions) {
@@ -228,16 +238,30 @@ const Page = () => {
           <label className="block font-medium text-zinc-700 mb-1">
             Commission Rate
           </label>
-          <input
-            type="number"
-            {...register("commissionRate", { valueAsNumber: true })}
-            placeholder="0.00"
+          <select
+            value={hasCommissionRate ? "set" : "none"}
+            onChange={(event) =>
+              setHasCommissionRate(event.target.value === "set")
+            }
             className="w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-          {errors.commissionRate && (
-            <p className="text-red-500 text-sm mt-1">
-              {errors.commissionRate.message}
-            </p>
+          >
+            <option value="none">Don&apos;t set commission rate</option>
+            <option value="set">Set commission rate</option>
+          </select>
+          {hasCommissionRate && (
+            <>
+              <input
+                type="number"
+                {...register("commissionRate", { valueAsNumber: true })}
+                placeholder="0.00"
+                className="mt-2 w-full text-zinc-800 border border-zinc-300 px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-red-500"
+              />
+              {errors.commissionRate && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.commissionRate.message}
+                </p>
+              )}
+            </>
           )}
         </div>
 

@@ -29,8 +29,5 @@ export const userSchema = z.object({
     .string()
     .min(1, "Active status is required")
     .transform((val) => val === "true"),
-  commissionRate: z
-    .number()
-    .min(0)
-    .transform((val) => (val === 0 ? null : val)),
+  commissionRate: z.number().min(0),
 });
